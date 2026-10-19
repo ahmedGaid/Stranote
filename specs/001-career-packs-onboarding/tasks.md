@@ -104,7 +104,10 @@ description: "Task list for 001 career packs and first-day onboarding"
     `META.pack`; EBS pack carries the old strings, so skills/CV drafts are identical (checked old vs new template
     on the fixture). `.ps1` hits were comments + the intended legacy fallback (now `Get-SnPackOrLegacy`). Test gate in
     `StranotePacks.Tests.ps1` keeps the template free of EBS words (only `X-EBS` and `ebsView` kept on purpose).
-- [ ] T032 [P] [US3] Write `packs\oracle-ebs-functional-financials.json` (GL/AP/AR/FA/CE setups, period close, configurations, test scripts)
+- [x] T032 [P] [US3] Write `packs\oracle-ebs-functional-financials.json` (GL/AP/AR/FA/CE setups, period close, configurations, test scripts)
+  - Done 2026-10-19: 17 areas (11 task modules incl. CLOSE, SYSADMIN, IBY, ZX, XLA), 9 task types (Setup, Period close, Requirements,
+    Testing, Data load, Support, Report, Training, Other), functional phases (CRP, Go-live), full `ui` block. Extractors: 2 `term`
+    (setup terms, profile options; produce cards once the engine runs `term`, T037) + 1 `table`. `starterLessons` still empty.
 - [ ] T033 [P] [US3] Write `packs\accountant.json` (IFRS/GAAP terms, month-end close, reconciliations, accruals, tax)
 - [ ] T034 [P] [US3] Write `packs\software-developer.json` (languages, frameworks, PRs, incidents, design decisions)
 - [ ] T035 [P] [US3] Write `packs\nurse.json` (units, procedures, medications, protocols, handover)

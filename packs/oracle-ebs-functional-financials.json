@@ -1,0 +1,467 @@
+{
+  "schemaVersion": 1,
+  "id": "oracle-ebs-functional-financials",
+  "name": "Oracle EBS Functional Consultant (Financials)",
+  "field": "IT / ERP",
+  "version": "1.0.0",
+  "description": "Oracle E-Business Suite Financials functional work: GL, AP, AR, FA and CE setups, period close, configurations, test scripts, data loads and user support.",
+  "levels": ["Student", "Junior", "Mid", "Senior", "Lead"],
+  "categories": [
+    { "id": "Setup", "label": "Setup", "labelAr": "إعدادات", "color": "#2563eb" },
+    { "id": "Process", "label": "Process", "labelAr": "دورة عمل", "color": "#2f8f5b" },
+    { "id": "Accounting", "label": "Accounting", "labelAr": "محاسبة", "color": "#0f766e" },
+    { "id": "Business", "label": "Business", "labelAr": "بيزنس", "color": "#b7791f" },
+    { "id": "Reporting", "label": "Reporting", "labelAr": "تقارير", "color": "#7c3aed" }
+  ],
+  "categoryRules": {
+    "byKind": { "answer": "Business", "decision": "Business", "api": "Setup", "table": "Setup", "term": "Setup" },
+    "default": "Setup"
+  },
+  "areas": [
+    { "id": "GL", "name": "General Ledger", "category": "Accounting", "taskModule": true,
+      "concepts": [
+        { "id": "gl-ledger", "title": "Ledger = chart of accounts + calendar + currency + accounting method (the 4 Cs)" },
+        { "id": "gl-coa", "title": "Chart of accounts: segments, value sets and the GL# key flexfield" },
+        { "id": "gl-cvr", "title": "Cross-validation rules vs security rules" },
+        { "id": "gl-calendar", "title": "Accounting calendar, period types and adjusting periods" },
+        { "id": "gl-journals", "title": "Journal sources and categories, journal import and posting" },
+        { "id": "gl-recurring", "title": "Recurring journals and MassAllocations" },
+        { "id": "gl-reval", "title": "Revaluation, translation and consolidation" },
+        { "id": "gl-das", "title": "Data access sets and the GL: Data Access Set profile" }
+      ] },
+    { "id": "AP", "name": "Payables", "category": "Process", "taskModule": true,
+      "concepts": [
+        { "id": "ap-invoice-flow", "title": "Invoice lifecycle: entry, validation, holds, accounting, payment" },
+        { "id": "ap-matching", "title": "2-way, 3-way and 4-way matching and match holds" },
+        { "id": "ap-options", "title": "Payables options, financials options and payment terms" },
+        { "id": "ap-suppliers", "title": "Suppliers, sites and site assignments (TCA)" },
+        { "id": "ap-withholding", "title": "Withholding tax setup" },
+        { "id": "ap-prepayments", "title": "Prepayments and their application" }
+      ] },
+    { "id": "AR", "name": "Receivables", "category": "Process", "taskModule": true,
+      "concepts": [
+        { "id": "ar-transactions", "title": "Transaction types, sources and batch sources" },
+        { "id": "ar-autoaccounting", "title": "AutoAccounting: where the revenue and receivable accounts come from" },
+        { "id": "ar-receipts", "title": "Receipt classes, methods, applications and remittance" },
+        { "id": "ar-customers", "title": "Customers, accounts, sites and profile classes" },
+        { "id": "ar-collections", "title": "Aging buckets, dunning and statements" }
+      ] },
+    { "id": "FA", "name": "Fixed Assets", "category": "Accounting", "taskModule": true,
+      "concepts": [
+        { "id": "fa-books", "title": "Asset books: corporate vs tax books" },
+        { "id": "fa-categories", "title": "Asset categories and the asset key and location flexfields" },
+        { "id": "fa-depreciation", "title": "Depreciation methods, prorate conventions and running depreciation" },
+        { "id": "fa-lifecycle", "title": "Additions, mass additions, transfers, adjustments and retirements" }
+      ] },
+    { "id": "CE", "name": "Cash Management", "category": "Process", "taskModule": true,
+      "concepts": [
+        { "id": "ce-banks", "title": "Banks, branches and bank accounts" },
+        { "id": "ce-statements", "title": "Bank statement load and import" },
+        { "id": "ce-reconciliation", "title": "Manual and automatic reconciliation, matching rules and tolerances" },
+        { "id": "ce-forecast", "title": "Cash positioning and cash forecasting" }
+      ] },
+    { "id": "IBY", "name": "Payments", "category": "Process", "taskModule": true,
+      "concepts": [
+        { "id": "iby-ppp", "title": "Payment process profiles, payment methods and formats" },
+        { "id": "iby-ppr", "title": "Payment process requests: selection, build, format, confirm" }
+      ] },
+    { "id": "ZX", "name": "E-Business Tax", "category": "Setup", "taskModule": true,
+      "concepts": [
+        { "id": "zx-regime", "title": "Tax regime, tax, status, rate and jurisdiction" },
+        { "id": "zx-rules", "title": "Tax rules and the tax determination flow" }
+      ] },
+    { "id": "XLA", "name": "Subledger Accounting", "category": "Accounting", "taskModule": true,
+      "concepts": [
+        { "id": "xla-flow", "title": "Create Accounting, transfer to GL and the accounting events" },
+        { "id": "xla-methods", "title": "Subledger accounting methods, journal line definitions and account derivation rules" }
+      ] },
+    { "id": "CLOSE", "name": "Period close", "category": "Accounting", "taskModule": true,
+      "concepts": [
+        { "id": "close-order", "title": "Close order: AP, AR, FA, CE, then GL" },
+        { "id": "close-recon", "title": "Subledger to GL reconciliation" },
+        { "id": "close-sweep", "title": "Unaccounted transactions, sweep and period status" }
+      ] },
+    { "id": "SYSADMIN", "name": "System Administration", "category": "Setup", "taskModule": true,
+      "concepts": [
+        { "id": "sa-resp", "title": "Responsibilities, menus, request groups and users" },
+        { "id": "sa-profiles", "title": "Profile options and their levels (site, application, responsibility, user)" },
+        { "id": "sa-mo", "title": "Multi-Org Access Control: security profiles and MO: profiles" }
+      ] },
+    { "id": "Other", "name": "Other", "taskModule": true, "concepts": [] },
+    { "id": "ORG", "name": "Enterprise structure", "category": "Setup",
+      "concepts": [
+        { "id": "org-structure", "title": "Legal entities, ledgers, operating units and inventory organizations" },
+        { "id": "org-acm", "title": "Accounting Setup Manager" }
+      ] },
+    { "id": "REPORTING", "name": "Financial reporting", "category": "Reporting",
+      "concepts": [
+        { "id": "rep-fsg", "title": "FSG: row sets, column sets and report definitions" },
+        { "id": "rep-standard", "title": "Standard reports for reconciliation (trial balance, aging, account analysis)" }
+      ] },
+    { "id": "WEBADI", "name": "Web ADI and data loads", "category": "Setup",
+      "concepts": [
+        { "id": "webadi-journals", "title": "Loading journals with Web ADI" },
+        { "id": "webadi-layouts", "title": "Integrators, layouts and mappings" }
+      ] },
+    { "id": "PO", "name": "Purchasing", "category": "Process", "concepts": [] },
+    { "id": "INV", "name": "Inventory", "category": "Process", "concepts": [] },
+    { "id": "PA", "name": "Projects", "category": "Accounting", "concepts": [] }
+  ],
+  "taskTypes": [
+    {
+      "name": "Setup",
+      "questions": [
+        { "k": "setup", "q": "What is being set up or changed (ledger, payment terms, transaction type...)", "d": "" },
+        { "k": "scope", "q": "Ledger / operating unit / legal entity in scope", "d": "" },
+        { "k": "env", "q": "Environment (DEV / CRP / TEST / PROD)", "d": "TEST" },
+        { "k": "navigation", "q": "Responsibility and navigation path", "d": "" }
+      ],
+      "openQuestions": [
+        "Setup values signed off by the business?",
+        "Does it affect other modules or existing transactions?",
+        "Who migrates the setup to PROD (manual / iSetup / FNDLOAD)?"
+      ],
+      "checklist": [
+        "Setup values documented (BR100)",
+        "Setup done in TEST",
+        "Setup tested with a sample transaction",
+        "Setup repeated or migrated to PROD"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Period close",
+      "questions": [
+        { "k": "period", "q": "Period (e.g. JAN-26)", "d": "" },
+        { "k": "ledger", "q": "Ledger(s)", "d": "" },
+        { "k": "modules", "q": "Modules to close (AP, AR, FA, CE, GL)", "d": "AP, AR, FA, CE, GL" },
+        { "k": "deadline", "q": "Close deadline", "d": "" }
+      ],
+      "openQuestions": [
+        "Any unaccounted or unposted transactions left?",
+        "Do subledgers reconcile to GL?",
+        "Who approves opening the next period?"
+      ],
+      "checklist": [
+        "AP: invoices validated and accounted, period closed",
+        "AR: transactions accounted, period closed",
+        "FA: depreciation run and period closed",
+        "CE: bank statements reconciled",
+        "GL: journals posted, reconciliation done, period closed",
+        "Next period opened"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Requirements",
+      "questions": [
+        { "k": "process", "q": "Business process (procure to pay, order to cash, record to report...)", "d": "" },
+        { "k": "stakeholders", "q": "Business owners / key users", "d": "" },
+        { "k": "asis", "q": "Current way of working (as-is) in one sentence", "d": "" },
+        { "k": "gap", "q": "Gap: what standard EBS cannot do", "d": "" }
+      ],
+      "openQuestions": [
+        "Can standard functionality cover it (fit) or is a RICEW needed (gap)?",
+        "Who signs off the to-be design?"
+      ],
+      "checklist": [
+        "Requirements workshop held",
+        "Requirements documented (RD050 / BP080)",
+        "Fit/gap decided",
+        "Functional design (MD050) for gaps",
+        "Signed off by the business"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Testing",
+      "questions": [
+        { "k": "phase", "q": "Test phase (CRP / SIT / UAT / regression)", "d": "UAT" },
+        { "k": "scenarios", "q": "Scenarios to test (comma separated)", "d": "" },
+        { "k": "testers", "q": "Who runs the tests", "d": "" }
+      ],
+      "openQuestions": [
+        "Is test data ready?",
+        "Where are defects logged?",
+        "Exit criteria for this phase?"
+      ],
+      "checklist": [
+        "Test script written (TE040)",
+        "Test data prepared",
+        "Scenarios executed with evidence",
+        "Defects logged and retested",
+        "Test sign-off"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Data load",
+      "questions": [
+        { "k": "entities", "q": "What is loaded (opening balances, suppliers, customers, assets, open invoices...)", "d": "" },
+        { "k": "tool", "q": "Load tool (Web ADI / mass additions / interface / manual)", "d": "Web ADI" },
+        { "k": "volume", "q": "Approximate volume (records)", "d": "" },
+        { "k": "cutover", "q": "Cut-over date", "d": "" }
+      ],
+      "openQuestions": [
+        "Mapping and templates signed off?",
+        "Who owns data cleansing?",
+        "Reconciliation method and sign-off?"
+      ],
+      "checklist": [
+        "Load template prepared",
+        "Mock load done in TEST",
+        "Loaded totals reconciled with legacy",
+        "Final load reconciled and signed off"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Support",
+      "questions": [
+        { "k": "error", "q": "Error message or wrong result (exact text)", "d": "" },
+        { "k": "steps", "q": "Steps to reproduce / transaction number", "d": "" },
+        { "k": "env", "q": "Where does it happen (PROD / TEST / ...)", "d": "PROD" },
+        { "k": "impact", "q": "Business impact (users blocked? close at risk?)", "d": "" }
+      ],
+      "openQuestions": [
+        "Setup issue, data issue or bug?",
+        "Is there a workaround meanwhile?",
+        "Is an SR with Oracle needed?"
+      ],
+      "checklist": [
+        "Root cause identified",
+        "Fix verified in TEST",
+        "Users informed",
+        "Root cause documented in _NOTES.md"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Report",
+      "questions": [
+        { "k": "tech", "q": "Report type (standard / FSG / custom request)", "d": "standard" },
+        { "k": "purpose", "q": "What the business wants to see", "d": "" },
+        { "k": "params", "q": "Parameters (ledger, period, OU...)", "d": "" }
+      ],
+      "openQuestions": [
+        "Does a standard report already cover it?",
+        "Which responsibility runs it?"
+      ],
+      "checklist": [
+        "Report definition (or MD050 for a custom report)",
+        "Output checked against GL balances",
+        "Added to request group"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Training",
+      "questions": [
+        { "k": "audience", "q": "Audience (key users, end users, finance team)", "d": "" },
+        { "k": "topics", "q": "Topics", "d": "" },
+        { "k": "format", "q": "Format (session / user guide / video)", "d": "session" }
+      ],
+      "openQuestions": [
+        "Training environment and users ready?"
+      ],
+      "checklist": [
+        "User guide written",
+        "Training session delivered",
+        "Attendance and feedback recorded"
+      ],
+      "objects": []
+    },
+    { "name": "Other", "questions": [], "openQuestions": [], "checklist": [], "objects": [] }
+  ],
+  "extractors": [
+    {
+      "id": "ebs-fin-setup-terms",
+      "kind": "term",
+      "files": [".txt", ".md", ".csv", ".sql"],
+      "pattern": "(?i)\\b(?<key>accounting calendar|chart of accounts|cross[- ]validation rules?|security rules?|data access sets?|journal sources?|journal categories|recurring journals?|massallocations?|revaluation|translation|consolidation|payment terms?|distribution sets?|payables options|financials options|withholding tax|prepayments?|transaction types?|transaction sources?|autoaccounting|autoinvoice|receipt class(?:es)?|receipt methods?|profile class(?:es)?|aging buckets?|dunning|lockbox|asset books?|asset categor(?:y|ies)|depreciation methods?|prorate conventions?|mass additions|bank statements?|bank accounts?|reconciliation tolerances?|payment process profiles?|payment process requests?|tax regimes?|tax rules?|subledger accounting methods?|account derivation rules?|journal line definitions?|create accounting|fsg|row sets?|column sets?|web adi)\\b",
+      "group": "Setup",
+      "minCount": 1,
+      "maxCards": 6,
+      "cardTemplate": { "topic": "Setup: {key}", "fact": "Used in {taskId}: {context}" }
+    },
+    {
+      "id": "ebs-fin-profiles",
+      "kind": "term",
+      "files": [".txt", ".md", ".csv"],
+      "pattern": "\\b(?<key>(?:GL|AP|AR|FA|CE|MO|XLA|HR|FND|IBY|ZX|Sequential Numbering|Journals):\\s?[A-Z][A-Za-z/ ]{2,40}?)(?=\\s*(?:[=,;.)\\r\\n]|$|\\bset\\b|\\bprofile\\b))",
+      "group": "Setup",
+      "minCount": 1,
+      "maxCards": 4,
+      "cardTemplate": { "topic": "Profile: {key}", "fact": "Set in {taskId}: {context}" }
+    },
+    {
+      "id": "ebs-fin-table",
+      "kind": "table",
+      "label": "Table",
+      "files": [".sql", ".txt"],
+      "commentPattern": "^\\s*--",
+      "pattern": "(?i)\\b(?<key>(?:gl|ap|ar|fa|ce|xla|zx|iby|hz|ra|fnd|mo|po)_[a-z0-9_]{3,})\\b(?!\\s*\\.)",
+      "excludePattern": "_(PKG|PUB|PVT|API|GRP|UTIL|S)$",
+      "skipOwnPrefix": true,
+      "maxCards": 6,
+      "operations": {
+        "INSERT": "(?i)insert\\s+into\\s+(\\w+\\.)?{key}\\b",
+        "UPDATE": "(?i)update\\s+(\\w+\\.)?{key}\\b",
+        "DELETE": "(?i)delete\\s+(from\\s+)?(\\w+\\.)?{key}\\b",
+        "SELECT": "(?i)(from|join)\\s+(\\w+\\.)?{key}\\b"
+      },
+      "packagePattern": "_(PKG|PUB|PVT|API|GRP|UTIL)$"
+    }
+  ],
+  "starterLessons": [],
+  "skillMap": [
+    { "skill": "Oracle General Ledger", "area": "GL", "group": "Oracle EBS Financials" },
+    { "skill": "Oracle Payables", "area": "AP", "group": "Oracle EBS Financials" },
+    { "skill": "Oracle Receivables", "area": "AR", "group": "Oracle EBS Financials" },
+    { "skill": "Oracle Fixed Assets", "area": "FA", "group": "Oracle EBS Financials" },
+    { "skill": "Oracle Cash Management", "area": "CE", "group": "Oracle EBS Financials" },
+    { "skill": "Oracle Payments", "area": "IBY", "group": "Oracle EBS Financials" },
+    { "skill": "Oracle E-Business Tax", "area": "ZX", "group": "Oracle EBS Financials" },
+    { "skill": "Subledger Accounting (SLA)", "area": "XLA", "group": "Oracle EBS Financials" },
+    { "skill": "Month-end and year-end close", "area": "CLOSE", "group": "Finance processes" },
+    { "skill": "Financial Statement Generator (FSG)", "area": "REPORTING", "group": "Tools" },
+    { "skill": "Web ADI", "area": "WEBADI", "group": "Tools" }
+  ],
+  "onboardingQuestions": [
+    { "id": "ebsVersion", "label": "EBS version", "type": "select", "options": ["R12.2", "R12.1", "11i"], "default": "R12.2", "writesTo": "pack.ebsVersion" },
+    { "id": "engagement", "label": "Mostly implementation or support?", "type": "select", "options": ["Implementation", "Support", "Both"], "default": "Both", "writesTo": "pack.engagement" },
+    { "id": "ledgers", "label": "Ledgers / countries you work with (e.g. EG Primary, UAE)", "type": "text", "default": "", "writesTo": "pack.ledgers" },
+    { "id": "environments", "label": "Environments", "type": "text", "default": "DEV, CRP, TEST, UAT, PROD", "writesTo": "pack.environments" },
+    { "id": "ticketFormat", "label": "Ticket ID format (e.g. FIN-1234)", "type": "text", "default": "", "writesTo": "pack.ticketFormat" }
+  ],
+  "ui": {
+    "workspace": "EBS Financials workspace",
+    "area": "Module",
+    "areas": "Modules",
+    "screenshotsTitle": "صور من EBS",
+    "cvTitle": "Oracle EBS Functional Consultant (Financials)",
+    "sample": { "id": "FIN-2051", "module": "GL", "type": "Setup", "title": "Fiscal_calendar_for_new_ledger", "code": "FY_CAL" },
+    "placeholders": {
+      "taskId": "FIN-2051",
+      "taskTitle": "Fiscal calendar and ledger for the new UAE entity",
+      "extraQuestions": "e.g. Do we need an adjusting period at year end?",
+      "cardTopic": "Setup: Cross-validation rules",
+      "cardFact": "Stop invalid segment combinations; they apply only to new combinations, existing ones need disabling",
+      "cardTags": "GL, Chart of accounts, Period close",
+      "scriptName": "gl_unposted_journals.sql",
+      "scriptPurpose": "List unposted journals before closing the period",
+      "checklistItem": "e.g. Setup tested with a sample transaction",
+      "newArea": "e.g. Lease Management",
+      "prefix": "XXABC",
+      "role": "e.g. Oracle EBS Functional Consultant (Financials)",
+      "target": "Oracle Fusion Financials, Finance Solution Lead...",
+      "cvSkill": "Add a skill, e.g. Month-end close"
+    },
+    "privateNames": "\\bXX[A-Z0-9]{2,}_",
+    "skills": {
+      "areaSkill": "Oracle EBS {name}",
+      "areaGroup": "Oracle EBS Financials",
+      "groups": ["Oracle EBS Financials", "Finance processes", "Implementation", "Methods", "Tools"],
+      "typeGroup": "Implementation",
+      "types": {
+        "Setup": "Oracle EBS configuration and setups",
+        "Period close": "Month-end and year-end close",
+        "Requirements": "Requirements gathering and fit/gap analysis",
+        "Testing": "Test scripts, CRP, SIT and UAT",
+        "Data load": "Data migration and reconciliation",
+        "Support": "Functional production support",
+        "Report": "Financial reporting",
+        "Training": "End-user training and user guides"
+      },
+      "rules": [
+        { "key": "fsg", "name": "Financial Statement Generator (FSG)", "group": "Tools", "details": "\\bfsg\\b|row set|column set", "tag": "^fsg$" },
+        { "key": "webadi", "name": "Web ADI", "group": "Tools", "details": "web ?adi", "tag": "^web ?adi$" },
+        { "key": "sla", "name": "Subledger Accounting (SLA)", "group": "Oracle EBS Financials", "details": "subledger|\\bsla\\b|create accounting", "tag": "^(sla|xla)$" },
+        { "key": "recon", "name": "Subledger to GL reconciliation", "group": "Finance processes", "checklist": "reconcil", "tag": "^reconciliation$" },
+        { "key": "aim", "name": "Oracle AIM/OUM documentation (BR100, MD050, TE040)", "group": "Methods", "checklist": "BR100|MD0?50|TE040|RD050|BP080" },
+        { "key": "uat", "name": "UAT coordination", "group": "Implementation", "types": ["Testing"], "details": "uat" },
+        { "key": "crp", "name": "Conference room pilots (CRP)", "group": "Implementation", "details": "\\bcrp\\b" },
+        { "key": "sql", "name": "SQL for validation and reconciliation", "group": "Tools", "tag": "^sql$" }
+      ],
+      "apis": {
+        "group": "Tools",
+        "patterns": ["\\b(gl_interface|ap_invoices_interface|ra_interface_lines_all|fa_mass_additions|ce_statement_headers_int)\\b"],
+        "tag": "_(interface|int|all)$"
+      },
+      "verbs": { "Setup": "Configured", "Period close": "Led", "Requirements": "Gathered", "Testing": "Tested", "Data load": "Migrated", "Support": "Resolved", "Report": "Delivered", "Training": "Trained users on" },
+      "bullet": "{verb} {title} in Oracle EBS {name}{api}, [result: e.g. close cut from 6 to 3 days / N records reconciled / N users trained]."
+    },
+    "cvTips": [
+      { "title": "Action, what, result.", "text": "Start with a verb (Configured, Led, Migrated, Tested), name the module and the setup, end with the business result." },
+      { "title": "Numbers win.", "text": "Close days saved, ledgers or entities set up, records loaded and reconciled, users trained." },
+      { "title": "Name the real setups.", "text": "Cross-validation rules, AutoAccounting, SLA methods, payment process profiles. Recruiters search for these exact terms." },
+      { "title": "Module and release.", "text": "\"Oracle EBS R12.2 GL, AP, AR\" says much more than \"Oracle Financials\"." },
+      { "title": "Show the full cycle.", "text": "Requirements, BR100, CRP, SIT, UAT, go-live, post go-live support." },
+      { "title": "Keep it confidential.", "text": "No client names, ticket IDs, internal object names or real amounts. Stranote flags these in amber." },
+      { "title": "Keep it fresh.", "text": "Check this page every month and export a new version." }
+    ]
+  },
+  "settings": {
+    "prefix": "XXCUST",
+    "phases": [
+      { "name": "Requirements", "percent": 10 },
+      { "name": "Solution design", "percent": 25 },
+      { "name": "Configuration", "percent": 45 },
+      { "name": "CRP", "percent": 60 },
+      { "name": "Testing", "percent": 70 },
+      { "name": "UAT", "percent": 85 },
+      { "name": "Go-live", "percent": 95 },
+      { "name": "On Hold", "percent": null },
+      { "name": "Done", "percent": 100 }
+    ],
+    "commonQuestions": [
+      "Who signs off UAT?",
+      "Target PROD date and any close or freeze window?"
+    ],
+    "baseChecklist": [
+      "Requirements confirmed in writing (email / RD050)",
+      "Setup document (BR100) updated",
+      "Configured and tested in TEST",
+      "Test script and evidence in 04_Test",
+      "UAT sign-off",
+      "Applied in PROD and checked with a sample transaction"
+    ],
+    "ticketFolders": ["01_Requirements", "02_Design", "03_Setup", "04_Test", "05_Deploy"],
+    "notesSections": ["Decisions", "Setup values", "Free notes"],
+    "saveTargets": [
+      { "name": "Setup document (BR100, setup screenshots)", "path": "{ticket}\\03_Setup", "prefix": true },
+      { "name": "Test script and evidence (TE040, outputs)", "path": "{ticket}\\04_Test", "prefix": true },
+      { "name": "Requirements (RD050, emails, workshop notes)", "path": "{ticket}\\01_Requirements", "prefix": false },
+      { "name": "Design (MD050, fit/gap, process flows)", "path": "{ticket}\\02_Design", "prefix": false },
+      { "name": "Go-live and cut-over (checklists, load templates)", "path": "{ticket}\\05_Deploy", "prefix": true },
+      { "name": "Reusable query (Knowledge base)", "path": "04_Knowledge\\SQL_Snippets\\{module}", "prefix": false },
+      { "name": "Close checklist or user guide (Knowledge base)", "path": "04_Knowledge\\Templates", "prefix": false }
+    ],
+    "workFolders": [
+      "00_Inbox",
+      "01_Tickets",
+      "03_Environments",
+      "04_Knowledge\\SQL_Snippets",
+      "04_Knowledge\\Templates",
+      "04_Knowledge\\Oracle_Notes",
+      "04_Knowledge\\Company",
+      "05_Tools",
+      "06_Admin",
+      "99_Archive"
+    ],
+    "abbreviations": {
+      "SUPPLIER": "SUPP", "SUPPLIERS": "SUPP", "INVOICE": "INV", "INVOICES": "INV",
+      "PAYMENT": "PMT", "PAYMENTS": "PMT", "RECEIPT": "RCPT", "RECEIPTS": "RCPT",
+      "CUSTOMER": "CUST", "CUSTOMERS": "CUST", "JOURNAL": "JE", "JOURNALS": "JE",
+      "ACCOUNT": "ACCT", "ACCOUNTS": "ACCT", "BALANCE": "BAL", "BALANCES": "BAL",
+      "TRANSACTION": "TRX", "TRANSACTIONS": "TRX", "ASSET": "AST", "ASSETS": "AST",
+      "STATEMENT": "STMT", "STATEMENTS": "STMT", "LEDGER": "LDG", "CALENDAR": "CAL",
+      "PERIOD": "PRD", "RECONCILIATION": "RECON", "DEPRECIATION": "DEPR", "CONFIGURATION": "CFG",
+      "FISCAL": "FY", "MONTHLY": "MTH", "OPENING": "OPN", "SUMMARY": "SUM", "DETAIL": "DTL"
+    },
+    "stopWords": [
+      "THE", "A", "AN", "OF", "FOR", "TO", "AND", "IN", "ON", "NEW", "FIX", "ISSUE",
+      "SETUP", "REPORT", "LOAD", "FROM", "INTO", "WITH", "BY"
+    ]
+  }
+}
