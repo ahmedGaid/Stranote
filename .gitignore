@@ -1,0 +1,8 @@
+# personal data and per-install state never go into the product repo
+src/config.json
+src/settings.json
+src/settings.backup.json
+/04_Knowledge/
+packs/custom/
+*.log
+*.bak

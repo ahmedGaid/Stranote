@@ -1,0 +1,17 @@
+[
+    {
+        "id":  "K-bbbb2222",
+        "taskId":  "T-0001",
+        "company":  "Acme",
+        "module":  "GL",
+        "topic":  "Rule = header + lines + usage",
+        "fact":  "A rule has a header, lines and usages.",
+        "code":  "",
+        "tags":  [
+                     "GL"
+                 ],
+        "source":  "manual",
+        "created":  "2026-01-12 10:00",
+        "updated":  "2026-01-12 10:00"
+    }
+]

@@ -1,0 +1,25 @@
+[
+    {
+        "id":  "Q-aaaa1111",
+        "type":  "tf",
+        "q":  "Rules need a usage.",
+        "answer":  true,
+        "explain":  "",
+        "module":  "GL",
+        "tags":  [
+                     "GL"
+                 ],
+        "taskId":  "T-0001",
+        "cardId":  "",
+        "source":  "claude",
+        "box":  3,
+        "due":  "2026-02-01",
+        "seen":  4,
+        "correct":  3,
+        "wrong":  1,
+        "lastAt":  "2026-01-20 08:00",
+        "created":  "2026-01-12 10:00",
+        "hist":  "1101",
+        "lapses":  1
+    }
+]

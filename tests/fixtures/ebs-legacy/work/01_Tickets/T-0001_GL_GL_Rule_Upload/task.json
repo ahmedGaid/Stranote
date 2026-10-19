@@ -1,0 +1,45 @@
+{
+    "id":  "T-0001",
+    "title":  "GL Rule Upload",
+    "module":  "GL",
+    "type":  "Interface",
+    "priority":  "P2",
+    "due":  "",
+    "requester":  "Finance",
+    "description":  "Upload flexfield security rules from a spreadsheet.",
+    "phase":  "Development",
+    "percent":  50,
+    "blocker":  "",
+    "created":  "2026-01-12 09:00",
+    "updated":  "2026-01-12 09:00",
+    "closed":  "",
+    "branch":  "feature/T-0001",
+    "shortCode":  "GL_RULE_UPL",
+    "company":  "Acme",
+    "details":  [
+                    {
+                        "k":  "direction",
+                        "q":  "Direction",
+                        "a":  "Inbound"
+                    }
+                ],
+    "objects":  [
+
+                ],
+    "checklist":  [
+
+                  ],
+    "history":  [
+
+                ],
+    "files":  [
+
+              ],
+    "questions":  [
+                      {
+                          "q":  "Who approves new rules?",
+                          "answered":  true,
+                          "answer":  "The GL manager signs off each new rule."
+                      }
+                  ]
+}

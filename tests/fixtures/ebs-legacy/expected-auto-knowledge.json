@@ -1,0 +1,286 @@
+{
+    "cards":  [
+                  {
+                      "id":  "A-c0407ee55d",
+                      "taskId":  "T-0001",
+                      "company":  "Acme",
+                      "module":  "GL",
+                      "topic":  "Task: GL Rule Upload",
+                      "fact":  "Upload flexfield security rules from a spreadsheet.\nDirection: Inbound",
+                      "code":  "",
+                      "tags":  [
+                                   "GL",
+                                   "Interface"
+                               ],
+                      "source":  "auto",
+                      "kind":  "task",
+                      "created":  "2026-01-12 09:00"
+                  },
+                  {
+                      "id":  "A-fe3492d13e",
+                      "taskId":  "T-0001",
+                      "company":  "Acme",
+                      "module":  "GL",
+                      "topic":  "Who approves new rules?",
+                      "fact":  "The GL manager signs off each new rule.  (business answer, T-0001: GL Rule Upload)",
+                      "code":  "",
+                      "tags":  [
+                                   "GL"
+                               ],
+                      "source":  "auto",
+                      "kind":  "answer",
+                      "created":  "2026-01-12 09:00"
+                  },
+                  {
+                      "id":  "A-5ea7d39b60",
+                      "taskId":  "T-0001",
+                      "company":  "Acme",
+                      "module":  "GL",
+                      "topic":  "Decision: Load rules through the public API, never direct inserts.",
+                      "fact":  "Load rules through the public API, never direct inserts.  (T-0001: GL Rule Upload)",
+                      "code":  "",
+                      "tags":  [
+                                   "GL"
+                               ],
+                      "source":  "auto",
+                      "kind":  "decision",
+                      "created":  "2026-01-12 09:00"
+                  },
+                  {
+                      "id":  "A-b64632b62c",
+                      "taskId":  "T-0001",
+                      "company":  "Acme",
+                      "module":  "GL",
+                      "topic":  "Decision: Keep one staging row per rule line.",
+                      "fact":  "Keep one staging row per rule line.  (T-0001: GL Rule Upload)",
+                      "code":  "",
+                      "tags":  [
+                                   "GL"
+                               ],
+                      "source":  "auto",
+                      "kind":  "decision",
+                      "created":  "2026-01-12 09:00"
+                  },
+                  {
+                      "id":  "A-60631d60d4",
+                      "taskId":  "T-0001",
+                      "company":  "Acme",
+                      "module":  "GL",
+                      "topic":  "API: FND_PROGRAM",
+                      "fact":  "Procedures used: ADD_TO_GROUP, DELETE_PROGRAM, EXECUTABLE, REGISTER. In 03_Dev\\API\\T-0001_01_load.sql for T-0001: GL Rule Upload.",
+                      "code":  "fnd_program.add_to_group(\u0027XXCUST_GL_RULE_UPL\u0027, \u0027XXCUST\u0027, \u0027GL Requests\u0027, \u0027SQLGL\u0027);",
+                      "tags":  [
+                                   "GL",
+                                   "FND_PROGRAM"
+                               ],
+                      "source":  "auto",
+                      "kind":  "api",
+                      "created":  "2026-01-12 09:00"
+                  },
+                  {
+                      "id":  "A-afa2b1fc2f",
+                      "taskId":  "T-0001",
+                      "company":  "Acme",
+                      "module":  "GL",
+                      "topic":  "API: FND_FILE.LOG",
+                      "fact":  "Called 1 time(s) in 03_Dev\\API\\T-0001_01_load.sql for T-0001: GL Rule Upload.",
+                      "code":  "fnd_file.put_line(fnd_file.log, \u0027done\u0027);",
+                      "tags":  [
+                                   "GL",
+                                   "FND_FILE"
+                               ],
+                      "source":  "auto",
+                      "kind":  "api",
+                      "created":  "2026-01-12 09:00"
+                  },
+                  {
+                      "id":  "A-b87a5d16af",
+                      "taskId":  "T-0001",
+                      "company":  "Acme",
+                      "module":  "GL",
+                      "topic":  "API: FND_FILE.PUT_LINE",
+                      "fact":  "Called 1 time(s) in 03_Dev\\API\\T-0001_01_load.sql for T-0001: GL Rule Upload.",
+                      "code":  "fnd_file.put_line(fnd_file.log, \u0027done\u0027);",
+                      "tags":  [
+                                   "GL",
+                                   "FND_FILE"
+                               ],
+                      "source":  "auto",
+                      "kind":  "api",
+                      "created":  "2026-01-12 09:00"
+                  },
+                  {
+                      "id":  "A-8aca300acf",
+                      "taskId":  "T-0001",
+                      "company":  "Acme",
+                      "module":  "GL",
+                      "topic":  "API: FND_FLEX_VALUE_RULE_LINES_PKG.INSERT_ROW",
+                      "fact":  "Called 1 time(s) in 03_Dev\\API\\T-0001_01_load.sql for T-0001: GL Rule Upload.",
+                      "code":  "fnd_flex_value_rule_lines_pkg.insert_row(x_rowid =\u003e l_rowid);",
+                      "tags":  [
+                                   "GL",
+                                   "FND_FLEX_VALUE_RULE_LINES_PKG"
+                               ],
+                      "source":  "auto",
+                      "kind":  "api",
+                      "created":  "2026-01-12 09:00"
+                  },
+                  {
+                      "id":  "A-9ecd4340cc",
+                      "taskId":  "T-0001",
+                      "company":  "Acme",
+                      "module":  "GL",
+                      "topic":  "API: FND_FLEX_VALUE_RULE_USAGES_PKG.INSERT_ROW",
+                      "fact":  "Called 1 time(s) in 03_Dev\\API\\T-0001_01_load.sql for T-0001: GL Rule Upload.",
+                      "code":  "fnd_flex_value_rule_usages_pkg.insert_row(x_rowid =\u003e l_rowid);",
+                      "tags":  [
+                                   "GL",
+                                   "FND_FLEX_VALUE_RULE_USAGES_PKG"
+                               ],
+                      "source":  "auto",
+                      "kind":  "api",
+                      "created":  "2026-01-12 09:00"
+                  },
+                  {
+                      "id":  "A-32df971fb2",
+                      "taskId":  "T-0001",
+                      "company":  "Acme",
+                      "module":  "GL",
+                      "topic":  "API: FND_FLEX_VALUE_RULES_PKG.INSERT_ROW",
+                      "fact":  "Called 1 time(s) in 03_Dev\\API\\T-0001_01_load.sql for T-0001: GL Rule Upload.",
+                      "code":  "fnd_flex_value_rules_pkg.insert_row(x_rowid =\u003e l_rowid,\n     x_flex_value_rule_id =\u003e 1);",
+                      "tags":  [
+                                   "GL",
+                                   "FND_FLEX_VALUE_RULES_PKG"
+                               ],
+                      "source":  "auto",
+                      "kind":  "api",
+                      "created":  "2026-01-12 09:00"
+                  },
+                  {
+                      "id":  "A-9414a21183",
+                      "taskId":  "T-0001",
+                      "company":  "Acme",
+                      "module":  "GL",
+                      "topic":  "Table: FND_FLEX_VALUE_RULES",
+                      "fact":  "Used in T-0001: GL Rule Upload (update x1). Files: 03_Dev\\API\\T-0001_01_load.sql.",
+                      "code":  "update fnd_flex_value_rules set description = \u0027x\u0027 where 1 = 2;",
+                      "tags":  [
+                                   "GL"
+                               ],
+                      "source":  "auto",
+                      "kind":  "table",
+                      "created":  "2026-01-12 09:00"
+                  },
+                  {
+                      "id":  "A-27f98f1b04",
+                      "taskId":  "T-0001",
+                      "company":  "Acme",
+                      "module":  "GL",
+                      "topic":  "Table: FND_FLEX_VALUE_SETS",
+                      "fact":  "Used in T-0001: GL Rule Upload (select x1). Files: 03_Dev\\API\\T-0001_01_load.sql.",
+                      "code":  "for r in (select * from fnd_flex_value_sets where flex_value_set_name = \u0027X\u0027) loop null; end loop;",
+                      "tags":  [
+                                   "GL"
+                               ],
+                      "source":  "auto",
+                      "kind":  "table",
+                      "created":  "2026-01-12 09:00"
+                  },
+                  {
+                      "id":  "A-71745577d2",
+                      "taskId":  "T-0001",
+                      "company":  "Acme",
+                      "module":  "GL",
+                      "topic":  "Table: FND_ID_FLEX_STRUCTURES",
+                      "fact":  "Used in T-0001: GL Rule Upload (select x1). Files: 03_Dev\\API\\T-0001_01_load.sql.",
+                      "code":  "select count(*) into l_n from gl_ledgers gl join fnd_id_flex_structures s on 1 = 1;",
+                      "tags":  [
+                                   "GL"
+                               ],
+                      "source":  "auto",
+                      "kind":  "table",
+                      "created":  "2026-01-12 09:00"
+                  },
+                  {
+                      "id":  "A-9235ee3882",
+                      "taskId":  "T-0001",
+                      "company":  "Acme",
+                      "module":  "GL",
+                      "topic":  "Table: GL_CODE_COMBINATIONS_TMP",
+                      "fact":  "Used in T-0001: GL Rule Upload (delete x1). Files: 03_Dev\\API\\T-0001_01_load.sql.",
+                      "code":  "delete from gl_code_combinations_tmp where 1 = 2;",
+                      "tags":  [
+                                   "GL"
+                               ],
+                      "source":  "auto",
+                      "kind":  "table",
+                      "created":  "2026-01-12 09:00"
+                  },
+                  {
+                      "id":  "A-7d0ff30fae",
+                      "taskId":  "T-0001",
+                      "company":  "Acme",
+                      "module":  "GL",
+                      "topic":  "Table: GL_LEDGERS",
+                      "fact":  "Used in T-0001: GL Rule Upload (select x1). Files: 03_Dev\\API\\T-0001_01_load.sql.",
+                      "code":  "select count(*) into l_n from gl_ledgers gl join fnd_id_flex_structures s on 1 = 1;",
+                      "tags":  [
+                                   "GL"
+                               ],
+                      "source":  "auto",
+                      "kind":  "table",
+                      "created":  "2026-01-12 09:00"
+                  }
+              ],
+    "questions":  [
+                      {
+                          "id":  "QB-587d081a9b",
+                          "type":  "blank",
+                          "q":  "Which package provides ADD_TO_GROUP, DELETE_PROGRAM, EXECUTABLE? (you used it in T-0001: GL Rule Upload)",
+                          "answer":  "FND_PROGRAM",
+                          "explain":  "Also: ADD_TO_GROUP, DELETE_PROGRAM, EXECUTABLE, REGISTER.",
+                          "cardId":  "A-60631d60d4"
+                      },
+                      {
+                          "id":  "QB-50cacaa91a",
+                          "type":  "blank",
+                          "q":  "Which package provides  (you used it in T-0001: GL Rule Upload)",
+                          "answer":  "FND_FILE",
+                          "explain":  "Seen in 03_Dev\\API\\T-0001_01_load.sql.",
+                          "cardId":  "A-afa2b1fc2f"
+                      },
+                      {
+                          "id":  "QB-23f0e12a21",
+                          "type":  "blank",
+                          "q":  "Which package provides  (you used it in T-0001: GL Rule Upload)",
+                          "answer":  "FND_FILE",
+                          "explain":  "Seen in 03_Dev\\API\\T-0001_01_load.sql.",
+                          "cardId":  "A-b87a5d16af"
+                      },
+                      {
+                          "id":  "QB-174abfb1d5",
+                          "type":  "blank",
+                          "q":  "Which package provides  (you used it in T-0001: GL Rule Upload)",
+                          "answer":  "FND_FLEX_VALUE_RULE_LINES_PKG",
+                          "explain":  "Seen in 03_Dev\\API\\T-0001_01_load.sql.",
+                          "cardId":  "A-8aca300acf"
+                      },
+                      {
+                          "id":  "QB-61e5d3af6d",
+                          "type":  "blank",
+                          "q":  "Which package provides  (you used it in T-0001: GL Rule Upload)",
+                          "answer":  "FND_FLEX_VALUE_RULE_USAGES_PKG",
+                          "explain":  "Seen in 03_Dev\\API\\T-0001_01_load.sql.",
+                          "cardId":  "A-9ecd4340cc"
+                      },
+                      {
+                          "id":  "QB-c3db684f0c",
+                          "type":  "blank",
+                          "q":  "Which package provides  (you used it in T-0001: GL Rule Upload)",
+                          "answer":  "FND_FLEX_VALUE_RULES_PKG",
+                          "explain":  "Seen in 03_Dev\\API\\T-0001_01_load.sql.",
+                          "cardId":  "A-32df971fb2"
+                      }
+                  ]
+}

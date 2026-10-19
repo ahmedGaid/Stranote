@@ -1,0 +1,1154 @@
+{
+    "schemaVersion":  1,
+    "id":  "oracle-ebs-technical",
+    "name":  "Oracle EBS Technical Consultant",
+    "field":  "IT / ERP",
+    "version":  "1.0.0",
+    "description":  "Oracle E-Business Suite technical work: reports, interfaces, conversions, extensions, OAF, workflow and support.",
+    "levels":  [
+                   "Student",
+                   "Junior",
+                   "Mid",
+                   "Senior",
+                   "Lead"
+               ],
+    "categories":  [
+                       {
+                           "id":  "Technical",
+                           "label":  "Technical",
+                           "labelAr":  "تقني",
+                           "color":  "#2563eb"
+                       },
+                       {
+                           "id":  "Financial",
+                           "label":  "Financial",
+                           "labelAr":  "مالي",
+                           "color":  "#2f8f5b"
+                       },
+                       {
+                           "id":  "Business",
+                           "label":  "Business",
+                           "labelAr":  "بيزنس",
+                           "color":  "#b7791f"
+                       },
+                       {
+                           "id":  "SCM",
+                           "label":  "SCM",
+                           "labelAr":  "سلاسل الإمداد",
+                           "color":  "#7c3aed"
+                       }
+                   ],
+    "categoryRules":  {
+                          "byKind":  {
+                                         "answer":  "Business",
+                                         "decision":  "Business",
+                                         "api":  "Technical",
+                                         "table":  "Technical"
+                                     },
+                          "default":  "Technical"
+                      },
+    "areas":  [
+                  {
+                      "id":  "AP",
+                      "name":  "Payables",
+                      "category":  "Financial",
+                      "taskModule":  true,
+                      "concepts":  [
+                                       {
+                                           "id":  "ap-invoice-flow",
+                                           "title":  "Invoice lifecycle: entry, validation, accounting, payment"
+                                       },
+                                       {
+                                           "id":  "ap-interface",
+                                           "title":  "AP open interface (AP_INVOICES_INTERFACE)"
+                                       }
+                                   ]
+                  },
+                  {
+                      "id":  "AR",
+                      "name":  "Receivables",
+                      "category":  "Financial",
+                      "taskModule":  true,
+                      "concepts":  [
+                                       {
+                                           "id":  "ar-transactions",
+                                           "title":  "Transactions: invoices, credit memos, receipts and applications"
+                                       },
+                                       {
+                                           "id":  "ar-autoinvoice",
+                                           "title":  "AutoInvoice interface (RA_INTERFACE_LINES_ALL)"
+                                       }
+                                   ]
+                  },
+                  {
+                      "id":  "GL",
+                      "name":  "General Ledger",
+                      "category":  "Financial",
+                      "taskModule":  true,
+                      "concepts":  [
+                                       {
+                                           "id":  "gl-coa",
+                                           "title":  "Chart of accounts and the GL# key flexfield"
+                                       },
+                                       {
+                                           "id":  "gl-security-rules",
+                                           "title":  "Flexfield security rules"
+                                       },
+                                       {
+                                           "id":  "gl-cvr",
+                                           "title":  "Cross-validation rules"
+                                       },
+                                       {
+                                           "id":  "gl-period-close",
+                                           "title":  "Period open and close"
+                                       }
+                                   ]
+                  },
+                  {
+                      "id":  "PO",
+                      "name":  "Purchasing",
+                      "category":  "SCM",
+                      "taskModule":  true,
+                      "concepts":  [
+                                       {
+                                           "id":  "po-p2p-flow",
+                                           "title":  "Procure to pay: requisition, PO, receipt, invoice match"
+                                       },
+                                       {
+                                           "id":  "po-approval",
+                                           "title":  "Document approval: approval hierarchy and workflow"
+                                       }
+                                   ]
+                  },
+                  {
+                      "id":  "INV",
+                      "name":  "Inventory",
+                      "category":  "SCM",
+                      "taskModule":  true,
+                      "concepts":  [
+                                       {
+                                           "id":  "inv-items",
+                                           "title":  "Items, organizations and subinventories"
+                                       },
+                                       {
+                                           "id":  "inv-aliases",
+                                           "title":  "Account aliases"
+                                       }
+                                   ]
+                  },
+                  {
+                      "id":  "OM",
+                      "name":  "Order Management",
+                      "category":  "SCM",
+                      "taskModule":  true,
+                      "concepts":  [
+                                       {
+                                           "id":  "om-o2c-flow",
+                                           "title":  "Order to cash: booking, pick release, ship confirm, invoicing"
+                                       },
+                                       {
+                                           "id":  "om-api",
+                                           "title":  "Order import and OE_ORDER_PUB.PROCESS_ORDER"
+                                       }
+                                   ]
+                  },
+                  {
+                      "id":  "FA",
+                      "name":  "Fixed Assets",
+                      "category":  "Financial",
+                      "taskModule":  true,
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "CE",
+                      "name":  "Cash Management",
+                      "category":  "Financial",
+                      "taskModule":  true,
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "PA",
+                      "name":  "Projects",
+                      "category":  "Financial",
+                      "taskModule":  true,
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "HR",
+                      "name":  "Human Resources",
+                      "taskModule":  true,
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "PAY",
+                      "name":  "Payroll",
+                      "taskModule":  true,
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "FND",
+                      "name":  "Application Object Library",
+                      "taskModule":  true,
+                      "concepts":  [
+                                       {
+                                           "id":  "fnd-conc",
+                                           "title":  "Concurrent programs, executables and request groups"
+                                       },
+                                       {
+                                           "id":  "fnd-resp",
+                                           "title":  "Responsibilities, menus and functions"
+                                       },
+                                       {
+                                           "id":  "fnd-profiles",
+                                           "title":  "Profile options"
+                                       }
+                                   ]
+                  },
+                  {
+                      "id":  "Other",
+                      "name":  "Other",
+                      "taskModule":  true,
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "XLA",
+                      "name":  "Subledger Accounting",
+                      "category":  "Financial",
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "ZX",
+                      "name":  "E-Business Tax",
+                      "category":  "Financial",
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "IBY",
+                      "name":  "Payments",
+                      "category":  "Financial",
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "IEX",
+                      "name":  "Advanced Collections",
+                      "category":  "Financial",
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "OKL",
+                      "name":  "Lease and Finance Management",
+                      "category":  "Financial",
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "ONT",
+                      "name":  "Order Management (ONT)",
+                      "category":  "SCM",
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "WSH",
+                      "name":  "Shipping Execution",
+                      "category":  "SCM",
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "BOM",
+                      "name":  "Bills of Material",
+                      "category":  "SCM",
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "WIP",
+                      "name":  "Work in Process",
+                      "category":  "SCM",
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "MRP",
+                      "name":  "Planning (MRP)",
+                      "category":  "SCM",
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "CST",
+                      "name":  "Costing",
+                      "category":  "SCM",
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "QP",
+                      "name":  "Advanced Pricing",
+                      "category":  "SCM",
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "ASCP",
+                      "name":  "Advanced Supply Chain Planning",
+                      "category":  "SCM",
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "PON",
+                      "name":  "Sourcing",
+                      "category":  "SCM",
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "ICX",
+                      "name":  "iProcurement",
+                      "category":  "SCM",
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "WMS",
+                      "name":  "Warehouse Management",
+                      "category":  "SCM",
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "EAM",
+                      "name":  "Enterprise Asset Management",
+                      "category":  "SCM",
+                      "concepts":  [
+
+                                   ]
+                  },
+                  {
+                      "id":  "PLSQL",
+                      "name":  "PL/SQL and SQL",
+                      "category":  "Technical",
+                      "concepts":  [
+                                       {
+                                           "id":  "plsql-packages",
+                                           "title":  "Packages, specs and bodies"
+                                       },
+                                       {
+                                           "id":  "plsql-bulk",
+                                           "title":  "BULK COLLECT and FORALL"
+                                       },
+                                       {
+                                           "id":  "plsql-errors",
+                                           "title":  "Exception handling and error logging"
+                                       }
+                                   ]
+                  },
+                  {
+                      "id":  "APIS",
+                      "name":  "Oracle public APIs",
+                      "category":  "Technical",
+                      "concepts":  [
+                                       {
+                                           "id":  "api-init",
+                                           "title":  "FND_GLOBAL.APPS_INITIALIZE and MO_GLOBAL"
+                                       },
+                                       {
+                                           "id":  "api-pattern",
+                                           "title":  "Calling public APIs: p_init_msg_list, x_return_status, messages"
+                                       }
+                                   ]
+                  },
+                  {
+                      "id":  "FNDLOAD",
+                      "name":  "FNDLOAD and migrations",
+                      "category":  "Technical",
+                      "concepts":  [
+                                       {
+                                           "id":  "fndload-lct",
+                                           "title":  "FNDLOAD download/upload and .lct control files"
+                                       },
+                                       {
+                                           "id":  "fndload-migrate",
+                                           "title":  "Migrating AOL setups between instances"
+                                       }
+                                   ]
+                  },
+                  {
+                      "id":  "BIP",
+                      "name":  "BI Publisher",
+                      "category":  "Technical",
+                      "concepts":  [
+                                       {
+                                           "id":  "bip-dd",
+                                           "title":  "Data definitions and data templates"
+                                       },
+                                       {
+                                           "id":  "bip-rtf",
+                                           "title":  "RTF templates"
+                                       }
+                                   ]
+                  },
+                  {
+                      "id":  "OAF",
+                      "name":  "Oracle Application Framework",
+                      "category":  "Technical",
+                      "concepts":  [
+                                       {
+                                           "id":  "oaf-mvc",
+                                           "title":  "OAF pages: AM, VO, EO, controller"
+                                       },
+                                       {
+                                           "id":  "oaf-perso",
+                                           "title":  "Personalization vs extension"
+                                       }
+                                   ]
+                  },
+                  {
+                      "id":  "WF",
+                      "name":  "Workflow",
+                      "category":  "Technical",
+                      "concepts":  [
+                                       {
+                                           "id":  "wf-builder",
+                                           "title":  "Item types, processes, activities and attributes"
+                                       },
+                                       {
+                                           "id":  "wf-runtime",
+                                           "title":  "Workflow runtime: WF_ENGINE, notifications and background engine"
+                                       }
+                                   ]
+                  },
+                  {
+                      "id":  "FORMS",
+                      "name":  "Forms and personalization",
+                      "category":  "Technical",
+                      "concepts":  [
+                                       {
+                                           "id":  "forms-triggers",
+                                           "title":  "Oracle Forms blocks, items and triggers"
+                                       },
+                                       {
+                                           "id":  "forms-perso",
+                                           "title":  "Forms personalization vs CUSTOM.pll"
+                                       }
+                                   ]
+                  },
+                  {
+                      "id":  "INTERFACES",
+                      "name":  "Interfaces and conversions",
+                      "category":  "Technical",
+                      "concepts":  [
+                                       {
+                                           "id":  "int-staging",
+                                           "title":  "Staging, validation and error tables"
+                                       },
+                                       {
+                                           "id":  "int-sqlldr",
+                                           "title":  "SQL*Loader control files"
+                                       }
+                                   ]
+                  }
+              ],
+    "taskTypes":  [
+                      {
+                          "name":  "Report",
+                          "questions":  [
+                                            {
+                                                "k":  "tech",
+                                                "q":  "Technology (BIP / Oracle Reports / SQL text output)",
+                                                "d":  "BIP"
+                                            },
+                                            {
+                                                "k":  "format",
+                                                "q":  "Output format (Excel / PDF / RTF / CSV)",
+                                                "d":  "Excel"
+                                            },
+                                            {
+                                                "k":  "params",
+                                                "q":  "Parameters (comma separated)",
+                                                "d":  ""
+                                            },
+                                            {
+                                                "k":  "frequency",
+                                                "q":  "Run frequency (ad-hoc / daily / month-end)",
+                                                "d":  "ad-hoc"
+                                            },
+                                            {
+                                                "k":  "base",
+                                                "q":  "Based on a seeded report? Name it (blank = new)",
+                                                "d":  ""
+                                            }
+                                        ],
+                          "openQuestions":  [
+                                                "Exact columns / mockup agreed?",
+                                                "Which responsibility / request group runs it?",
+                                                "Data security: which OU / ledger?",
+                                                "Sorting, grouping and totals?"
+                                            ],
+                          "checklist":  [
+                                            "Concurrent program registered",
+                                            "Added to request group",
+                                            "Data definition + template registered (BIP)",
+                                            "FNDLOAD ldt extracted"
+                                        ],
+                          "objects":  [
+                                          "{base} (concurrent program short name)",
+                                          "{base}_PKG (data/trigger package)",
+                                          "{base} (BIP data definition + template code)"
+                                      ]
+                      },
+                      {
+                          "name":  "Interface",
+                          "questions":  [
+                                            {
+                                                "k":  "direction",
+                                                "q":  "Direction (Inbound / Outbound)",
+                                                "d":  "Inbound"
+                                            },
+                                            {
+                                                "k":  "system",
+                                                "q":  "Other system (source/target)",
+                                                "d":  ""
+                                            },
+                                            {
+                                                "k":  "transport",
+                                                "q":  "File format and transport (CSV over SFTP / API / DB link)",
+                                                "d":  ""
+                                            },
+                                            {
+                                                "k":  "frequency",
+                                                "q":  "Frequency (real-time / hourly / daily)",
+                                                "d":  "daily"
+                                            },
+                                            {
+                                                "k":  "api",
+                                                "q":  "EBS open interface tables or API to use (if known)",
+                                                "d":  ""
+                                            }
+                                        ],
+                          "openQuestions":  [
+                                                "Sample file / payload received?",
+                                                "Validation rules and mandatory fields?",
+                                                "Who is notified on errors and how?",
+                                                "Reprocessing logic for failed records?",
+                                                "Scheduling and dependencies?"
+                                            ],
+                          "checklist":  [
+                                            "Staging + error tables created",
+                                            "Validation and error report",
+                                            "Concurrent program scheduled",
+                                            "FNDLOAD ldt extracted"
+                                        ],
+                          "objects":  [
+                                          "{base}_STG (staging table)",
+                                          "{base}_ERR (error table)",
+                                          "{base}_PKG (load/validate/import package)",
+                                          "{base}_INT (concurrent program)"
+                                      ]
+                      },
+                      {
+                          "name":  "Conversion",
+                          "questions":  [
+                                            {
+                                                "k":  "source",
+                                                "q":  "Legacy source system",
+                                                "d":  ""
+                                            },
+                                            {
+                                                "k":  "entities",
+                                                "q":  "Entities to convert (suppliers, customers, open invoices...)",
+                                                "d":  ""
+                                            },
+                                            {
+                                                "k":  "volume",
+                                                "q":  "Approximate volume (records)",
+                                                "d":  ""
+                                            },
+                                            {
+                                                "k":  "api",
+                                                "q":  "Interface tables / API to use (if known)",
+                                                "d":  ""
+                                            },
+                                            {
+                                                "k":  "cutover",
+                                                "q":  "Go-live / cut-over date",
+                                                "d":  ""
+                                            }
+                                        ],
+                          "openQuestions":  [
+                                                "Mapping sheet signed off?",
+                                                "Who owns data cleansing?",
+                                                "Number of mock loads before go-live?",
+                                                "Reconciliation method and sign-off?"
+                                            ],
+                          "checklist":  [
+                                            "Staging tables + SQL*Loader ctl",
+                                            "Validation report",
+                                            "Mock load 1 reconciled",
+                                            "Final load reconciled"
+                                        ],
+                          "objects":  [
+                                          "{base}_CNV_STG (staging table)",
+                                          "{base}_CNV_PKG (validate/load package)",
+                                          "{base}_CNV.ctl (SQL*Loader control file)",
+                                          "{base}_CNV (concurrent program)"
+                                      ]
+                      },
+                      {
+                          "name":  "Extension",
+                          "questions":  [
+                                            {
+                                                "k":  "form",
+                                                "q":  "Form or screen name (e.g. POXPOEPO)",
+                                                "d":  ""
+                                            },
+                                            {
+                                                "k":  "approach",
+                                                "q":  "Approach (Forms Personalization / CUSTOM.pll / new custom form)",
+                                                "d":  "Forms Personalization"
+                                            },
+                                            {
+                                                "k":  "event",
+                                                "q":  "When should it fire (WHEN-NEW-FORM-INSTANCE, on save, ...)",
+                                                "d":  ""
+                                            },
+                                            {
+                                                "k":  "rule",
+                                                "q":  "Business rule in one sentence",
+                                                "d":  ""
+                                            }
+                                        ],
+                          "openQuestions":  [
+                                                "Which responsibilities / users are affected?",
+                                                "Behaviour when rule fails (error vs warning)?"
+                                            ],
+                          "checklist":  [
+                                            "Personalization / CUSTOM.pll change done",
+                                            "FNDLOAD affrmcus ldt extracted"
+                                        ],
+                          "objects":  [
+                                          "Forms personalization rule: \u0027{prefix} - {code}\u0027",
+                                          "{base}_UTIL_PKG (helper package if needed)"
+                                      ]
+                      },
+                      {
+                          "name":  "OAF",
+                          "questions":  [
+                                            {
+                                                "k":  "page",
+                                                "q":  "Page / region (e.g. /oracle/apps/pos/...)",
+                                                "d":  ""
+                                            },
+                                            {
+                                                "k":  "approach",
+                                                "q":  "Approach (Personalization / Controller extension / VO extension / new page)",
+                                                "d":  "Personalization"
+                                            },
+                                            {
+                                                "k":  "rule",
+                                                "q":  "Business rule in one sentence",
+                                                "d":  ""
+                                            }
+                                        ],
+                          "openQuestions":  [
+                                                "Which responsibilities / users are affected?",
+                                                "Site level or responsibility level personalization?"
+                                            ],
+                          "checklist":  [
+                                            "Personalization / extension exported",
+                                            "jpximport tested on TEST"
+                                        ],
+                          "objects":  [
+                                          "Package path: {prefixLower}.oracle.apps.\u003cprod\u003e.\u003ccomp\u003e",
+                                          "{base}_UTIL_PKG (helper package if needed)"
+                                      ]
+                      },
+                      {
+                          "name":  "Workflow",
+                          "questions":  [
+                                            {
+                                                "k":  "itemtype",
+                                                "q":  "Item type (e.g. POAPPRV, REQAPPRV, custom)",
+                                                "d":  ""
+                                            },
+                                            {
+                                                "k":  "change",
+                                                "q":  "Change (custom notification / approval rule / new process)",
+                                                "d":  ""
+                                            },
+                                            {
+                                                "k":  "approvers",
+                                                "q":  "Approver logic (hierarchy / position / AME)",
+                                                "d":  ""
+                                            }
+                                        ],
+                          "openQuestions":  [
+                                                "Timeout and escalation rules?",
+                                                "Notification text approved?"
+                                            ],
+                          "checklist":  [
+                                            ".wft saved in repo",
+                                            "Test approval cycle passed"
+                                        ],
+                          "objects":  [
+                                          "Item type: {prefix}{module} (max 8 chars)",
+                                          "{base}_WF_PKG (workflow functions)"
+                                      ]
+                      },
+                      {
+                          "name":  "Support",
+                          "questions":  [
+                                            {
+                                                "k":  "error",
+                                                "q":  "Error message (exact text)",
+                                                "d":  ""
+                                            },
+                                            {
+                                                "k":  "request",
+                                                "q":  "Concurrent request ID or steps to reproduce",
+                                                "d":  ""
+                                            },
+                                            {
+                                                "k":  "env",
+                                                "q":  "Where does it happen (PROD / TEST / ...)",
+                                                "d":  "PROD"
+                                            },
+                                            {
+                                                "k":  "since",
+                                                "q":  "Since when / any recent change or patch",
+                                                "d":  ""
+                                            },
+                                            {
+                                                "k":  "impact",
+                                                "q":  "Business impact (users blocked? workaround?)",
+                                                "d":  ""
+                                            }
+                                        ],
+                          "openQuestions":  [
+                                                "Can it be reproduced in TEST?",
+                                                "Is there a workaround for users meanwhile?",
+                                                "Is an SR with Oracle needed?"
+                                            ],
+                          "checklist":  [
+                                            "Root cause identified",
+                                            "Fix verified in TEST",
+                                            "Root cause documented in _NOTES.md"
+                                        ],
+                          "objects":  [
+
+                                      ]
+                      },
+                      {
+                          "name":  "Analysis",
+                          "questions":  [
+                                            {
+                                                "k":  "question",
+                                                "q":  "What question must be answered",
+                                                "d":  ""
+                                            },
+                                            {
+                                                "k":  "deliverable",
+                                                "q":  "Expected deliverable (estimate / design / recommendation)",
+                                                "d":  ""
+                                            }
+                                        ],
+                          "openQuestions":  [
+                                                "Who is the decision maker?"
+                                            ],
+                          "checklist":  [
+                                            "Findings documented",
+                                            "Presented to requester"
+                                        ],
+                          "objects":  [
+
+                                      ]
+                      },
+                      {
+                          "name":  "Other",
+                          "questions":  [
+
+                                        ],
+                          "openQuestions":  [
+
+                                            ],
+                          "checklist":  [
+
+                                        ],
+                          "objects":  [
+
+                                      ]
+                      }
+                  ],
+    "extractors":  [
+                       {
+                           "id":  "ebs-api",
+                           "kind":  "api",
+                           "label":  "API",
+                           "files":  [
+                                         ".sql",
+                                         ".pks",
+                                         ".pkb",
+                                         ".pls",
+                                         ".ctl",
+                                         ".prog",
+                                         ".sh",
+                                         ".txt"
+                                     ],
+                           "commentPattern":  "^\\s*--",
+                           "pattern":  "(?i)\\b(?\u003cpkg\u003e(?:fnd|mo|hr|ap|ar|gl|po|inv|wf|xdo|ego|hz|iby|ce|fa|pa|xla|oe|wsh|ra|jtf|per|pay|mtl|ont|cst|bom|wip|okc|qp|zx)_[a-z0-9_]+|[a-z][a-z0-9_]*_(?:pkg|pub|pvt|api|grp|util))\\.(?\u003cmember\u003e[a-z][a-z0-9_]+)\\b",
+                           "skipMembers":  [
+                                               "PKB",
+                                               "PKS",
+                                               "SQL",
+                                               "LDT",
+                                               "CTL",
+                                               "PLS",
+                                               "XML",
+                                               "NEXTVAL",
+                                               "CURRVAL",
+                                               "TXT",
+                                               "PROG"
+                                           ],
+                           "skipOwnPrefix":  true,
+                           "maxCards":  8,
+                           "groupThreshold":  3,
+                           "snippetLines":  8,
+                           "snippetEnd":  ";\\s*$",
+                           "question":  "Which package provides {members}? (you used it in {ref})"
+                       },
+                       {
+                           "id":  "ebs-table",
+                           "kind":  "table",
+                           "label":  "Table",
+                           "files":  [
+                                         ".sql",
+                                         ".pks",
+                                         ".pkb",
+                                         ".pls",
+                                         ".ctl",
+                                         ".prog",
+                                         ".sh",
+                                         ".txt"
+                                     ],
+                           "commentPattern":  "^\\s*--",
+                           "pattern":  "(?i)\\b(?\u003ckey\u003e(?:fnd|mo|hr|ap|ar|gl|po|inv|wf|xdo|ego|hz|iby|ce|fa|pa|xla|oe|wsh|ra|jtf|per|pay|mtl|ont|cst|bom|wip|okc|qp|zx)_[a-z0-9_]{3,})\\b(?!\\s*\\.)",
+                           "excludePattern":  "_(PKG|PUB|PVT|API|GRP|UTIL|S)$",
+                           "skipOwnPrefix":  true,
+                           "maxCards":  6,
+                           "operations":  {
+                                              "INSERT":  "(?i)insert\\s+into\\s+(\\w+\\.)?{key}\\b",
+                                              "UPDATE":  "(?i)update\\s+(\\w+\\.)?{key}\\b",
+                                              "DELETE":  "(?i)delete\\s+(from\\s+)?(\\w+\\.)?{key}\\b",
+                                              "SELECT":  "(?i)(from|join)\\s+(\\w+\\.)?{key}\\b"
+                                          },
+                           "packagePattern":  "_(PKG|PUB|PVT|API|GRP|UTIL)$"
+                       }
+                   ],
+    "starterLessons":  [
+
+                       ],
+    "skillMap":  [
+                     {
+                         "skill":  "PL/SQL",
+                         "area":  "PLSQL",
+                         "group":  "Technical"
+                     },
+                     {
+                         "skill":  "Oracle EBS public APIs",
+                         "area":  "APIS",
+                         "group":  "Technical"
+                     },
+                     {
+                         "skill":  "FNDLOAD",
+                         "area":  "FNDLOAD",
+                         "group":  "Technical"
+                     },
+                     {
+                         "skill":  "BI Publisher",
+                         "area":  "BIP",
+                         "group":  "Technical"
+                     },
+                     {
+                         "skill":  "OAF",
+                         "area":  "OAF",
+                         "group":  "Technical"
+                     },
+                     {
+                         "skill":  "Oracle Workflow",
+                         "area":  "WF",
+                         "group":  "Technical"
+                     },
+                     {
+                         "skill":  "Oracle General Ledger",
+                         "area":  "GL",
+                         "group":  "Functional"
+                     },
+                     {
+                         "skill":  "Oracle Payables",
+                         "area":  "AP",
+                         "group":  "Functional"
+                     }
+                 ],
+    "onboardingQuestions":  [
+                                {
+                                    "id":  "prefix",
+                                    "label":  "Custom object prefix (e.g. XXCUST)",
+                                    "type":  "text",
+                                    "default":  "XXCUST",
+                                    "writesTo":  "settings.prefix"
+                                },
+                                {
+                                    "id":  "ebsVersion",
+                                    "label":  "EBS version",
+                                    "type":  "select",
+                                    "options":  [
+                                                    "R12.2",
+                                                    "R12.1",
+                                                    "11i"
+                                                ],
+                                    "default":  "R12.2",
+                                    "writesTo":  "pack.ebsVersion"
+                                },
+                                {
+                                    "id":  "dbVersion",
+                                    "label":  "Database version",
+                                    "type":  "select",
+                                    "options":  [
+                                                    "19c",
+                                                    "12c",
+                                                    "11g"
+                                                ],
+                                    "default":  "19c",
+                                    "writesTo":  "pack.dbVersion"
+                                },
+                                {
+                                    "id":  "environments",
+                                    "label":  "Environments",
+                                    "type":  "text",
+                                    "default":  "DEV, TEST, UAT, PROD",
+                                    "writesTo":  "pack.environments"
+                                },
+                                {
+                                    "id":  "ticketFormat",
+                                    "label":  "Ticket ID format (e.g. FIN-1234)",
+                                    "type":  "text",
+                                    "default":  "",
+                                    "writesTo":  "pack.ticketFormat"
+                                }
+                            ],
+    "settings":  {
+                     "prefix":  "XXCUST",
+                     "phases":  [
+                                    {
+                                        "name":  "Requirements",
+                                        "percent":  10
+                                    },
+                                    {
+                                        "name":  "Design",
+                                        "percent":  25
+                                    },
+                                    {
+                                        "name":  "Development",
+                                        "percent":  50
+                                    },
+                                    {
+                                        "name":  "Testing",
+                                        "percent":  70
+                                    },
+                                    {
+                                        "name":  "UAT",
+                                        "percent":  85
+                                    },
+                                    {
+                                        "name":  "Deployment",
+                                        "percent":  95
+                                    },
+                                    {
+                                        "name":  "On Hold",
+                                        "percent":  null
+                                    },
+                                    {
+                                        "name":  "Done",
+                                        "percent":  100
+                                    }
+                                ],
+                     "commonQuestions":  [
+                                             "Who signs off UAT?",
+                                             "Target PROD date and any freeze window?"
+                                         ],
+                     "baseChecklist":  [
+                                           "Requirements confirmed in writing (MD050 / email)",
+                                           "Technical design (MD070)",
+                                           "Code committed on feature branch",
+                                           "Compiles clean in DEV",
+                                           "Unit test evidence in 04_Test",
+                                           "Install + rollback scripts tested on TEST",
+                                           "UAT sign-off",
+                                           "MD120 migration doc",
+                                           "Deployed to PROD and smoke-tested"
+                                       ],
+                     "ticketFolders":  [
+                                           "01_Requirements",
+                                           "02_Design",
+                                           "03_Dev",
+                                           "04_Test",
+                                           "05_Deploy"
+                                       ],
+                     "notesSections":  [
+                                           "Decisions",
+                                           "Free notes"
+                                       ],
+                     "saveTargets":  [
+                                         {
+                                             "name":  "Task script (API test / dev / analysis)",
+                                             "path":  "{ticket}\\03_Dev\\API",
+                                             "prefix":  true
+                                         },
+                                         {
+                                             "name":  "Deployment script (install / rollback / data fix)",
+                                             "path":  "{ticket}\\05_Deploy",
+                                             "prefix":  true
+                                         },
+                                         {
+                                             "name":  "Production code (Git repo)",
+                                             "path":  "02_Repos\\xxcust_ebs",
+                                             "prefix":  false
+                                         },
+                                         {
+                                             "name":  "Reusable snippet (Knowledge base)",
+                                             "path":  "04_Knowledge\\SQL_Snippets\\{module}",
+                                             "prefix":  false
+                                         },
+                                         {
+                                             "name":  "Requirements (MD050, emails, mockups)",
+                                             "path":  "{ticket}\\01_Requirements",
+                                             "prefix":  false
+                                         },
+                                         {
+                                             "name":  "Design (MD070, mapping sheets)",
+                                             "path":  "{ticket}\\02_Design",
+                                             "prefix":  false
+                                         },
+                                         {
+                                             "name":  "Test evidence (TE040, screenshots, outputs)",
+                                             "path":  "{ticket}\\04_Test",
+                                             "prefix":  true
+                                         }
+                                     ],
+                     "workFolders":  [
+                                         "00_Inbox",
+                                         "01_Tickets",
+                                         "02_Repos",
+                                         "03_Environments",
+                                         "04_Knowledge\\SQL_Snippets",
+                                         "04_Knowledge\\Templates",
+                                         "04_Knowledge\\Oracle_Notes",
+                                         "04_Knowledge\\Company",
+                                         "05_Tools",
+                                         "06_Admin",
+                                         "99_Archive"
+                                     ],
+                     "abbreviations":  {
+                                           "SUPPLIER":  "SUPP",
+                                           "SUPPLIERS":  "SUPP",
+                                           "VENDOR":  "VEND",
+                                           "INVOICE":  "INV",
+                                           "INVOICES":  "INV",
+                                           "INBOUND":  "IN",
+                                           "OUTBOUND":  "OUT",
+                                           "PAYMENT":  "PMT",
+                                           "PAYMENTS":  "PMT",
+                                           "RECEIPT":  "RCPT",
+                                           "RECEIPTS":  "RCPT",
+                                           "CUSTOMER":  "CUST",
+                                           "CUSTOMERS":  "CUST",
+                                           "PURCHASE":  "PUR",
+                                           "ORDER":  "ORD",
+                                           "ORDERS":  "ORD",
+                                           "REQUISITION":  "REQ",
+                                           "REQUISITIONS":  "REQ",
+                                           "JOURNAL":  "JE",
+                                           "JOURNALS":  "JE",
+                                           "ACCOUNT":  "ACCT",
+                                           "ACCOUNTS":  "ACCT",
+                                           "BALANCE":  "BAL",
+                                           "BALANCES":  "BAL",
+                                           "TRANSACTION":  "TRX",
+                                           "TRANSACTIONS":  "TRX",
+                                           "EMPLOYEE":  "EMP",
+                                           "EMPLOYEES":  "EMP",
+                                           "ITEMS":  "ITEM",
+                                           "INVENTORY":  "INV",
+                                           "APPROVAL":  "APPR",
+                                           "STATEMENT":  "STMT",
+                                           "STATEMENTS":  "STMT",
+                                           "ASSET":  "AST",
+                                           "ASSETS":  "AST",
+                                           "SUMMARY":  "SUM",
+                                           "DETAIL":  "DTL",
+                                           "MONTHLY":  "MTH",
+                                           "DAILY":  "DLY",
+                                           "VALIDATION":  "VAL",
+                                           "EXTRACT":  "EXT",
+                                           "UPLOAD":  "UPL",
+                                           "DOWNLOAD":  "DWN",
+                                           "PROJECT":  "PRJ"
+                                       },
+                     "stopWords":  [
+                                       "THE",
+                                       "A",
+                                       "AN",
+                                       "OF",
+                                       "FOR",
+                                       "TO",
+                                       "AND",
+                                       "IN",
+                                       "ON",
+                                       "NEW",
+                                       "FIX",
+                                       "ISSUE",
+                                       "REPORT",
+                                       "INTERFACE",
+                                       "CONVERSION",
+                                       "LOAD",
+                                       "FROM",
+                                       "INTO",
+                                       "WITH",
+                                       "BY"
+                                   ]
+                 }
+}

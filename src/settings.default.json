@@ -1,0 +1,127 @@
+{
+    "prefix":  "",
+    "defaultPriority":  "P3",
+    "autoIdPrefix":  "T-",
+    "branchPattern":  "feature/{id}",
+    "ticketFolderName":  "{id}_{module}_{title}",
+    "modules":  [
+                    "General"
+                ],
+    "priorities":  [
+                       "P1",
+                       "P2",
+                       "P3",
+                       "P4"
+                   ],
+    "phases":  [
+                   {
+                       "name":  "Planned",
+                       "percent":  0
+                   },
+                   {
+                       "name":  "In progress",
+                       "percent":  50
+                   },
+                   {
+                       "name":  "Review",
+                       "percent":  80
+                   },
+                   {
+                       "name":  "On Hold",
+                       "percent":  null
+                   },
+                   {
+                       "name":  "Done",
+                       "percent":  100
+                   }
+               ],
+    "types":  [
+                  {
+                      "name":  "Task",
+                      "questions":  [
+
+                                    ],
+                      "openQuestions":  [
+
+                                        ],
+                      "checklist":  [
+
+                                    ],
+                      "objects":  [
+
+                                  ]
+                  }
+              ],
+    "commonQuestions":  [
+
+                        ],
+    "baseChecklist":  [
+
+                      ],
+    "ticketFolders":  [
+                          "01_Files",
+                          "02_Notes"
+                      ],
+    "notesSections":  [
+                          "Decisions",
+                          "Free notes"
+                      ],
+    "appearance":  {
+                       "accent":  "#4F46E5",
+                       "tint":  false,
+                       "learnAccent":  "#2563EB"
+                   },
+    "knowledge":  {
+                      "categories":  [
+                                         "General"
+                                     ],
+                      "areaCategory":  {
+
+                                       },
+                      "byKind":  {
+
+                                 },
+                      "defaultCategory":  "General"
+                  },
+    "career":  {
+                   "weekend":  [
+                                   "Sat",
+                                   "Sun"
+                               ],
+                   "companies":  [
+
+                                 ]
+               },
+    "saveTargets":  [
+                        {
+                            "name":  "Task file",
+                            "path":  "{ticket}\\01_Files",
+                            "prefix":  false
+                        }
+                    ],
+    "workFolders":  [
+                        "00_Inbox",
+                        "01_Tickets",
+                        "04_Knowledge",
+                        "06_Admin",
+                        "99_Archive"
+                    ],
+    "abbreviations":  {
+
+                      },
+    "stopWords":  [
+                      "THE",
+                      "A",
+                      "AN",
+                      "OF",
+                      "FOR",
+                      "TO",
+                      "AND",
+                      "IN",
+                      "ON",
+                      "FROM",
+                      "INTO",
+                      "WITH",
+                      "BY"
+                  ]
+}
