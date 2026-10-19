@@ -1,0 +1,16 @@
+Acme month-end close runbook (fictional sample)
+
+- Bank statements loaded daily; reconciliation tolerances 1 USD for fees.
+- Create accounting run for Payables and Receivables before the GL close.
+- Subledger accounting methods: Standard Accrual, with our own account derivation rules for intercompany.
+- Journal line definitions copied from the seeded ones and changed for the freight line.
+- Revaluation for EUR and GBP balances on the last day; translation for the UK ledger.
+- Consolidation run into the ACME GROUP ledger.
+- FSG report with row sets "ACME P&L ROWS" and column sets "ACME MONTH vs BUDGET".
+- Web ADI used for the budget upload.
+- Profile XLA: Enable Data Access Set Security in Subledgers = No.
+
+Checks:
+select period_name, closing_status from gl_period_statuses where application_id = 101 and ledger_id = 1;
+select je_source, status, count(*) from gl_je_headers where period_name = 'OCT-26' group by je_source, status;
+select event_status_code, process_status_code, count(*) from xla_events where application_id = 200 group by event_status_code, process_status_code;

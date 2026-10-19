@@ -1,0 +1,8 @@
+Refactor of the notification module (fictional sample)
+
+- Moved the senders behind an interface and used dependency injection (Spring Boot).
+- Applied SOLID: one class per channel (email, SMS, push) instead of one 900-line class.
+- Added a circuit breaker around the SMS provider.
+- Optimistic locking on the template table to stop two admins overwriting each other.
+- Paid down technical debt: removed the old Kotlin prototype and the unused GraphQL resolver.
+- Tests run in Jenkins until the GitHub Actions migration is done.

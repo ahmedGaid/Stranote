@@ -1,0 +1,8 @@
+Receivables review for the half-year (fictional sample)
+
+- Aged debtors over 90 days: 42,000 across 6 customers.
+- Expected credit loss calculated with a provision matrix (IFRS 9) by ageing band.
+- Specific provision for one customer in administration; the rest of the bad debt allowance follows the matrix.
+- Revenue recognition for the bill-and-hold order checked against the five-step model.
+- Going concern: no doubt, but working capital is tight in Q4; cash forecast attached.
+- Provisions for warranty claims reviewed under IAS 37.

@@ -1,0 +1,12 @@
+Bank reconciliation - main current account, October (fictional sample)
+
+Balance per bank statement  125,430.00
+Less unpresented cheques      (4,210.00)
+Add outstanding lodgements     2,050.00
+Balance per ledger          123,270.00
+
+Notes
+- Cut-off: two customer receipts dated 31 Oct arrived on 1 Nov; kept in November.
+- Bank charges 35.00 posted through the clearing account, then reclassification to bank fees.
+- Intercompany transfer to Acme Logistics matched; eliminations will be done at group level.
+- One old cheque (> 6 months) written back; materiality is low but logged for the auditor.

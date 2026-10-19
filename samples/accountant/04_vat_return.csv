@@ -1,0 +1,8 @@
+Box,Description,Amount,Comment
+1,Output VAT on sales,18200.00,from the sales day book
+4,Input VAT on purchases,9650.00,excluding blocked items
+5,Net VAT payable,8550.00,
+Note,Reverse charge on software bought from abroad,1200.00,both sides of the entry booked
+Note,Withholding tax on the consultant fee,300.00,paid to the tax office by the 15th
+Note,E-invoicing,,all sales invoices sent through the portal since July
+Note,Corporate tax,,quarterly instalment of the corporate income tax paid

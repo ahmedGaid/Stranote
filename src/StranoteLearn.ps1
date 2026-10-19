@@ -176,16 +176,60 @@ function Get-TaskCodeFacts($Task, [string]$Prefix, $Extractors) {
     foreach ($k in @($tables.Keys)) { if (@($apis.Keys | Where-Object { $_.StartsWith("$k.") }).Count) { $tables.Remove($k) } }
     return @{ apis = $apis; tables = $tables }
 }
+
+function Get-TaskTermFacts($Task, $Extractors) {
+    # words and names (drugs, standards, tools...) found in a task's work files, using the pack's `term` extractors.
+    # Returns one entry per extractor: @{ ex; terms = @{ lowercase key = @{ key; count; file; context } } }
+    if ($null -eq $Extractors) { $Extractors = Get-SnExtractors }
+    $out = @()
+    $termEx = @($Extractors | Where-Object { $_.kind -eq 'term' })
+    if (-not $termEx.Count) { return ,$out }
+    $exts = @($termEx | ForEach-Object { if (@($_.files).Count) { @($_.files) } else { @('.txt', '.md') } } | ForEach-Object { "$_".ToLower() } | Select-Object -Unique)
+    $files = @(Get-ChildItem -Path $Task._path -Recurse -File -ErrorAction SilentlyContinue |
+        Where-Object { $exts -contains $_.Extension.ToLower() -and $_.Length -lt 2MB -and $_.Name -ne 'task.json' } | Sort-Object FullName)
+    foreach ($e in $termEx) {
+        $eExts = if (@($e.files).Count) { @(@($e.files) | ForEach-Object { "$_".ToLower() }) } else { @('.txt', '.md') }
+        $terms = @{}
+        foreach ($f in @($files | Where-Object { $eExts -contains $_.Extension.ToLower() })) {
+            $rel = $f.FullName.Substring($Task._path.Length).TrimStart('\')
+            $lines = @(); try { $lines = [IO.File]::ReadAllLines($f.FullName) } catch { continue }
+            foreach ($ln in $lines) {
+                if ($e.commentPattern -and $ln -match $e.commentPattern) { continue }
+                foreach ($m in [regex]::Matches($ln, $e.pattern)) {
+                    $key = $m.Groups['key'].Value.Trim(); if (-not $key) { continue }
+                    $k = $key.ToLower()
+                    if ($e.excludePattern -and $key -match $e.excludePattern) { continue }
+                    if (-not $terms.ContainsKey($k)) {
+                        # context = the line it was first seen on, without list/heading marks, cut around the match
+                        $ctx = ($ln -replace '^\s*(?:#+|[-*+>]|\d+[.)])\s*', '').Trim()
+                        if ($ctx.Length -gt 180) {
+                            $at = [Math]::Max(0, $ctx.IndexOf($key, [StringComparison]::OrdinalIgnoreCase) - 60)
+                            $ctx = $(if ($at -gt 0) { '...' }) + $ctx.Substring($at, [Math]::Min(170, $ctx.Length - $at)).Trim() + '...'
+                        }
+                        $terms[$k] = @{ key = $key; count = 0; file = $rel; context = $ctx }
+                    }
+                    $terms[$k].count++
+                }
+            }
+        }
+        $out += @{ ex = $e; terms = $terms }
+    }
+    return ,$out
+}
+
 function Get-AutoKnowledge($Task, [string]$Prefix) {
     $t = $Task
     $cards = @(); $qs = @()
     $mk = {
-        param($topic, $fact, $code, $tags, $kind)
-        $cards += [pscustomobject][ordered]@{
+        param($topic, $fact, $code, $tags, $kind, $category)
+        $c = [pscustomobject][ordered]@{
             id = ('A-' + (Get-ShortHash "$($t.id)|$topic")); taskId = "$($t.id)"; company = "$($t.company)"; module = "$($t.module)"
             topic = $topic; fact = "$fact".Trim(); code = "$code"; tags = @(ConvertTo-StrArray $tags); source = 'auto'; kind = $kind
             created = "$($t.created)"; updated = (Get-Now)
         }
+        # a pack extractor's `group` names the card category directly (Test-SnPack checks it is a category id)
+        if ($category) { $c | Add-Member -NotePropertyName category -NotePropertyValue "$category" }
+        $cards += $c
         Set-Variable -Name cards -Value $cards -Scope 1
     }
     $ref = "$($t.id): $($t.title)"
@@ -256,6 +300,23 @@ function Get-AutoKnowledge($Task, [string]$Prefix) {
         $ops = @($tb.Value.ops.GetEnumerator() | Where-Object { $_.Name -ne 'REFERENCE' } | ForEach-Object { "$($_.Name.ToLower()) x$($_.Value)" }) -join ', '
         $files = @($tb.Value.files.Keys) -join ', '
         & $mk "${tabLabel}: $($tb.Name)" ("Used in $ref" + $(if ($ops) { " ($ops)" }) + ". Files: $files.") $tb.Value.code @($t.module) 'table'
+    }
+
+    # terms: drugs, standards, tools... (pack `term` extractors; card text from cardTemplate {key} {taskId} {context})
+    foreach ($tf in (Get-TaskTermFacts $t $exs)) {
+        $e = $tf.ex
+        $min = if ($e.minCount) { [int]$e.minCount } else { 1 }
+        $max = if ($e.maxCards) { [int]$e.maxCards } else { 6 }
+        $tTopic = if ($e.cardTemplate -and $e.cardTemplate.topic) { "$($e.cardTemplate.topic)" } elseif ($e.label) { "$($e.label): {key}" } else { '{key}' }
+        $tFact = if ($e.cardTemplate -and $e.cardTemplate.fact) { "$($e.cardTemplate.fact)" } else { 'Seen in {taskId}: {context}' }
+        $top = @($tf.terms.Values | Where-Object { $_.count -ge $min } | Sort-Object -Property @{e = { $_.count }; Descending = $true }, @{e = { $_.key } } | Select-Object -First $max)
+        foreach ($x in $top) {
+            $fill = { param($s) $s.Replace('{key}', $x.key).Replace('{taskId}', "$($t.id)").Replace('{context}', $x.context) }
+            $topic = & $fill $tTopic
+            if (@($cards | Where-Object { $_.topic -eq $topic }).Count) { continue }   # same term from two extractors
+            $src = if ($tFact.Contains('{taskId}')) { $x.file } else { "$ref; $($x.file)" }
+            & $mk $topic ((& $fill $tFact) + "  ($src)") '' @($t.module, $e.group) 'term' $e.group
+        }
     }
     return @{ cards = $cards; questions = $qs }
 }

@@ -65,22 +65,27 @@ default: "Technical" }`. A card's category = `byKind[card.kind]`, else the categ
 **settings**: any engine setting the pack provides (phases, folders, saveTargets, abbreviations, prefix...).
 `modules`, `types` and `knowledge` are derived from `areas`, `taskTypes`, `categories` and `categoryRules`.
 
-**Extractors** (code kinds; `term` arrives with US3):
+**Extractors** (code kinds `api`/`table`; word kind `term`, T037):
 
-| Field | api | table | Meaning |
-|---|---|---|---|
-| `pattern` | `(?<pkg>)` + `(?<member>)` | `(?<key>)` | .NET regex run per line |
-| `files` | yes | yes | file extensions to read |
-| `commentPattern` | yes | yes | lines matching it are skipped |
-| `skipMembers` | yes | - | members to ignore (e.g. `NEXTVAL`) |
-| `skipOwnPrefix` | yes | yes | ignore the person's own objects (`<prefix>_...`) |
-| `excludePattern` | - | yes | keys to ignore (e.g. `_PKG$`, `_S$`) |
-| `packagePattern` | - | yes | in suggestions, keys that look like packages count as APIs |
-| `operations` | - | yes | ordered `{ INSERT: regex with {key}, ... }`; first match wins, else REFERENCE |
-| `maxCards`, `groupThreshold` | 8, 3 | 6 | card limits; 3+ members of one package -> one package card |
-| `snippetLines`, `snippetEnd` | 8, `;\s*$` | - | code snippet stored on the card |
-| `label` | `API` | `Table` | card topic prefix (`API: FND_PROGRAM`) |
-| `question` | template | - | `{members}`, `{ref}` placeholders for the fill-the-blank question |
+| Field | api | table | term | Meaning |
+|---|---|---|---|---|
+| `pattern` | `(?<pkg>)` + `(?<member>)` | `(?<key>)` | `(?<key>)` | .NET regex run per line |
+| `files` | yes | yes | yes (default `.txt`, `.md`) | file extensions to read (`task.json` is never read) |
+| `commentPattern` | yes | yes | yes | lines matching it are skipped |
+| `skipMembers` | yes | - | - | members to ignore (e.g. `NEXTVAL`) |
+| `skipOwnPrefix` | yes | yes | - | ignore the person's own objects (`<prefix>_...`) |
+| `excludePattern` | - | yes | yes | keys to ignore (e.g. `_PKG$`, `_S$`) |
+| `packagePattern` | - | yes | - | in suggestions, keys that look like packages count as APIs |
+| `operations` | - | yes | - | ordered `{ INSERT: regex with {key}, ... }`; first match wins, else REFERENCE |
+| `maxCards`, `groupThreshold` | 8, 3 | 6 | 6 | card limits per task; 3+ members of one package -> one package card |
+| `minCount` | - | - | 1 | a term must appear this many times in the task's files to make a card |
+| `snippetLines`, `snippetEnd` | 8, `;\s*$` | - | - | code snippet stored on the card |
+| `label` | `API` | `Table` | (topic prefix if no `cardTemplate`) | card topic prefix (`API: FND_PROGRAM`) |
+| `question` | template | - | - | `{members}`, `{ref}` placeholders for the fill-the-blank question |
+| `cardTemplate` | - | - | `{ topic, fact }` | tokens `{key}` (first spelling seen), `{taskId}`, `{context}` (first line it was seen on) |
+| `group` | - | - | category id | card category and tag (must be a `categories[].id`) |
+
+Term keys are counted case-insensitively per task; the most used `maxCards` become cards (kind `term`, one flash question each).
 
 **ui** (optional, T031): the wording the dashboard shows, so the template holds no career words. Everything is
 optional; the page falls back to neutral defaults ("Area"/"Areas", "Workspace", generic placeholders and CV tips).

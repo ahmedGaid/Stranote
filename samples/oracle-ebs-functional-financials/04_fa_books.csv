@@ -1,0 +1,8 @@
+Item,Setting,Value,Note
+Asset books,ACME CORP,Corporate book,linked to the ACME ledger
+Asset books,ACME TAX,Tax book,Mass copy from ACME CORP
+Asset categories,COMPUTER.LAPTOP,3 years,depreciation methods STL
+Asset categories,BUILDING.OFFICE,40 years,depreciation methods STL
+Prorate conventions,MONTHLY,first day of month,used by both books
+Mass additions,AP invoices,Create Mass Additions weekly,from clearing account 1590
+Profile,FA: Use Workflow Account Generation = Yes,,set at site level

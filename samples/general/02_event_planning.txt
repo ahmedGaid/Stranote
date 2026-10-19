@@ -1,0 +1,7 @@
+Customer day planning (fictional sample)
+
+- Task board in Trello: venue, catering, invitations, agenda.
+- Guest list kept in Google Sheets; VLOOKUP to match RSVPs with the CRM export.
+- Contacts pulled from HubSpot; reminder emails scheduled two days before.
+- Timeline drawn as a Gantt chart so the team can see the dependencies.
+- Remote speakers will join on Zoom.

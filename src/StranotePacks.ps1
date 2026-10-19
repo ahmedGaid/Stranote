@@ -88,6 +88,7 @@ function Test-SnPack {
         $e = $ex[$i]
         if ($script:ExtractorKinds -notcontains "$($e.kind)") { & $err "extractors[$i].kind: must be one of $($script:ExtractorKinds -join ', ')" }
         $need = if ($e.kind -eq 'api') { @('pkg', 'member') } else { @('key') }
+        if ("$($e.group)" -and $catIds -notcontains "$($e.group)") { & $err "extractors[$i].group: '$($e.group)' is not a category id" }
         foreach ($pp in @('pattern', 'excludePattern', 'commentPattern', 'packagePattern', 'snippetEnd')) {
             if (-not $e.$pp) { if ($pp -eq 'pattern') { & $err "extractors[$i].pattern: required" }; continue }
             try { $rx = New-Object Text.RegularExpressions.Regex ($e.$pp), ([Text.RegularExpressions.RegexOptions]::None), ([TimeSpan]::FromMilliseconds(200)) }

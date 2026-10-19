@@ -1,0 +1,6 @@
+Monthly sales follow-up (fictional sample)
+
+- Exported the open opportunities from Salesforce.
+- Cleaned the list in Excel; XLOOKUP to bring in the account owner.
+- Shared the follow-up list in OneDrive with the two account managers.
+- Agreed actions logged in Asana with due dates.

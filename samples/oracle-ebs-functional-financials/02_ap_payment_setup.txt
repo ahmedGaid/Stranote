@@ -1,0 +1,15 @@
+Acme Payables setup checklist (fictional sample)
+
+1. Payment terms: created "NET 45" and "2/10 NET 30".
+2. Distribution sets for utility invoices (60% Ops, 40% Admin).
+3. Payables options: allow adjustments to paid invoices = No; GL date basis = Invoice date.
+4. Financials options: default liability account 01-000-2210-0000-000.
+5. Withholding tax: not used for the US operating unit.
+6. Prepayments: apply automatically to the next invoice from the same supplier.
+7. Payment process profiles: "ACME CHECK" and "ACME ACH" built in Payments Setup.
+8. Payment process requests are run weekly every Thursday.
+9. Profile MO: Operating Unit = Acme US OU for the Payables Manager responsibility.
+
+Query used to check the invoices on hold:
+select invoice_id, hold_lookup_code, release_lookup_code from ap_holds_all where release_lookup_code is null;
+select invoice_num, invoice_amount, payment_status_flag from ap_invoices_all where org_id = 204;

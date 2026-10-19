@@ -1,0 +1,8 @@
+Diabetes care - Bed 12 (fictional sample)
+
+- Capillary glucose 4-hourly. Insulin given per the variable rate insulin infusion protocol.
+- Potassium chloride added to the maintenance fluid after the lab result (K 3.2).
+- Hypo at 03:00 (3.4 mmol/L): treated with oral glucose, rechecked after 15 minutes.
+- Ondansetron given for nausea before breakfast.
+- Infusion pump alarms checked; line labelled.
+- Teaching session on insulin pen technique booked with the diabetes nurse.

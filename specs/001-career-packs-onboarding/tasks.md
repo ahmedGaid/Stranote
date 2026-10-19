@@ -131,7 +131,12 @@ description: "Task list for 001 career packs and first-day onboarding"
     phases, neutral `ui` ("Workspace", "Professional" CV title). "Areas from free text": onboarding questions save job title,
     work areas and daily tools to `profile.packAnswers` (`jobTitle`, `workAreas`, `tools`) for the T042 pack builder.
     Extractors: 1 `term` (everyday office tools: Excel, Power BI, Jira, SharePoint...). `starterLessons` empty.
-- [ ] T037 [US3] Add `samples\<pack>\` work files and a test that each pack yields ≥ 10 cards from 5 samples (SC-004)
+- [x] T037 [US3] Add `samples\<pack>\` work files and a test that each pack yields ≥ 10 cards from 5 samples (SC-004)
+  - Done 2026-10-19: engine runs `term` extractors (`Get-TaskTermFacts` + term cards in `Get-AutoKnowledge`, StranoteLearn.ps1):
+    case-insensitive count per task, `minCount`, `maxCards`, `cardTemplate` {key}/{taskId}/{context}, `group` -> card
+    category + tag; `Test-SnPack` rejects a `group` that is not a category id. `samples\<pack-id>\` holds 5 fictional work
+    files for each of the 6 packs. `tests\StranoteSamples.Tests.ps1`: one task per sample, Sync-SnKnowledge, >= 10 cards
+    per pack (got 25-43), every card in a pack category + term-extractor unit tests. 102 tests pass.
 - [ ] T038 [US3] Write `docs\pack-authoring.md` (how to write and validate a pack)
 
 ---

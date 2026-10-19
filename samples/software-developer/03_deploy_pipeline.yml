@@ -1,0 +1,25 @@
+# Sample work file (fictional): CI/CD for the orders service with GitHub Actions
+name: orders-service
+on:
+  push:
+    branches: [main]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the Docker image
+        run: docker build -t registry.example.com/orders:${{ github.sha }} .
+      - name: Unit tests
+        run: pytest -q
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Canary release to Kubernetes with Helm (10% of traffic)
+        run: helm upgrade orders ./chart --set image.tag=${{ github.sha }} --set canary.weight=10
+      - name: Check the SLO in Prometheus before full rollout
+        run: ./scripts/check-error-budget.sh
+      - name: Rollback on failure
+        if: failure()
+        run: helm rollback orders

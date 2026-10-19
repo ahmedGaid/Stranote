@@ -1,0 +1,8 @@
+ICU bay 2 - sedation and ventilation notes (fictional sample)
+
+- Patient on mechanical ventilation via endotracheal tube; suctioning every 2-4 h as needed.
+- Propofol and fentanyl infusions on the syringe driver; titrated to RASS -1.
+- CAM-ICU negative this morning.
+- Noradrenaline running at 0.08 mcg/kg/min to keep MAP > 65; arterial line in place.
+- Central line dressing changed, insertion date recorded.
+- Pantoprazole for stress ulcer prophylaxis; enoxaparin held before the planned procedure.
