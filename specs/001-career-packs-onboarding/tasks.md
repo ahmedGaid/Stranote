@@ -113,7 +113,12 @@ description: "Task list for 001 career packs and first-day onboarding"
     STANDARDS and TOOLS as knowledge areas), 9 task types (Month-end close, Reconciliation, Journal entry, Tax filing, Financial
     statements, Audit support, Budget / forecast, Query / support, Other), accounting phases, full `ui` block ("Area" noun).
     Extractors: 3 `term` (IFRS/IAS/ASC standards, accounting concepts, tax terms), no code extractors. `starterLessons` empty.
-- [ ] T034 [P] [US3] Write `packs\software-developer.json` (languages, frameworks, PRs, incidents, design decisions)
+- [x] T034 [P] [US3] Write `packs\software-developer.json` (languages, frameworks, PRs, incidents, design decisions)
+  - Done 2026-10-19: 14 areas (12 task modules: FRONTEND, BACKEND, API, DATA, BUGFIX, TESTING, REVIEW, DESIGN, DEVOPS, INCIDENT,
+    SECURITY + Other; LANGUAGES and FUNDAMENTALS as knowledge areas), 9 task types (Feature, Bug fix, Incident, Code review,
+    Design / ADR, Spike / research, Refactor / tech debt, Deployment / release, Other), dev phases, full `ui` block ("Area").
+    Extractors: 3 `term` (languages/frameworks, engineering concepts, ops tools). No `api` kind (engine's api is package.member
+    shaped). Bare `Go`/`Express` left out of the languages regex (false hits at sentence start). `starterLessons` empty.
 - [ ] T035 [P] [US3] Write `packs\nurse.json` (units, procedures, medications, protocols, handover)
 - [ ] T036 [P] [US3] Write `packs\general.json` (minimal areas from free text, generic task types)
 - [ ] T037 [US3] Add `samples\<pack>\` work files and a test that each pack yields ≥ 10 cards from 5 samples (SC-004)
