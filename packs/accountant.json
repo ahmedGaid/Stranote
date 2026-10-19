@@ -1,0 +1,452 @@
+{
+  "schemaVersion": 1,
+  "id": "accountant",
+  "name": "Accountant",
+  "field": "Finance / Accounting",
+  "version": "1.0.0",
+  "description": "Accounting work: bookkeeping, month-end and year-end close, reconciliations, accruals and provisions, VAT and corporate tax, IFRS/GAAP reporting, audit support and budgeting.",
+  "levels": ["Student", "Junior", "Mid", "Senior", "Lead"],
+  "categories": [
+    { "id": "Accounting", "label": "Accounting", "labelAr": "محاسبة", "color": "#0f766e" },
+    { "id": "Standards", "label": "Standards", "labelAr": "معايير", "color": "#2563eb" },
+    { "id": "Tax", "label": "Tax", "labelAr": "ضرايب", "color": "#c2410c" },
+    { "id": "Process", "label": "Process", "labelAr": "دورة عمل", "color": "#2f8f5b" },
+    { "id": "Reporting", "label": "Reporting", "labelAr": "تقارير", "color": "#7c3aed" },
+    { "id": "Business", "label": "Business", "labelAr": "بيزنس", "color": "#b7791f" }
+  ],
+  "categoryRules": {
+    "byKind": { "answer": "Business", "decision": "Business", "term": "Accounting" },
+    "default": "Accounting"
+  },
+  "areas": [
+    { "id": "GL", "name": "General ledger and journals", "category": "Accounting", "taskModule": true,
+      "concepts": [
+        { "id": "gl-double-entry", "title": "Double entry: every debit has an equal credit; the accounting equation A = L + E" },
+        { "id": "gl-coa", "title": "Chart of accounts: account types, numbering and cost centres" },
+        { "id": "gl-journals", "title": "Journal entries: standard, recurring, adjusting and reversing journals" },
+        { "id": "gl-trial-balance", "title": "Trial balance: what it proves and what it cannot catch" },
+        { "id": "gl-suspense", "title": "Suspense and clearing accounts: why they must be cleared every month" }
+      ] },
+    { "id": "CLOSE", "name": "Month-end and year-end close", "category": "Process", "taskModule": true,
+      "concepts": [
+        { "id": "close-checklist", "title": "Close checklist and close calendar: order of steps and owners" },
+        { "id": "close-cutoff", "title": "Cut-off: recording income and expenses in the right period" },
+        { "id": "close-accruals", "title": "Accruals vs prepayments (deferrals) and their reversal next month" },
+        { "id": "close-provisions", "title": "Provisions: bad debt, warranties, bonuses (IAS 37 recognition rules)" },
+        { "id": "close-yearend", "title": "Year-end: closing entries, retained earnings and opening balances" }
+      ] },
+    { "id": "RECON", "name": "Reconciliations", "category": "Process", "taskModule": true,
+      "concepts": [
+        { "id": "recon-bank", "title": "Bank reconciliation: outstanding cheques, deposits in transit, bank charges" },
+        { "id": "recon-subledger", "title": "Subledger to GL reconciliation (AP, AR, fixed assets, inventory)" },
+        { "id": "recon-intercompany", "title": "Intercompany reconciliation and eliminations" },
+        { "id": "recon-balance-sheet", "title": "Balance sheet account reconciliations: supporting schedules and sign-off" }
+      ] },
+    { "id": "AP", "name": "Accounts payable", "category": "Process", "taskModule": true,
+      "concepts": [
+        { "id": "ap-three-way", "title": "Three-way match: purchase order, goods receipt and invoice" },
+        { "id": "ap-payment-run", "title": "Payment runs, payment terms and early-payment discounts" },
+        { "id": "ap-vendor-statement", "title": "Vendor statement reconciliation" },
+        { "id": "ap-aging", "title": "AP aging and cash planning" }
+      ] },
+    { "id": "AR", "name": "Accounts receivable", "category": "Process", "taskModule": true,
+      "concepts": [
+        { "id": "ar-invoicing", "title": "Customer invoicing, credit notes and cash application" },
+        { "id": "ar-aging", "title": "AR aging and collections follow-up" },
+        { "id": "ar-ecl", "title": "Expected credit loss (IFRS 9) and the bad debt provision" },
+        { "id": "ar-dso", "title": "DSO: days sales outstanding" }
+      ] },
+    { "id": "FA", "name": "Fixed assets", "category": "Accounting", "taskModule": true,
+      "concepts": [
+        { "id": "fa-capex", "title": "Capital vs revenue expenditure: when to capitalise" },
+        { "id": "fa-depreciation", "title": "Depreciation methods: straight-line, reducing balance, units of production" },
+        { "id": "fa-register", "title": "Fixed asset register, additions, disposals and gain/loss on disposal" },
+        { "id": "fa-impairment", "title": "Impairment (IAS 36): carrying amount vs recoverable amount" }
+      ] },
+    { "id": "TAX", "name": "Tax (VAT, corporate, withholding)", "category": "Tax", "taskModule": true,
+      "concepts": [
+        { "id": "tax-vat", "title": "VAT: input vs output VAT and the VAT return" },
+        { "id": "tax-withholding", "title": "Withholding tax: deducting, paying and reporting it" },
+        { "id": "tax-corporate", "title": "Corporate income tax: accounting profit vs taxable profit" },
+        { "id": "tax-deferred", "title": "Deferred tax (IAS 12): temporary differences" },
+        { "id": "tax-einvoice", "title": "E-invoicing and tax authority filing deadlines" }
+      ] },
+    { "id": "REPORTING", "name": "Financial statements and reporting", "category": "Reporting", "taskModule": true,
+      "concepts": [
+        { "id": "rep-statements", "title": "The financial statements: income statement, balance sheet, cash flow, equity" },
+        { "id": "rep-cash-flow", "title": "Cash flow statement: direct vs indirect method" },
+        { "id": "rep-notes", "title": "Disclosure notes and accounting policies" },
+        { "id": "rep-management", "title": "Management reports, KPIs and variance analysis" },
+        { "id": "rep-consolidation", "title": "Consolidation (IFRS 10): eliminations and non-controlling interest" }
+      ] },
+    { "id": "AUDIT", "name": "Audit and internal control", "category": "Process", "taskModule": true,
+      "concepts": [
+        { "id": "audit-pbc", "title": "PBC list: preparing schedules for external auditors" },
+        { "id": "audit-controls", "title": "Internal controls: segregation of duties, approvals, maker-checker" },
+        { "id": "audit-adjustments", "title": "Audit adjustments and the management letter" }
+      ] },
+    { "id": "BUDGET", "name": "Budgeting and costing", "category": "Business", "taskModule": true,
+      "concepts": [
+        { "id": "budget-cycle", "title": "Budget and forecast cycle; budget vs actual" },
+        { "id": "budget-costing", "title": "Cost centres, cost allocation and standard costing" },
+        { "id": "budget-inventory", "title": "Inventory valuation (IAS 2): FIFO, weighted average, lower of cost and NRV" }
+      ] },
+    { "id": "PAYROLL", "name": "Payroll accounting", "category": "Accounting", "taskModule": true,
+      "concepts": [
+        { "id": "payroll-entries", "title": "Payroll journal: gross pay, deductions, social insurance and net pay" },
+        { "id": "payroll-eosb", "title": "End-of-service benefits and employee provisions (IAS 19)" }
+      ] },
+    { "id": "Other", "name": "Other", "taskModule": true, "concepts": [] },
+    { "id": "STANDARDS", "name": "IFRS / GAAP standards", "category": "Standards",
+      "concepts": [
+        { "id": "std-framework", "title": "Conceptual framework: accrual basis, going concern, materiality, prudence" },
+        { "id": "std-ifrs15", "title": "IFRS 15 revenue: the five-step model" },
+        { "id": "std-ifrs16", "title": "IFRS 16 leases: right-of-use asset and lease liability" },
+        { "id": "std-ifrs9", "title": "IFRS 9 financial instruments: classification and expected credit loss" },
+        { "id": "std-ifrs-vs-gaap", "title": "Main differences between IFRS and US GAAP (inventory LIFO, development costs, revaluation)" }
+      ] },
+    { "id": "TOOLS", "name": "Accounting systems and Excel", "category": "Business",
+      "concepts": [
+        { "id": "tools-excel", "title": "Excel for accountants: pivot tables, XLOOKUP, SUMIFS" },
+        { "id": "tools-erp", "title": "ERP basics: modules, master data and period status" }
+      ] }
+  ],
+  "taskTypes": [
+    {
+      "name": "Month-end close",
+      "questions": [
+        { "k": "period", "q": "Period (e.g. Jan 2026)", "d": "" },
+        { "k": "entity", "q": "Company / entity", "d": "" },
+        { "k": "deadline", "q": "Close deadline (working day)", "d": "WD+5" },
+        { "k": "steps", "q": "Your steps in the close (accruals, depreciation, reconciliations...)", "d": "" }
+      ],
+      "openQuestions": [
+        "Are all invoices and receipts for the period recorded (cut-off)?",
+        "Any unreconciled or suspense balances left?",
+        "Who reviews and approves the close?"
+      ],
+      "checklist": [
+        "Cut-off checked for sales and purchases",
+        "Accruals and prepayments booked",
+        "Depreciation booked",
+        "Bank and subledger reconciliations done",
+        "Trial balance reviewed and variances explained",
+        "Period closed in the system"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Reconciliation",
+      "questions": [
+        { "k": "account", "q": "Account or balance being reconciled (bank, vendor, intercompany...)", "d": "" },
+        { "k": "period", "q": "As of date", "d": "" },
+        { "k": "source", "q": "What it is reconciled against (bank statement, vendor statement, subledger)", "d": "" },
+        { "k": "difference", "q": "Difference found (amount and reason if known)", "d": "" }
+      ],
+      "openQuestions": [
+        "Is the difference timing or an error?",
+        "Who books the correcting entry?"
+      ],
+      "checklist": [
+        "Balances extracted from both sides",
+        "Reconciling items listed and explained",
+        "Correcting entries booked",
+        "Reconciliation reviewed and signed off"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Journal entry",
+      "questions": [
+        { "k": "purpose", "q": "What the entry records (accrual, reclass, correction, allocation...)", "d": "" },
+        { "k": "accounts", "q": "Debit and credit accounts", "d": "" },
+        { "k": "support", "q": "Supporting document (invoice, contract, calculation)", "d": "" },
+        { "k": "reversing", "q": "Reverses next period?", "d": "No" }
+      ],
+      "openQuestions": [
+        "Is the supporting calculation approved?",
+        "Does it need a reversal or a recurring entry?"
+      ],
+      "checklist": [
+        "Supporting document attached",
+        "Entry posted",
+        "Entry approved by reviewer"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Tax filing",
+      "questions": [
+        { "k": "tax", "q": "Tax (VAT, withholding, corporate income tax, payroll tax)", "d": "VAT" },
+        { "k": "period", "q": "Tax period", "d": "" },
+        { "k": "deadline", "q": "Filing and payment deadline", "d": "" },
+        { "k": "authority", "q": "Tax authority / portal", "d": "" }
+      ],
+      "openQuestions": [
+        "Do tax accounts in the GL agree with the return?",
+        "Any non-deductible items or adjustments?",
+        "Who signs and submits the return?"
+      ],
+      "checklist": [
+        "Tax accounts reconciled to the GL",
+        "Return prepared",
+        "Return reviewed",
+        "Return filed and tax paid",
+        "Filing receipt saved"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Financial statements",
+      "questions": [
+        { "k": "type", "q": "Report (monthly management pack, quarterly, annual statements)", "d": "monthly management pack" },
+        { "k": "framework", "q": "Framework (IFRS / local GAAP / US GAAP)", "d": "IFRS" },
+        { "k": "audience", "q": "Who reads it (management, board, auditors, bank)", "d": "" }
+      ],
+      "openQuestions": [
+        "Are prior-period comparatives final?",
+        "Which variances need a comment?"
+      ],
+      "checklist": [
+        "Trial balance mapped to statement lines",
+        "Statements and notes prepared",
+        "Variance analysis written",
+        "Reviewed and approved"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Audit support",
+      "questions": [
+        { "k": "audit", "q": "Audit (external year-end, interim, internal, tax audit)", "d": "external year-end" },
+        { "k": "requests", "q": "Requests on the PBC list you own", "d": "" },
+        { "k": "deadline", "q": "Due date", "d": "" }
+      ],
+      "openQuestions": [
+        "Any proposed audit adjustments?",
+        "Any control findings to fix?"
+      ],
+      "checklist": [
+        "PBC schedules prepared",
+        "Samples and supporting documents provided",
+        "Auditor queries answered",
+        "Audit adjustments booked"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Budget / forecast",
+      "questions": [
+        { "k": "scope", "q": "Budget, forecast or variance analysis?", "d": "budget" },
+        { "k": "period", "q": "Period covered", "d": "" },
+        { "k": "drivers", "q": "Key assumptions and drivers", "d": "" }
+      ],
+      "openQuestions": [
+        "Who owns each cost centre's numbers?",
+        "Which version gets approved?"
+      ],
+      "checklist": [
+        "Assumptions agreed",
+        "Model built and checked",
+        "Reviewed with budget owners",
+        "Final version approved"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Query / support",
+      "questions": [
+        { "k": "question", "q": "Question or problem (from whom)", "d": "" },
+        { "k": "documents", "q": "Documents or transaction numbers involved", "d": "" }
+      ],
+      "openQuestions": [
+        "Data error, process gap or policy question?"
+      ],
+      "checklist": [
+        "Root cause found",
+        "Correction booked or answer sent",
+        "Lesson noted in _NOTES.md"
+      ],
+      "objects": []
+    },
+    { "name": "Other", "questions": [], "openQuestions": [], "checklist": [], "objects": [] }
+  ],
+  "extractors": [
+    {
+      "id": "acct-standards",
+      "kind": "term",
+      "files": [".txt", ".md", ".csv"],
+      "pattern": "\\b(?<key>(?:IFRS|IAS)\\s?\\d{1,2}|ASC\\s?\\d{3})\\b",
+      "group": "Standards",
+      "minCount": 1,
+      "maxCards": 4,
+      "cardTemplate": { "topic": "Standard: {key}", "fact": "Applied in {taskId}: {context}" }
+    },
+    {
+      "id": "acct-terms",
+      "kind": "term",
+      "files": [".txt", ".md", ".csv"],
+      "pattern": "(?i)\\b(?<key>accruals?|prepayments?|deferred revenue|provisions?|bad debt|expected credit loss|depreciation|amortisation|amortization|impairment|right[- ]of[- ]use|lease liabilit(?:y|ies)|revenue recognition|cut[- ]off|bank reconciliation|intercompany|eliminations?|suspense account|clearing account|reversing (?:journal|entry)|reclass(?:ification)?|retained earnings|trial balance|goodwill|fair value|working capital|going concern|materiality)\\b",
+      "group": "Accounting",
+      "minCount": 1,
+      "maxCards": 6,
+      "cardTemplate": { "topic": "Concept: {key}", "fact": "Used in {taskId}: {context}" }
+    },
+    {
+      "id": "acct-tax",
+      "kind": "term",
+      "files": [".txt", ".md", ".csv"],
+      "pattern": "(?i)\\b(?<key>VAT return|input VAT|output VAT|reverse charge|withholding tax|corporate (?:income )?tax|deferred tax|tax provision|e[- ]invoic(?:e|ing)|zakat|stamp duty|transfer pricing)\\b",
+      "group": "Tax",
+      "minCount": 1,
+      "maxCards": 4,
+      "cardTemplate": { "topic": "Tax: {key}", "fact": "Seen in {taskId}: {context}" }
+    }
+  ],
+  "starterLessons": [],
+  "skillMap": [
+    { "skill": "General ledger and journal entries", "area": "GL", "group": "Accounting" },
+    { "skill": "Month-end and year-end close", "area": "CLOSE", "group": "Accounting" },
+    { "skill": "Account reconciliations", "area": "RECON", "group": "Accounting" },
+    { "skill": "Accounts payable", "area": "AP", "group": "Accounting" },
+    { "skill": "Accounts receivable and collections", "area": "AR", "group": "Accounting" },
+    { "skill": "Fixed asset accounting", "area": "FA", "group": "Accounting" },
+    { "skill": "VAT and corporate tax compliance", "area": "TAX", "group": "Tax" },
+    { "skill": "Financial reporting (IFRS)", "area": "REPORTING", "group": "Reporting" },
+    { "skill": "Audit support and internal controls", "area": "AUDIT", "group": "Reporting" },
+    { "skill": "Budgeting and variance analysis", "area": "BUDGET", "group": "Business" },
+    { "skill": "Payroll accounting", "area": "PAYROLL", "group": "Accounting" },
+    { "skill": "IFRS / GAAP", "area": "STANDARDS", "group": "Reporting" },
+    { "skill": "Advanced Excel", "area": "TOOLS", "group": "Tools" }
+  ],
+  "onboardingQuestions": [
+    { "id": "framework", "label": "Reporting framework", "type": "select", "options": ["IFRS", "Local GAAP", "US GAAP", "Mixed"], "default": "IFRS", "writesTo": "pack.framework" },
+    { "id": "system", "label": "Accounting system you use (e.g. Oracle, SAP, Odoo, QuickBooks, Excel)", "type": "text", "default": "", "writesTo": "pack.system" },
+    { "id": "industry", "label": "Industry", "type": "text", "default": "", "writesTo": "pack.industry" },
+    { "id": "focus", "label": "Main focus", "type": "select", "options": ["General accounting", "AP / AR", "Tax", "Reporting", "Audit", "Costing / FP&A"], "default": "General accounting", "writesTo": "pack.focus" },
+    { "id": "country", "label": "Country (tax rules)", "type": "text", "default": "", "writesTo": "pack.country" }
+  ],
+  "ui": {
+    "workspace": "Accounting workspace",
+    "area": "Area",
+    "areas": "Areas",
+    "screenshotsTitle": "صور من الشغل",
+    "cvTitle": "Accountant",
+    "sample": { "id": "CLOSE-0126", "module": "CLOSE", "type": "Month-end close", "title": "January_close_accruals", "code": "JAN_CLOSE" },
+    "placeholders": {
+      "taskId": "CLOSE-0126",
+      "taskTitle": "January month-end close: accruals and bank reconciliation",
+      "extraQuestions": "e.g. Do we accrue the December utility bill or wait for the invoice?",
+      "cardTopic": "Concept: Accruals",
+      "cardFact": "Expense incurred but not yet invoiced: Dr Expense / Cr Accrued liabilities, reversed next month when the invoice arrives",
+      "cardTags": "Close, Accruals, IAS 37",
+      "scriptName": "bank_recon_template.xlsx",
+      "scriptPurpose": "Monthly bank reconciliation with outstanding items",
+      "checklistItem": "e.g. Accruals and prepayments booked",
+      "newArea": "e.g. Treasury",
+      "prefix": "ACME",
+      "role": "e.g. Senior Accountant",
+      "target": "Financial Controller, Chief Accountant, Finance Manager...",
+      "cvSkill": "Add a skill, e.g. IFRS 16 lease accounting"
+    },
+    "skills": {
+      "areaSkill": "{name}",
+      "areaGroup": "Accounting",
+      "groups": ["Accounting", "Tax", "Reporting", "Business", "Tools"],
+      "typeGroup": "Accounting",
+      "types": {
+        "Month-end close": "Month-end and year-end close",
+        "Reconciliation": "Account reconciliations",
+        "Journal entry": "Journal entries and adjustments",
+        "Tax filing": "Tax returns and compliance",
+        "Financial statements": "Financial statement preparation",
+        "Audit support": "Audit support",
+        "Budget / forecast": "Budgeting and forecasting",
+        "Query / support": "Finance business partnering"
+      },
+      "rules": [
+        { "key": "ifrs16", "name": "IFRS 16 lease accounting", "group": "Reporting", "details": "ifrs ?16|right[- ]of[- ]use|lease liabilit", "tag": "^ifrs ?16$" },
+        { "key": "ifrs15", "name": "IFRS 15 revenue recognition", "group": "Reporting", "details": "ifrs ?15|revenue recognition", "tag": "^ifrs ?15$" },
+        { "key": "ifrs9", "name": "IFRS 9 expected credit loss", "group": "Reporting", "details": "ifrs ?9\\b|expected credit loss|\\becl\\b", "tag": "^(ifrs ?9|ecl)$" },
+        { "key": "vat", "name": "VAT returns", "group": "Tax", "types": ["Tax filing"], "details": "vat", "tag": "^vat$" },
+        { "key": "consolidation", "name": "Group consolidation", "group": "Reporting", "details": "consolidat|intercompany|elimination", "tag": "^consolidation$" },
+        { "key": "bankrec", "name": "Bank reconciliation", "group": "Accounting", "checklist": "bank", "tag": "^bank reconciliation$" },
+        { "key": "variance", "name": "Variance analysis", "group": "Business", "checklist": "varianc", "tag": "^variance" },
+        { "key": "excel", "name": "Advanced Excel (pivot tables, XLOOKUP)", "group": "Tools", "details": "pivot|xlookup|vlookup|power query", "tag": "^excel$" }
+      ],
+      "verbs": {
+        "Month-end close": "Closed",
+        "Reconciliation": "Reconciled",
+        "Journal entry": "Booked",
+        "Tax filing": "Prepared and filed",
+        "Financial statements": "Prepared",
+        "Audit support": "Supported",
+        "Budget / forecast": "Built",
+        "Query / support": "Resolved"
+      },
+      "bullet": "{verb} {title} ({name}), [result: e.g. close cut from 8 to 5 days / zero audit adjustments / difference of N cleared]."
+    },
+    "cvTips": [
+      { "title": "Action, what, result.", "text": "Start with a verb (Closed, Reconciled, Prepared, Filed), say what and end with the result." },
+      { "title": "Numbers win.", "text": "Close days saved, entities handled, accounts reconciled each month, returns filed on time, audit adjustments avoided." },
+      { "title": "Name the standards.", "text": "IFRS 15, IFRS 16, IFRS 9, IAS 12. Recruiters search for these exact terms." },
+      { "title": "Name the systems.", "text": "Say which ERP and tools you used (Oracle, SAP, Odoo, Excel Power Query)." },
+      { "title": "Keep it confidential.", "text": "No client names, real amounts or internal account codes. Stranote flags these in amber." },
+      { "title": "Keep it fresh.", "text": "Check this page every month and export a new version." }
+    ]
+  },
+  "settings": {
+    "phases": [
+      { "name": "Not started", "percent": 0 },
+      { "name": "Collecting data", "percent": 20 },
+      { "name": "Preparing", "percent": 45 },
+      { "name": "Booking / filing", "percent": 70 },
+      { "name": "Review", "percent": 85 },
+      { "name": "On Hold", "percent": null },
+      { "name": "Done", "percent": 100 }
+    ],
+    "commonQuestions": [
+      "Who reviews and approves this?",
+      "What is the deadline?"
+    ],
+    "baseChecklist": [
+      "Supporting documents collected",
+      "Work prepared",
+      "Entries booked or return filed",
+      "Reviewed and signed off",
+      "Working papers saved in 03_Working_papers"
+    ],
+    "ticketFolders": ["01_Source_documents", "02_Calculations", "03_Working_papers", "04_Review"],
+    "notesSections": ["Decisions", "Journal entries", "Free notes"],
+    "saveTargets": [
+      { "name": "Source document (invoice, contract, statement)", "path": "{ticket}\\01_Source_documents", "prefix": false },
+      { "name": "Calculation (accrual, depreciation, tax)", "path": "{ticket}\\02_Calculations", "prefix": false },
+      { "name": "Working paper or reconciliation", "path": "{ticket}\\03_Working_papers", "prefix": false },
+      { "name": "Review notes and sign-off", "path": "{ticket}\\04_Review", "prefix": false },
+      { "name": "Reusable template (Knowledge base)", "path": "04_Knowledge\\Templates", "prefix": false },
+      { "name": "Policy or standard summary (Knowledge base)", "path": "04_Knowledge\\Standards", "prefix": false }
+    ],
+    "workFolders": [
+      "00_Inbox",
+      "01_Tasks",
+      "04_Knowledge\\Templates",
+      "04_Knowledge\\Standards",
+      "04_Knowledge\\Company",
+      "05_Tools",
+      "06_Admin",
+      "99_Archive"
+    ],
+    "abbreviations": {
+      "ACCRUAL": "ACR", "ACCRUALS": "ACR", "RECONCILIATION": "RECON", "RECONCILIATIONS": "RECON",
+      "DEPRECIATION": "DEPR", "PREPAYMENT": "PREPAY", "PREPAYMENTS": "PREPAY", "PROVISION": "PROV",
+      "PROVISIONS": "PROV", "INTERCOMPANY": "IC", "JOURNAL": "JE", "JOURNALS": "JE", "INVOICE": "INV",
+      "INVOICES": "INV", "PAYMENT": "PMT", "PAYMENTS": "PMT", "BALANCE": "BAL", "STATEMENT": "STMT",
+      "STATEMENTS": "STMT", "BUDGET": "BUD", "FORECAST": "FCST", "PAYROLL": "PAY", "MONTHLY": "MTH",
+      "QUARTERLY": "QTR", "ANNUAL": "ANN", "JANUARY": "JAN", "FEBRUARY": "FEB", "DECEMBER": "DEC"
+    },
+    "stopWords": [
+      "THE", "A", "AN", "OF", "FOR", "TO", "AND", "IN", "ON", "NEW", "FIX", "ISSUE",
+      "FROM", "INTO", "WITH", "BY"
+    ]
+  }
+}

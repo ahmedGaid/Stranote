@@ -108,7 +108,11 @@ description: "Task list for 001 career packs and first-day onboarding"
   - Done 2026-10-19: 17 areas (11 task modules incl. CLOSE, SYSADMIN, IBY, ZX, XLA), 9 task types (Setup, Period close, Requirements,
     Testing, Data load, Support, Report, Training, Other), functional phases (CRP, Go-live), full `ui` block. Extractors: 2 `term`
     (setup terms, profile options; produce cards once the engine runs `term`, T037) + 1 `table`. `starterLessons` still empty.
-- [ ] T033 [P] [US3] Write `packs\accountant.json` (IFRS/GAAP terms, month-end close, reconciliations, accruals, tax)
+- [x] T033 [P] [US3] Write `packs\accountant.json` (IFRS/GAAP terms, month-end close, reconciliations, accruals, tax)
+  - Done 2026-10-19: 14 areas (11 task modules: GL, CLOSE, RECON, AP, AR, FA, TAX, REPORTING, AUDIT, BUDGET, PAYROLL + Other;
+    STANDARDS and TOOLS as knowledge areas), 9 task types (Month-end close, Reconciliation, Journal entry, Tax filing, Financial
+    statements, Audit support, Budget / forecast, Query / support, Other), accounting phases, full `ui` block ("Area" noun).
+    Extractors: 3 `term` (IFRS/IAS/ASC standards, accounting concepts, tax terms), no code extractors. `starterLessons` empty.
 - [ ] T034 [P] [US3] Write `packs\software-developer.json` (languages, frameworks, PRs, incidents, design decisions)
 - [ ] T035 [P] [US3] Write `packs\nurse.json` (units, procedures, medications, protocols, handover)
 - [ ] T036 [P] [US3] Write `packs\general.json` (minimal areas from free text, generic task types)
