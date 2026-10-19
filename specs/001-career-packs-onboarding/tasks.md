@@ -76,18 +76,18 @@ description: "Task list for 001 career packs and first-day onboarding"
 
 ### Tests for User Story 2
 
-- [ ] T022 [P] [US2] Write failing tests in `tests\StranoteOnboarding.Tests.ps1`: save/resume steps; complete writes profile, career entry, weekend, review time; ratings -> concept statuses (expert=known, comfortable=understood, basic=taught, new=new); folders created only when missing; plan orders goal areas first and fits daily minutes; pasted CV never reaches cv.json
-- [ ] T023 [P] [US2] Write test: questions of an area rated new are not quiz-ready until its lesson check passes (SC-005)
+- [x] T022 [P] [US2] Write failing tests in `tests\StranoteOnboarding.Tests.ps1`: save/resume steps; complete writes profile, career entry, weekend, review time; ratings -> concept statuses (expert=known, comfortable=understood, basic=taught, new=new); folders created only when missing; plan orders goal areas first and fits daily minutes; pasted CV never reaches cv.json
+- [x] T023 [P] [US2] Write test: questions of an area rated new are not quiz-ready until its lesson check passes (SC-005)
 
 ### Implementation for User Story 2
 
-- [ ] T024 [US2] Implement `Save-SnOnboarding`, `Complete-SnOnboarding`, `Restart-SnOnboarding` in `src\StranoteOnboarding.ps1` (uses `Set-SnConceptStatus -Source onboarding`, `Save-SnSettings`, folder creation)
-- [ ] T025 [US2] Implement `New-SnFirstWeekPlan` (research R6) writing `plan.json`; add "Today's new lesson" to `Get-SnDailyReview`
-- [ ] T026 [US2] Update `Start-StranoteMorning.ps1 -Install -Time` to be called from onboarding with the chosen review time
-- [ ] T027 [US2] Add `POST /api/onboarding/save|complete|restart` and `GET /api/plan` to `src\StranoteServer.ps1`
-- [ ] T028 [US2] Build the wizard in `src\dashboard_template.html`: steps You -> Field & role & level -> Rate your areas -> The job (pack onboardingQuestions) -> How work arrives -> Learning goals -> Privacy -> Optional CV -> Summary; progress bar, back/next, resume, Arabic learning text, learning accent and visual faces for areas
-- [ ] T029 [US2] Settings > Profile & roles tab: edit every answer, "Run onboarding again"
-- [ ] T030 [US2] Browser-check quickstart §4 in light and dark, phone width, no console errors
+- [x] T024 [US2] Implement `Save-SnOnboarding`, `Complete-SnOnboarding`, `Restart-SnOnboarding` in `src\StranoteOnboarding.ps1` (uses `Set-SnConceptStatus -Source onboarding`, `Save-SnSettings`, folder creation)
+- [x] T025 [US2] Implement `New-SnFirstWeekPlan` (research R6) writing `plan.json`; add "Today's new lesson" to `Get-SnDailyReview`
+- [x] T026 [US2] Update `Start-StranoteMorning.ps1 -Install -Time` to be called from onboarding with the chosen review time
+- [x] T027 [US2] Add `POST /api/onboarding/save|complete|restart` and `GET /api/plan` to `src\StranoteServer.ps1`
+- [x] T028 [US2] Build the wizard in `src\dashboard_template.html`: steps You -> Field & role & level -> Rate your areas -> The job (pack onboardingQuestions) -> How work arrives -> Learning goals -> Privacy -> Optional CV -> Summary; progress bar, back/next, resume, Arabic learning text, learning accent and visual faces for areas
+- [x] T029 [US2] Settings > Profile & roles tab: edit every answer, "Run onboarding again"
+- [x] T030 [US2] Browser-check quickstart §4 in light and dark, phone width, no console errors
 
 **Checkpoint**: New users get a working, personal Ops on day one.
 
