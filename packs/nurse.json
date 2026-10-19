@@ -1,0 +1,451 @@
+{
+  "schemaVersion": 1,
+  "id": "nurse",
+  "name": "Nurse",
+  "field": "Healthcare",
+  "version": "1.0.0",
+  "description": "Nursing work in any unit: patient assessment, medication administration, IV therapy, procedures and wound care, emergencies, infection prevention, handover, incidents and training. Never store real patient data: use initials or a case number only.",
+  "levels": ["Student", "Junior", "Mid", "Senior", "Lead"],
+  "categories": [
+    { "id": "Clinical", "label": "Clinical", "labelAr": "إكلينيكي", "color": "#2563eb" },
+    { "id": "Medication", "label": "Medication", "labelAr": "أدوية", "color": "#2f8f5b" },
+    { "id": "Procedures", "label": "Procedures", "labelAr": "إجراءات", "color": "#7c3aed" },
+    { "id": "Safety", "label": "Safety", "labelAr": "سلامة المريض", "color": "#c2410c" },
+    { "id": "Communication", "label": "Communication", "labelAr": "تواصل وتوثيق", "color": "#b7791f" },
+    { "id": "Professional", "label": "Professional", "labelAr": "مهني", "color": "#4f46e5" }
+  ],
+  "categoryRules": {
+    "byKind": { "answer": "Communication", "decision": "Clinical", "term": "Clinical" },
+    "default": "Clinical"
+  },
+  "areas": [
+    { "id": "ASSESS", "name": "Patient assessment and monitoring", "category": "Clinical", "taskModule": true,
+      "concepts": [
+        { "id": "as-abcde", "title": "ABCDE assessment: airway, breathing, circulation, disability, exposure" },
+        { "id": "as-vitals", "title": "Vital signs: normal ranges and what a trend means more than one reading" },
+        { "id": "as-ews", "title": "Early warning scores (NEWS2 / MEWS): scoring and when to escalate" },
+        { "id": "as-gcs", "title": "Glasgow Coma Scale: eye, verbal, motor (3-15) and pupil checks" },
+        { "id": "as-pain", "title": "Pain assessment: numeric scale, FLACC for non-verbal patients, reassess after analgesia" },
+        { "id": "as-fluid", "title": "Fluid balance: intake/output charting, urine output targets, signs of dehydration and overload" }
+      ] },
+    { "id": "MEDS", "name": "Medication administration", "category": "Medication", "taskModule": true,
+      "concepts": [
+        { "id": "med-rights", "title": "The rights of medication administration: right patient, drug, dose, route, time, documentation" },
+        { "id": "med-high-alert", "title": "High-alert medications: insulin, anticoagulants, opioids, concentrated potassium; independent double check" },
+        { "id": "med-calc", "title": "Dose calculations: mg/kg, infusion rates in mL/h, drops per minute" },
+        { "id": "med-controlled", "title": "Controlled drugs: storage, register, witnessed administration and waste" },
+        { "id": "med-reactions", "title": "Adverse drug reactions and anaphylaxis: recognise, stop the drug, escalate, document" }
+      ] },
+    { "id": "IV", "name": "IV therapy and vascular access", "category": "Procedures", "taskModule": true,
+      "concepts": [
+        { "id": "iv-cannula", "title": "Peripheral IV cannulation: site choice, gauge, aseptic technique, securing" },
+        { "id": "iv-phlebitis", "title": "Phlebitis and infiltration: VIP score, when to remove a cannula" },
+        { "id": "iv-central", "title": "Central lines and PICC lines: care bundle, dressing changes, line infection signs" },
+        { "id": "iv-pumps", "title": "Infusion pumps and syringe drivers: programming, drug libraries, line checks" },
+        { "id": "iv-transfusion", "title": "Blood transfusion: bedside identity check, observations, transfusion reactions" }
+      ] },
+    { "id": "PROC", "name": "Procedures and wound care", "category": "Procedures", "taskModule": true,
+      "concepts": [
+        { "id": "pr-aseptic", "title": "Aseptic non-touch technique (ANTT): key parts and key sites" },
+        { "id": "pr-wounds", "title": "Wound assessment and dressings: wound bed, exudate, signs of infection" },
+        { "id": "pr-pressure", "title": "Pressure injuries: risk assessment (Braden / Waterlow), stages, repositioning" },
+        { "id": "pr-catheter", "title": "Urinary catheter care: insertion, CAUTI prevention, removal as early as possible" },
+        { "id": "pr-ng", "title": "Nasogastric tubes: placement check (pH / X-ray) before every feed or drug" }
+      ] },
+    { "id": "RESP", "name": "Respiratory care and airway", "category": "Clinical", "taskModule": true,
+      "concepts": [
+        { "id": "rs-oxygen", "title": "Oxygen therapy: delivery devices, target saturations (94-98% or 88-92% in CO2 retainers)" },
+        { "id": "rs-niv", "title": "Non-invasive ventilation: CPAP vs BiPAP, mask fit, skin care" },
+        { "id": "rs-vent", "title": "Mechanical ventilation basics: modes, alarms, VAP prevention bundle" },
+        { "id": "rs-trach", "title": "Tracheostomy care: suctioning, inner cannula, emergency equipment at the bedside" },
+        { "id": "rs-abg", "title": "Arterial blood gas interpretation: pH, PaCO2, HCO3, compensation" }
+      ] },
+    { "id": "CARDIO", "name": "Cardiac care and monitoring", "category": "Clinical", "taskModule": true,
+      "concepts": [
+        { "id": "cv-ecg", "title": "ECG basics: lead placement, sinus rhythm, AF, VT/VF, heart blocks" },
+        { "id": "cv-chest-pain", "title": "Chest pain pathway: 12-lead ECG quickly, troponin, escalation" },
+        { "id": "cv-vasoactive", "title": "Vasoactive infusions: titration to target MAP, central line, never flush the line" },
+        { "id": "cv-fluids", "title": "Fluid resuscitation: bolus, reassessment, signs of fluid overload" }
+      ] },
+    { "id": "EMERG", "name": "Emergencies and resuscitation", "category": "Safety", "taskModule": true,
+      "concepts": [
+        { "id": "em-bls", "title": "Basic life support: high-quality CPR, compressions 100-120/min, early defibrillation" },
+        { "id": "em-als", "title": "Advanced life support: shockable vs non-shockable rhythms, adrenaline timing, reversible causes (4 Hs and 4 Ts)" },
+        { "id": "em-sepsis", "title": "Sepsis recognition and the first-hour bundle: cultures, antibiotics, fluids, lactate" },
+        { "id": "em-deteriorating", "title": "The deteriorating patient: rapid response team, escalation by early warning score" },
+        { "id": "em-triage", "title": "Triage: prioritising patients by acuity (e.g. ESI, Manchester Triage)" }
+      ] },
+    { "id": "INFECT", "name": "Infection prevention and control", "category": "Safety", "taskModule": true,
+      "concepts": [
+        { "id": "ip-hands", "title": "Hand hygiene: the five moments" },
+        { "id": "ip-precautions", "title": "Standard vs transmission-based precautions: contact, droplet, airborne" },
+        { "id": "ip-ppe", "title": "PPE: donning and doffing order" },
+        { "id": "ip-hai", "title": "Healthcare-associated infections and their bundles: CLABSI, CAUTI, VAP, SSI" }
+      ] },
+    { "id": "HANDOVER", "name": "Handover and documentation", "category": "Communication", "taskModule": true,
+      "concepts": [
+        { "id": "ho-sbar", "title": "SBAR: situation, background, assessment, recommendation" },
+        { "id": "ho-bedside", "title": "Bedside handover: involve the patient, check lines, drains and alarms together" },
+        { "id": "ho-docs", "title": "Documentation: timely, factual, legible; if it was not documented it was not done" },
+        { "id": "ho-closed-loop", "title": "Closed-loop communication and read-back of verbal orders" }
+      ] },
+    { "id": "SAFETY", "name": "Patient safety and incidents", "category": "Safety", "taskModule": true,
+      "concepts": [
+        { "id": "sf-falls", "title": "Falls prevention: risk assessment (Morse), bed rails, post-fall review" },
+        { "id": "sf-incidents", "title": "Incident and near-miss reporting: report the system problem, not to blame a person" },
+        { "id": "sf-rca", "title": "Root cause analysis: timeline, contributing factors, action plan" },
+        { "id": "sf-id", "title": "Patient identification: two identifiers before every procedure and drug" },
+        { "id": "sf-restraint", "title": "Delirium and restraint: CAM-ICU screening, least restrictive option" }
+      ] },
+    { "id": "EDU", "name": "Patient education and discharge", "category": "Communication", "taskModule": true,
+      "concepts": [
+        { "id": "ed-teach-back", "title": "Teach-back: ask the patient to explain it in their own words" },
+        { "id": "ed-discharge", "title": "Discharge planning: medications, follow-up, red-flag symptoms, home support" },
+        { "id": "ed-consent", "title": "Informed consent and capacity: the nurse's role" }
+      ] },
+    { "id": "Other", "name": "Other", "taskModule": true, "concepts": [] },
+    { "id": "PHARM", "name": "Pharmacology", "category": "Medication",
+      "concepts": [
+        { "id": "ph-classes", "title": "Common drug classes: anticoagulants, antibiotics, analgesics, diuretics, antiarrhythmics" },
+        { "id": "ph-pk", "title": "Pharmacokinetics: half-life, loading dose, renal and hepatic dose adjustment" },
+        { "id": "ph-antidotes", "title": "Antidotes: naloxone for opioids, protamine for heparin, glucose / glucagon for hypoglycaemia" },
+        { "id": "ph-levels", "title": "Therapeutic drug monitoring: vancomycin and gentamicin levels, digoxin toxicity" }
+      ] },
+    { "id": "PATHO", "name": "Pathophysiology and lab values", "category": "Clinical",
+      "concepts": [
+        { "id": "pa-electrolytes", "title": "Electrolytes: potassium, sodium, magnesium; what high and low values cause" },
+        { "id": "pa-labs", "title": "Common labs: full blood count, renal function, coagulation (INR, aPTT), lactate" },
+        { "id": "pa-diabetes", "title": "Diabetes: hypo- and hyperglycaemia, DKA, insulin types and timing" },
+        { "id": "pa-shock", "title": "Shock types: hypovolaemic, cardiogenic, distributive (septic, anaphylactic), obstructive" }
+      ] },
+    { "id": "PROF", "name": "Professional practice", "category": "Professional",
+      "concepts": [
+        { "id": "pf-scope", "title": "Scope of practice and delegation to assistants and students" },
+        { "id": "pf-ethics", "title": "Confidentiality, dignity and patient advocacy" },
+        { "id": "pf-ebp", "title": "Evidence-based practice: protocols, audits and why a policy changes" },
+        { "id": "pf-cpd", "title": "Continuing professional development and competency sign-off" }
+      ] }
+  ],
+  "taskTypes": [
+    {
+      "name": "Patient case",
+      "questions": [
+        { "k": "case", "q": "Case summary (no names: age range, condition, unit)", "d": "" },
+        { "k": "problem", "q": "Main nursing problems / priorities", "d": "" },
+        { "k": "interventions", "q": "Key interventions and orders", "d": "" },
+        { "k": "outcome", "q": "Outcome / response", "d": "" }
+      ],
+      "openQuestions": [
+        "What would make me escalate this patient?",
+        "Which guideline or protocol applies?",
+        "What do I need to hand over at the end of the shift?"
+      ],
+      "checklist": [
+        "Assessment done and charted",
+        "Care plan updated",
+        "Interventions given and evaluated",
+        "Escalated when needed",
+        "Handover written"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Procedure",
+      "questions": [
+        { "k": "procedure", "q": "Procedure (e.g. cannulation, catheter, dressing, NG tube)", "d": "" },
+        { "k": "indication", "q": "Indication", "d": "" },
+        { "k": "equipment", "q": "Equipment and technique used", "d": "" },
+        { "k": "result", "q": "Result / complications", "d": "" }
+      ],
+      "openQuestions": [
+        "Was consent obtained and documented?",
+        "Am I signed off as competent for this procedure?"
+      ],
+      "checklist": [
+        "Patient identified and consent obtained",
+        "Equipment prepared",
+        "Aseptic technique followed",
+        "Procedure done",
+        "Documented with date, size and site"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Medication administration",
+      "questions": [
+        { "k": "drug", "q": "Drug, dose, route and frequency", "d": "" },
+        { "k": "indication", "q": "Indication", "d": "" },
+        { "k": "checks", "q": "Checks needed (levels, vitals, double check)", "d": "" },
+        { "k": "calc", "q": "Calculation (dose, rate in mL/h)", "d": "" }
+      ],
+      "openQuestions": [
+        "Is it a high-alert drug that needs an independent double check?",
+        "Which side effects should I watch for?",
+        "Is there an antidote or reversal?"
+      ],
+      "checklist": [
+        "Prescription checked (rights of administration)",
+        "Allergies checked",
+        "Dose calculated and double checked",
+        "Given and documented",
+        "Effect and side effects reviewed"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Handover",
+      "questions": [
+        { "k": "shift", "q": "Shift and unit", "d": "" },
+        { "k": "sbar", "q": "Key points (SBAR)", "d": "" },
+        { "k": "pending", "q": "Pending results, tasks and reviews", "d": "" }
+      ],
+      "openQuestions": [
+        "Did the receiving nurse read back the critical points?"
+      ],
+      "checklist": [
+        "SBAR prepared",
+        "Lines, drains and infusions checked together",
+        "Pending tasks handed over",
+        "Handover documented"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Incident / near miss",
+      "questions": [
+        { "k": "what", "q": "What happened (facts only, no names)", "d": "" },
+        { "k": "harm", "q": "Harm level (none, low, moderate, severe)", "d": "none" },
+        { "k": "actions", "q": "Immediate actions taken", "d": "" },
+        { "k": "factors", "q": "Contributing factors (staffing, equipment, process)", "d": "" }
+      ],
+      "openQuestions": [
+        "Was the patient and family informed (duty of candour)?",
+        "What would stop it happening again?"
+      ],
+      "checklist": [
+        "Patient made safe",
+        "Senior / doctor informed",
+        "Incident report submitted",
+        "Learning shared with the team"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Admission / discharge",
+      "questions": [
+        { "k": "kind", "q": "Admission, transfer or discharge", "d": "Admission" },
+        { "k": "assessments", "q": "Risk assessments due (falls, pressure, nutrition, VTE)", "d": "" },
+        { "k": "plan", "q": "Discharge plan / follow-up and teaching", "d": "" }
+      ],
+      "openQuestions": [
+        "Are discharge medications explained with teach-back?"
+      ],
+      "checklist": [
+        "Admission assessment done",
+        "Risk assessments done",
+        "Medications reconciled",
+        "Patient education given",
+        "Discharge summary and follow-up arranged"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Training / competency",
+      "questions": [
+        { "k": "topic", "q": "Course or competency (e.g. BLS, ACLS, IV, ventilator)", "d": "" },
+        { "k": "provider", "q": "Provider / educator", "d": "" },
+        { "k": "evidence", "q": "Evidence (certificate, sign-off, CPD hours)", "d": "" }
+      ],
+      "openQuestions": [
+        "When does it expire?"
+      ],
+      "checklist": [
+        "Training attended",
+        "Assessment passed",
+        "Certificate or sign-off saved",
+        "Renewal date noted"
+      ],
+      "objects": []
+    },
+    { "name": "Other", "questions": [], "openQuestions": [], "checklist": [], "objects": [] }
+  ],
+  "extractors": [
+    {
+      "id": "nurse-drugs",
+      "kind": "term",
+      "files": [".txt", ".md"],
+      "pattern": "(?i)\\b(?<key>heparin|enoxaparin|warfarin|apixaban|rivaroxaban|insulin|noradrenaline|norepinephrine|adrenaline|epinephrine|dobutamine|dopamine|vasopressin|amiodarone|digoxin|furosemide|morphine|fentanyl|oxycodone|midazolam|propofol|paracetamol|acetaminophen|ibuprofen|ondansetron|metoclopramide|ceftriaxone|vancomycin|piperacillin[- ]tazobactam|meropenem|gentamicin|potassium chloride|magnesium sulphate|magnesium sulfate|sodium bicarbonate|salbutamol|albuterol|ipratropium|hydrocortisone|dexamethasone|naloxone|atropine|protamine|pantoprazole|omeprazole|labetalol|nitroglycerin|GTN)\\b",
+      "group": "Medication",
+      "minCount": 1,
+      "maxCards": 6,
+      "cardTemplate": { "topic": "Drug: {key}", "fact": "Given in {taskId}: {context}" }
+    },
+    {
+      "id": "nurse-procedures",
+      "kind": "term",
+      "files": [".txt", ".md"],
+      "pattern": "(?i)\\b(?<key>IV cannula(?:tion)?|central line|CVC|PICC(?: line)?|arterial line|urinary catheter|Foley catheter|nasogastric tube|NG tube|PEG tube|tracheostomy|endotracheal tube|mechanical ventilation|CPAP|BiPAP|NIV|high[- ]flow nasal (?:cannula|oxygen)|chest drain|negative pressure wound therapy|NPWT|wound dressing|blood transfusion|infusion pump|syringe driver|12-lead ECG|telemetry|defibrillat(?:or|ion)|CPR|suctioning|blood culture|arterial blood gas|ABG)\\b",
+      "group": "Procedures",
+      "minCount": 1,
+      "maxCards": 5,
+      "cardTemplate": { "topic": "Procedure: {key}", "fact": "Done in {taskId}: {context}" }
+    },
+    {
+      "id": "nurse-scores",
+      "kind": "term",
+      "files": [".txt", ".md"],
+      "pattern": "\\b(?<key>NEWS2|NEWS|MEWS|PEWS|GCS|Glasgow Coma Scale|Braden(?: [Ss]cale)?|Morse(?: [Ff]all [Ss]cale)?|Waterlow|qSOFA|SOFA|APACHE II|RASS|CAM-ICU|FLACC|VIP score|SBAR|ABCDE|ESI|Manchester Triage)\\b",
+      "group": "Clinical",
+      "minCount": 1,
+      "maxCards": 4,
+      "cardTemplate": { "topic": "Score: {key}", "fact": "Used in {taskId}: {context}" }
+    }
+  ],
+  "starterLessons": [],
+  "skillMap": [
+    { "skill": "Patient assessment and monitoring", "area": "ASSESS", "group": "Clinical" },
+    { "skill": "Safe medication administration", "area": "MEDS", "group": "Medication" },
+    { "skill": "IV therapy and vascular access", "area": "IV", "group": "Procedures" },
+    { "skill": "Wound care and clinical procedures", "area": "PROC", "group": "Procedures" },
+    { "skill": "Respiratory care and airway management", "area": "RESP", "group": "Clinical" },
+    { "skill": "Cardiac monitoring", "area": "CARDIO", "group": "Clinical" },
+    { "skill": "Emergency response and resuscitation", "area": "EMERG", "group": "Safety" },
+    { "skill": "Infection prevention and control", "area": "INFECT", "group": "Safety" },
+    { "skill": "Clinical handover and documentation", "area": "HANDOVER", "group": "Communication" },
+    { "skill": "Patient safety and incident reporting", "area": "SAFETY", "group": "Safety" },
+    { "skill": "Patient education and discharge planning", "area": "EDU", "group": "Communication" },
+    { "skill": "Pharmacology", "area": "PHARM", "group": "Medication" },
+    { "skill": "Pathophysiology and lab interpretation", "area": "PATHO", "group": "Clinical" },
+    { "skill": "Professional nursing practice", "area": "PROF", "group": "Professional" }
+  ],
+  "onboardingQuestions": [
+    { "id": "unit", "label": "Which unit do you work in?", "type": "select", "options": ["ICU / critical care", "Emergency", "Medical ward", "Surgical ward", "Operating theatre", "Paediatrics / NICU", "Maternity", "Oncology", "Community / clinic", "Other"], "default": "Medical ward", "writesTo": "pack.unit" },
+    { "id": "role", "label": "Your role", "type": "select", "options": ["Nursing student", "Staff nurse", "Charge nurse", "Nurse specialist", "Nurse educator", "Nurse manager"], "default": "Staff nurse", "writesTo": "pack.role" },
+    { "id": "specialty", "label": "Specialty or patient group (e.g. cardiac, renal, neuro)", "type": "text", "default": "", "writesTo": "pack.specialty" },
+    { "id": "certs", "label": "Certifications you hold (e.g. BLS, ACLS, PALS)", "type": "text", "default": "", "writesTo": "pack.certifications" },
+    { "id": "ehr", "label": "Electronic health record system (e.g. Epic, Cerner)", "type": "text", "default": "", "writesTo": "pack.ehr" }
+  ],
+  "ui": {
+    "workspace": "Nursing workspace",
+    "area": "Area",
+    "areas": "Areas",
+    "screenshotsTitle": "صور ومرفقات (من غير بيانات مرضى)",
+    "cvTitle": "Registered nurse",
+    "sample": { "id": "CASE-0142", "module": "MEDS", "type": "Medication administration", "title": "Heparin_infusion_titration", "code": "HEP_INF" },
+    "placeholders": {
+      "taskId": "CASE-0142",
+      "taskTitle": "Heparin infusion titration by aPTT protocol",
+      "extraQuestions": "e.g. When do I stop the infusion before a procedure?",
+      "cardTopic": "Drug: Heparin",
+      "cardFact": "Titrate the infusion by aPTT per protocol; protamine reverses it; watch for bleeding and low platelets",
+      "cardTags": "Medication, Anticoagulation, High-alert",
+      "scriptName": "heparin_protocol_notes.md",
+      "scriptPurpose": "My summary of the unit heparin protocol",
+      "checklistItem": "e.g. Dose double checked",
+      "newArea": "e.g. Dialysis",
+      "prefix": "UNIT",
+      "role": "e.g. ICU Staff Nurse",
+      "target": "Senior Staff Nurse, Charge Nurse, Clinical Nurse Specialist...",
+      "cvSkill": "Add a skill, e.g. Ventilator management"
+    },
+    "privateNames": "\\b(MRN|bed\\s*\\d+|room\\s*\\d+|DOB)\\b",
+    "skills": {
+      "areaSkill": "{name}",
+      "areaGroup": "Clinical",
+      "groups": ["Clinical", "Medication", "Procedures", "Safety", "Communication", "Professional", "Certifications"],
+      "typeGroup": "Clinical",
+      "types": {
+        "Patient case": "Holistic patient care",
+        "Procedure": "Clinical procedures",
+        "Medication administration": "Safe medication administration",
+        "Handover": "Clinical handover (SBAR)",
+        "Incident / near miss": "Incident reporting and patient safety",
+        "Admission / discharge": "Admission and discharge planning",
+        "Training / competency": "Continuing professional development"
+      },
+      "rules": [
+        { "key": "bls", "name": "BLS certified", "group": "Certifications", "types": ["Training / competency"], "details": "\\bbls\\b|basic life support", "tag": "^bls$" },
+        { "key": "acls", "name": "ACLS certified", "group": "Certifications", "types": ["Training / competency"], "details": "\\bacls\\b|\\bals\\b|advanced (cardiac )?life support", "tag": "^(acls|als)$" },
+        { "key": "pals", "name": "PALS certified", "group": "Certifications", "types": ["Training / competency"], "details": "\\bpals\\b|paediatric advanced|pediatric advanced", "tag": "^pals$" },
+        { "key": "vent", "name": "Ventilator management", "group": "Clinical", "details": "ventilat|\\bniv\\b|cpap|bipap", "tag": "^(ventilation|ventilator)$" },
+        { "key": "iv", "name": "IV cannulation", "group": "Procedures", "types": ["Procedure"], "details": "cannula", "tag": "^(iv|cannulation)$" },
+        { "key": "central", "name": "Central line and PICC care", "group": "Procedures", "details": "central line|\\bcvc\\b|picc", "tag": "^(cvc|picc)$" },
+        { "key": "sepsis", "name": "Sepsis recognition and management", "group": "Clinical", "details": "sepsis|septic", "tag": "^sepsis$" },
+        { "key": "transfusion", "name": "Blood transfusion", "group": "Procedures", "details": "transfusion|blood product", "tag": "^transfusion$" },
+        { "key": "wound", "name": "Wound and pressure injury care", "group": "Procedures", "details": "wound|pressure (injury|ulcer)|npwt", "tag": "^(wound|pressure injury)$" },
+        { "key": "sbar", "name": "SBAR communication", "group": "Communication", "checklist": "sbar", "tag": "^sbar$" },
+        { "key": "ipc", "name": "Infection prevention (PPE, isolation)", "group": "Safety", "details": "isolation|ppe|mrsa|c\\.? ?diff", "tag": "^(ipc|infection control)$" }
+      ],
+      "verbs": {
+        "Patient case": "Cared for",
+        "Procedure": "Performed",
+        "Medication administration": "Administered",
+        "Handover": "Coordinated",
+        "Incident / near miss": "Reported and resolved",
+        "Admission / discharge": "Managed",
+        "Training / competency": "Completed"
+      },
+      "bullet": "{verb} {title} ({name}), [result: e.g. zero medication errors / falls on the unit reduced by N% / N patients per shift]."
+    },
+    "cvTips": [
+      { "title": "Action, what, result.", "text": "Start with a verb (Cared for, Administered, Led, Trained), say what and end with the result." },
+      { "title": "Numbers win.", "text": "Patients per shift, beds in the unit, audit scores, falls or infections reduced, staff you trained." },
+      { "title": "Name your unit and skills.", "text": "ICU, ER, ward type, ventilators, central lines, triage. Recruiters search for these exact words." },
+      { "title": "List certifications with dates.", "text": "BLS, ACLS, PALS and your license number status (not the number itself)." },
+      { "title": "Protect patients.", "text": "Never put patient names, MRNs, bed numbers or dates of birth in Stranote or a CV. Stranote flags these in amber." },
+      { "title": "Keep it fresh.", "text": "Check this page every month and export a new version." }
+    ]
+  },
+  "settings": {
+    "phases": [
+      { "name": "Not started", "percent": 0 },
+      { "name": "Assessment", "percent": 20 },
+      { "name": "In progress", "percent": 50 },
+      { "name": "Evaluation", "percent": 80 },
+      { "name": "On Hold", "percent": null },
+      { "name": "Done", "percent": 100 }
+    ],
+    "commonQuestions": [
+      "Which protocol or policy applies?",
+      "Who do I escalate to?"
+    ],
+    "baseChecklist": [
+      "Situation understood",
+      "Protocol checked",
+      "Care given",
+      "Documented",
+      "Notes saved in 01_Notes"
+    ],
+    "ticketFolders": ["01_Notes", "02_Files", "03_Protocols"],
+    "notesSections": ["What I learned", "Protocols and doses", "Free notes"],
+    "saveTargets": [
+      { "name": "Notes or reflection", "path": "{ticket}\\01_Notes", "prefix": false },
+      { "name": "Photo or file (no patient data)", "path": "{ticket}\\02_Files", "prefix": false },
+      { "name": "Protocol or guideline", "path": "{ticket}\\03_Protocols", "prefix": false },
+      { "name": "Protocol (Knowledge base)", "path": "04_Knowledge\\Protocols", "prefix": false },
+      { "name": "Drug note (Knowledge base)", "path": "04_Knowledge\\Drugs", "prefix": false },
+      { "name": "Certificate or CPD evidence", "path": "06_Admin\\Certificates", "prefix": false }
+    ],
+    "workFolders": [
+      "00_Inbox",
+      "01_Tasks",
+      "04_Knowledge\\Protocols",
+      "04_Knowledge\\Drugs",
+      "04_Knowledge\\Unit",
+      "05_Tools",
+      "06_Admin\\Certificates",
+      "99_Archive"
+    ],
+    "abbreviations": {
+      "ADMINISTRATION": "ADMIN", "ADMISSION": "ADM", "ASSESSMENT": "ASSESS", "CATHETER": "CATH", "CANNULATION": "CANN",
+      "DISCHARGE": "DC", "DRESSING": "DRSG", "EMERGENCY": "EMERG", "HANDOVER": "HO", "INFUSION": "INF",
+      "INTRAVENOUS": "IV", "MEDICATION": "MED", "MEDICATIONS": "MEDS", "MONITORING": "MON", "PROCEDURE": "PROC",
+      "PROTOCOL": "PROT", "RESUSCITATION": "RESUS", "TRANSFUSION": "TRANSF", "TRACHEOSTOMY": "TRACH",
+      "VENTILATION": "VENT", "VENTILATOR": "VENT", "WOUND": "WND", "TRAINING": "TRN", "INCIDENT": "INC",
+      "HEPARIN": "HEP", "INSULIN": "INS", "TITRATION": "TITR"
+    },
+    "stopWords": [
+      "THE", "A", "AN", "OF", "FOR", "TO", "AND", "IN", "ON", "NEW", "BY", "WITH", "FROM", "AT", "PATIENT"
+    ]
+  }
+}

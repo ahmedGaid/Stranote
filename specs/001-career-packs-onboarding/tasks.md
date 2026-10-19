@@ -119,7 +119,12 @@ description: "Task list for 001 career packs and first-day onboarding"
     Design / ADR, Spike / research, Refactor / tech debt, Deployment / release, Other), dev phases, full `ui` block ("Area").
     Extractors: 3 `term` (languages/frameworks, engineering concepts, ops tools). No `api` kind (engine's api is package.member
     shaped). Bare `Go`/`Express` left out of the languages regex (false hits at sentence start). `starterLessons` empty.
-- [ ] T035 [P] [US3] Write `packs\nurse.json` (units, procedures, medications, protocols, handover)
+- [x] T035 [P] [US3] Write `packs\nurse.json` (units, procedures, medications, protocols, handover)
+  - Done 2026-10-19: 15 areas (12 task modules: ASSESS, MEDS, IV, PROC, RESP, CARDIO, EMERG, INFECT, HANDOVER, SAFETY, EDU
+    + Other; PHARM, PATHO, PROF as knowledge areas), 8 task types (Patient case, Procedure, Medication administration, Handover,
+    Incident / near miss, Admission / discharge, Training / competency, Other), nursing phases, full `ui` block ("Nursing
+    workspace"; `privateNames` flags MRN / bed / room / DOB). Extractors: 3 `term` (drugs, procedures/devices, clinical
+    scores; the scores regex is case-sensitive so "news"/"must" do not match). No patient data in placeholders. `starterLessons` empty.
 - [ ] T036 [P] [US3] Write `packs\general.json` (minimal areas from free text, generic task types)
 - [ ] T037 [US3] Add `samples\<pack>\` work files and a test that each pack yields ≥ 10 cards from 5 samples (SC-004)
 - [ ] T038 [US3] Write `docs\pack-authoring.md` (how to write and validate a pack)
