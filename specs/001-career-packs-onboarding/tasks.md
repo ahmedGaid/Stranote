@@ -125,7 +125,12 @@ description: "Task list for 001 career packs and first-day onboarding"
     Incident / near miss, Admission / discharge, Training / competency, Other), nursing phases, full `ui` block ("Nursing
     workspace"; `privateNames` flags MRN / bed / room / DOB). Extractors: 3 `term` (drugs, procedures/devices, clinical
     scores; the scores regex is case-sensitive so "news"/"must" do not match). No patient data in placeholders. `starterLessons` empty.
-- [ ] T036 [P] [US3] Write `packs\general.json` (minimal areas from free text, generic task types)
+- [x] T036 [P] [US3] Write `packs\general.json` (minimal areas from free text, generic task types)
+  - Done 2026-10-19: 7 areas, all task modules (PLANNING, COMMUNICATION, PROBLEM, PROJECT, LEARNING, ADMIN + Other), 6 task
+    types (Task, Meeting, Problem / issue, Learning, Project, Other), 4 categories (Work, People, Growth, Tools), generic
+    phases, neutral `ui` ("Workspace", "Professional" CV title). "Areas from free text": onboarding questions save job title,
+    work areas and daily tools to `profile.packAnswers` (`jobTitle`, `workAreas`, `tools`) for the T042 pack builder.
+    Extractors: 1 `term` (everyday office tools: Excel, Power BI, Jira, SharePoint...). `starterLessons` empty.
 - [ ] T037 [US3] Add `samples\<pack>\` work files and a test that each pack yields ≥ 10 cards from 5 samples (SC-004)
 - [ ] T038 [US3] Write `docs\pack-authoring.md` (how to write and validate a pack)
 

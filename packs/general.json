@@ -1,0 +1,290 @@
+{
+  "schemaVersion": 1,
+  "id": "general",
+  "name": "General (any job)",
+  "field": "General",
+  "version": "1.0.0",
+  "description": "A minimal starter pack for any job: planning, communication, problem solving, learning, projects and admin. Used when your career is not listed yet; add your own areas in Settings or ask Claude to build a pack for your career.",
+  "levels": ["Student", "Junior", "Mid", "Senior", "Lead"],
+  "categories": [
+    { "id": "Work", "label": "Work", "labelAr": "شغل", "color": "#2563eb" },
+    { "id": "People", "label": "People", "labelAr": "ناس وتواصل", "color": "#b7791f" },
+    { "id": "Growth", "label": "Growth", "labelAr": "تعلم وتطور", "color": "#2f8f5b" },
+    { "id": "Tools", "label": "Tools", "labelAr": "أدوات", "color": "#7c3aed" }
+  ],
+  "categoryRules": {
+    "byKind": { "answer": "People", "decision": "Work", "term": "Tools" },
+    "default": "Work"
+  },
+  "areas": [
+    { "id": "PLANNING", "name": "Planning and prioritising", "category": "Work", "taskModule": true,
+      "concepts": [
+        { "id": "pl-priorities", "title": "Prioritising: urgent vs important (Eisenhower matrix)" },
+        { "id": "pl-breakdown", "title": "Breaking a big job into small next actions" },
+        { "id": "pl-estimate", "title": "Estimating time and adding a buffer for the unknown" },
+        { "id": "pl-goals", "title": "SMART goals: specific, measurable, achievable, relevant, time-bound" }
+      ] },
+    { "id": "COMMUNICATION", "name": "Communication", "category": "People", "taskModule": true,
+      "concepts": [
+        { "id": "cm-email", "title": "Clear emails: the ask in the first line, context after, one topic per email" },
+        { "id": "cm-meetings", "title": "Useful meetings: agenda before, decisions and owners after" },
+        { "id": "cm-update", "title": "Status updates: done, next, blocked" },
+        { "id": "cm-feedback", "title": "Giving and receiving feedback: specific behaviour, impact, request" }
+      ] },
+    { "id": "PROBLEM", "name": "Problem solving", "category": "Work", "taskModule": true,
+      "concepts": [
+        { "id": "pb-define", "title": "Define the problem first: what is expected, what happens, since when" },
+        { "id": "pb-root-cause", "title": "Root cause: 5 whys, and fixing the cause not only the symptom" },
+        { "id": "pb-options", "title": "Comparing options: pros, cons, cost, risk; then decide and write down why" },
+        { "id": "pb-escalate", "title": "When and how to escalate: what you tried, what you need, by when" }
+      ] },
+    { "id": "PROJECT", "name": "Projects and delivery", "category": "Work", "taskModule": true,
+      "concepts": [
+        { "id": "pj-scope", "title": "Scope: what is in, what is out, and who signs it off" },
+        { "id": "pj-stakeholders", "title": "Stakeholders: who decides, who is affected, who must be kept informed" },
+        { "id": "pj-risks", "title": "Risks and dependencies: write them down early with an owner" },
+        { "id": "pj-review", "title": "Lessons learned: what went well, what to change next time" }
+      ] },
+    { "id": "LEARNING", "name": "Learning and growth", "category": "Growth", "taskModule": true,
+      "concepts": [
+        { "id": "ln-spaced", "title": "Spaced repetition: review just before you forget" },
+        { "id": "ln-notes", "title": "Notes in your own words beat copied text" },
+        { "id": "ln-mentor", "title": "Learning from others: ask good questions, shadow, get a mentor" }
+      ] },
+    { "id": "ADMIN", "name": "Admin and organisation", "category": "Tools", "taskModule": true,
+      "concepts": [
+        { "id": "ad-files", "title": "Folders and file names others can find (date, topic, version)" },
+        { "id": "ad-inbox", "title": "Inbox zero: do, delegate, defer or delete" },
+        { "id": "ad-templates", "title": "Templates and checklists for work you repeat" }
+      ] },
+    { "id": "Other", "name": "Other", "taskModule": true, "concepts": [] }
+  ],
+  "taskTypes": [
+    {
+      "name": "Task",
+      "questions": [
+        { "k": "goal", "q": "What needs to be done and why", "d": "" },
+        { "k": "requester", "q": "Who asked for it (role, not name)", "d": "" },
+        { "k": "due", "q": "Due date", "d": "" }
+      ],
+      "openQuestions": [
+        "What does done look like?",
+        "Who do I ask if I get stuck?"
+      ],
+      "checklist": [
+        "Goal understood",
+        "Work done",
+        "Checked with the requester",
+        "Notes saved"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Meeting",
+      "questions": [
+        { "k": "topic", "q": "Meeting topic", "d": "" },
+        { "k": "decisions", "q": "Decisions made", "d": "" },
+        { "k": "actions", "q": "Action items and owners", "d": "" }
+      ],
+      "openQuestions": [
+        "What do I need to prepare before the next one?"
+      ],
+      "checklist": [
+        "Agenda prepared",
+        "Notes taken",
+        "Action items shared",
+        "My action items done"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Problem / issue",
+      "questions": [
+        { "k": "symptom", "q": "What is wrong (expected vs actual)", "d": "" },
+        { "k": "impact", "q": "Who or what is affected", "d": "" },
+        { "k": "cause", "q": "Root cause (when found)", "d": "" },
+        { "k": "fix", "q": "Fix or workaround", "d": "" }
+      ],
+      "openQuestions": [
+        "Has this happened before?",
+        "How do we stop it happening again?"
+      ],
+      "checklist": [
+        "Problem described",
+        "Root cause found",
+        "Fixed or worked around",
+        "Confirmed with the person affected",
+        "Lesson written down"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Learning",
+      "questions": [
+        { "k": "topic", "q": "What I am learning", "d": "" },
+        { "k": "source", "q": "Source (course, book, colleague, video)", "d": "" },
+        { "k": "use", "q": "Where I will use it at work", "d": "" }
+      ],
+      "openQuestions": [
+        "Can I explain it in my own words?"
+      ],
+      "checklist": [
+        "Studied",
+        "Notes in my own words",
+        "Tried it on real work",
+        "Knowledge card saved"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Project",
+      "questions": [
+        { "k": "goal", "q": "Project goal", "d": "" },
+        { "k": "scope", "q": "Scope (in / out)", "d": "" },
+        { "k": "stakeholders", "q": "Stakeholders (roles)", "d": "" },
+        { "k": "deadline", "q": "Deadline and milestones", "d": "" }
+      ],
+      "openQuestions": [
+        "What are the main risks?",
+        "Who signs it off?"
+      ],
+      "checklist": [
+        "Scope agreed",
+        "Plan and milestones set",
+        "Work delivered",
+        "Signed off",
+        "Lessons learned written"
+      ],
+      "objects": []
+    },
+    { "name": "Other", "questions": [], "openQuestions": [], "checklist": [], "objects": [] }
+  ],
+  "extractors": [
+    {
+      "id": "general-tools",
+      "kind": "term",
+      "files": [".txt", ".md"],
+      "pattern": "(?i)\\b(?<key>Excel|pivot table|VLOOKUP|XLOOKUP|Power BI|Google Sheets|PowerPoint|SharePoint|OneDrive|Microsoft Teams|Outlook|Slack|Zoom|Jira|Trello|Asana|Notion|Confluence|Salesforce|HubSpot|SAP|Power Automate|Gantt chart|Kanban|Scrum)\\b",
+      "group": "Tools",
+      "minCount": 1,
+      "maxCards": 5,
+      "cardTemplate": { "topic": "Tool: {key}", "fact": "Used in {taskId}: {context}" }
+    }
+  ],
+  "starterLessons": [],
+  "skillMap": [
+    { "skill": "Planning and prioritisation", "area": "PLANNING", "group": "Work" },
+    { "skill": "Written and verbal communication", "area": "COMMUNICATION", "group": "People" },
+    { "skill": "Problem solving", "area": "PROBLEM", "group": "Work" },
+    { "skill": "Project delivery", "area": "PROJECT", "group": "Work" },
+    { "skill": "Continuous learning", "area": "LEARNING", "group": "Growth" },
+    { "skill": "Organisation and admin", "area": "ADMIN", "group": "Tools" }
+  ],
+  "onboardingQuestions": [
+    { "id": "job", "label": "Your job title (e.g. Civil site engineer, Teacher, Sales rep)", "type": "text", "default": "", "writesTo": "pack.jobTitle" },
+    { "id": "workAreas", "label": "Main areas of your work, comma separated (Claude can turn them into a pack for you)", "type": "text", "default": "", "writesTo": "pack.workAreas" },
+    { "id": "tools", "label": "Tools you use every day (e.g. Excel, AutoCAD, Salesforce)", "type": "text", "default": "", "writesTo": "pack.tools" }
+  ],
+  "ui": {
+    "workspace": "Workspace",
+    "area": "Area",
+    "areas": "Areas",
+    "cvTitle": "Professional",
+    "sample": { "id": "TASK-0001", "module": "PLANNING", "type": "Task", "title": "Weekly_report_template", "code": "WEEKLY_RPT" },
+    "placeholders": {
+      "taskId": "TASK-0001",
+      "taskTitle": "Prepare the weekly status report",
+      "extraQuestions": "e.g. Who needs a copy of the report?",
+      "cardTopic": "Tool: Excel pivot table",
+      "cardFact": "A pivot table sums a long list by any column in seconds; refresh it after the data changes",
+      "cardTags": "Tools, Reporting",
+      "scriptName": "weekly_report_steps.md",
+      "scriptPurpose": "Steps I follow to build the weekly report",
+      "checklistItem": "e.g. Sent to the team",
+      "newArea": "e.g. Customer service",
+      "prefix": "TASK",
+      "role": "e.g. Operations Coordinator",
+      "target": "Senior, Team Lead, Manager...",
+      "cvSkill": "Add a skill, e.g. Stakeholder management"
+    },
+    "skills": {
+      "areaSkill": "{name}",
+      "areaGroup": "Work",
+      "groups": ["Work", "People", "Growth", "Tools"],
+      "typeGroup": "Work",
+      "types": {
+        "Task": "Task ownership and delivery",
+        "Meeting": "Meeting facilitation",
+        "Problem / issue": "Problem solving and root cause analysis",
+        "Learning": "Continuous learning",
+        "Project": "Project management"
+      },
+      "rules": [
+        { "key": "excel", "name": "Microsoft Excel", "group": "Tools", "details": "\\bexcel\\b|pivot|vlookup|xlookup", "tag": "^excel$" },
+        { "key": "powerbi", "name": "Power BI reporting", "group": "Tools", "details": "power ?bi", "tag": "^(power ?bi)$" },
+        { "key": "stakeholders", "name": "Stakeholder management", "group": "People", "types": ["Project", "Meeting"], "details": "stakeholder", "tag": "^stakeholders?$" }
+      ],
+      "verbs": {
+        "Task": "Delivered",
+        "Meeting": "Led",
+        "Problem / issue": "Solved",
+        "Learning": "Learned",
+        "Project": "Managed"
+      },
+      "bullet": "{verb} {title} ({name}), [result: e.g. saved N hours a week / N% faster / N people helped]."
+    },
+    "cvTips": [
+      { "title": "Action, what, result.", "text": "Start with a verb (Delivered, Led, Solved, Improved), say what and end with the result." },
+      { "title": "Numbers win.", "text": "Time saved, money saved, people helped, tasks per week, error rate cut." },
+      { "title": "Use the words of your field.", "text": "Recruiters search for the exact tool and skill names of your job." },
+      { "title": "Keep private things out.", "text": "No employer secrets, client names or internal ids in a CV." },
+      { "title": "Keep it fresh.", "text": "Check this page every month and export a new version." }
+    ]
+  },
+  "settings": {
+    "phases": [
+      { "name": "Not started", "percent": 0 },
+      { "name": "Planning", "percent": 20 },
+      { "name": "In progress", "percent": 50 },
+      { "name": "Review", "percent": 80 },
+      { "name": "On Hold", "percent": null },
+      { "name": "Done", "percent": 100 }
+    ],
+    "commonQuestions": [
+      "What does done look like?",
+      "Who do I ask if I get stuck?"
+    ],
+    "baseChecklist": [
+      "Goal understood",
+      "Work done",
+      "Checked",
+      "Notes saved in 01_Notes"
+    ],
+    "ticketFolders": ["01_Notes", "02_Files"],
+    "notesSections": ["What I learned", "Steps and decisions", "Free notes"],
+    "saveTargets": [
+      { "name": "Notes", "path": "{ticket}\\01_Notes", "prefix": false },
+      { "name": "File or attachment", "path": "{ticket}\\02_Files", "prefix": false },
+      { "name": "How-to (Knowledge base)", "path": "04_Knowledge\\HowTo", "prefix": false },
+      { "name": "Template (Knowledge base)", "path": "04_Knowledge\\Templates", "prefix": false },
+      { "name": "Certificate or admin file", "path": "06_Admin", "prefix": false }
+    ],
+    "workFolders": [
+      "00_Inbox",
+      "01_Tasks",
+      "04_Knowledge\\HowTo",
+      "04_Knowledge\\Templates",
+      "05_Tools",
+      "06_Admin",
+      "99_Archive"
+    ],
+    "abbreviations": {
+      "MEETING": "MTG", "REPORT": "RPT", "WEEKLY": "WKLY", "MONTHLY": "MTHLY", "PROJECT": "PRJ",
+      "PRESENTATION": "PRES", "TEMPLATE": "TMPL", "TRAINING": "TRN", "REVIEW": "REV", "CUSTOMER": "CUST",
+      "MANAGEMENT": "MGMT", "DOCUMENT": "DOC", "PROCESS": "PROC", "REQUEST": "REQ"
+    },
+    "stopWords": [
+      "THE", "A", "AN", "OF", "FOR", "TO", "AND", "IN", "ON", "NEW", "BY", "WITH", "FROM", "AT"
+    ]
+  }
+}
