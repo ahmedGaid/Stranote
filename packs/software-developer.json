@@ -1,0 +1,466 @@
+{
+  "schemaVersion": 1,
+  "id": "software-developer",
+  "name": "Software developer",
+  "field": "Software / IT",
+  "version": "1.0.0",
+  "description": "Software development work: features, bug fixes, production incidents, code reviews, design decisions (ADRs), spikes, testing, CI/CD and cloud operations, in any language or framework.",
+  "levels": ["Student", "Junior", "Mid", "Senior", "Lead"],
+  "categories": [
+    { "id": "Engineering", "label": "Engineering", "labelAr": "هندسة", "color": "#4f46e5" },
+    { "id": "Languages", "label": "Languages", "labelAr": "لغات برمجة", "color": "#2563eb" },
+    { "id": "Architecture", "label": "Architecture", "labelAr": "معمارية", "color": "#7c3aed" },
+    { "id": "Operations", "label": "Operations", "labelAr": "تشغيل", "color": "#c2410c" },
+    { "id": "Quality", "label": "Quality", "labelAr": "جودة", "color": "#2f8f5b" },
+    { "id": "Business", "label": "Business", "labelAr": "بيزنس", "color": "#b7791f" }
+  ],
+  "categoryRules": {
+    "byKind": { "answer": "Business", "decision": "Architecture", "term": "Engineering" },
+    "default": "Engineering"
+  },
+  "areas": [
+    { "id": "FRONTEND", "name": "Frontend and UI", "category": "Engineering", "taskModule": true,
+      "concepts": [
+        { "id": "fe-rendering", "title": "Rendering: the DOM, re-renders and the virtual DOM; SSR vs CSR vs static" },
+        { "id": "fe-state", "title": "State management: local vs shared state, lifting state, stores and caching server data" },
+        { "id": "fe-a11y", "title": "Accessibility: semantic HTML, keyboard focus, ARIA only when needed, contrast" },
+        { "id": "fe-performance", "title": "Web performance: bundle size, lazy loading, Core Web Vitals (LCP, INP, CLS)" },
+        { "id": "fe-css", "title": "CSS layout: flexbox, grid, responsive design and design tokens" }
+      ] },
+    { "id": "BACKEND", "name": "Backend and services", "category": "Engineering", "taskModule": true,
+      "concepts": [
+        { "id": "be-http", "title": "HTTP: methods, status codes, idempotency and caching headers" },
+        { "id": "be-concurrency", "title": "Concurrency: threads vs async/await, race conditions, locks" },
+        { "id": "be-queues", "title": "Message queues and background jobs: retries, dead-letter queues, at-least-once delivery" },
+        { "id": "be-config", "title": "Configuration and secrets: environment variables, secret stores, never in the repo" },
+        { "id": "be-errors", "title": "Error handling: fail fast, retries with backoff, timeouts and circuit breakers" }
+      ] },
+    { "id": "API", "name": "APIs and integrations", "category": "Architecture", "taskModule": true,
+      "concepts": [
+        { "id": "api-rest", "title": "REST design: resources, versioning, pagination and error formats" },
+        { "id": "api-contracts", "title": "API contracts: OpenAPI/schemas, backward compatibility and breaking changes" },
+        { "id": "api-auth", "title": "Authentication vs authorization: sessions, JWT, OAuth 2.0 / OpenID Connect" },
+        { "id": "api-webhooks", "title": "Webhooks and event integrations: signatures, retries and idempotency keys" }
+      ] },
+    { "id": "DATA", "name": "Databases and data", "category": "Engineering", "taskModule": true,
+      "concepts": [
+        { "id": "db-indexes", "title": "Indexes: when they help, composite index order, reading a query plan" },
+        { "id": "db-transactions", "title": "Transactions and ACID; isolation levels and deadlocks" },
+        { "id": "db-migrations", "title": "Schema migrations: forward-only, zero-downtime changes (expand and contract)" },
+        { "id": "db-nplus1", "title": "The N+1 query problem in ORMs and how to batch or join" },
+        { "id": "db-sql-nosql", "title": "SQL vs NoSQL: relational modelling vs document/key-value stores" }
+      ] },
+    { "id": "BUGFIX", "name": "Debugging and bug fixing", "category": "Quality", "taskModule": true,
+      "concepts": [
+        { "id": "bug-repro", "title": "Reproduce first: minimal reproduction, failing test before the fix" },
+        { "id": "bug-bisect", "title": "Narrowing down: git bisect, logs, breakpoints and binary search on the input" },
+        { "id": "bug-root-cause", "title": "Root cause vs symptom: the five whys" },
+        { "id": "bug-regression", "title": "Regression tests: lock the fix so the bug cannot come back" }
+      ] },
+    { "id": "TESTING", "name": "Testing and quality", "category": "Quality", "taskModule": true,
+      "concepts": [
+        { "id": "test-pyramid", "title": "Test pyramid: unit, integration and end-to-end tests and their cost" },
+        { "id": "test-doubles", "title": "Test doubles: mocks, stubs, fakes; when mocking hides real bugs" },
+        { "id": "test-tdd", "title": "TDD: red, green, refactor" },
+        { "id": "test-flaky", "title": "Flaky tests: causes (time, order, shared state) and how to fix them" }
+      ] },
+    { "id": "REVIEW", "name": "Code review and collaboration", "category": "Quality", "taskModule": true,
+      "concepts": [
+        { "id": "rev-small-prs", "title": "Small pull requests: one change per PR, clear description, easy to review" },
+        { "id": "rev-what-to-check", "title": "What to check in review: correctness, tests, naming, security, simplicity" },
+        { "id": "rev-feedback", "title": "Giving review feedback: blocking vs nit, ask questions, explain why" },
+        { "id": "rev-git-flow", "title": "Branching: trunk-based vs feature branches, rebase vs merge" }
+      ] },
+    { "id": "DESIGN", "name": "Design and architecture", "category": "Architecture", "taskModule": true,
+      "concepts": [
+        { "id": "design-adr", "title": "ADRs: record the context, decision, options considered and consequences" },
+        { "id": "design-solid", "title": "SOLID principles and separation of concerns" },
+        { "id": "design-patterns", "title": "Common patterns: strategy, factory, adapter, observer, repository" },
+        { "id": "design-monolith", "title": "Modular monolith vs microservices: trade-offs and when to split" },
+        { "id": "design-tradeoffs", "title": "Trade-offs: consistency vs availability (CAP), latency vs throughput" }
+      ] },
+    { "id": "DEVOPS", "name": "CI/CD and DevOps", "category": "Operations", "taskModule": true,
+      "concepts": [
+        { "id": "ops-ci", "title": "Continuous integration: build, test and lint on every push" },
+        { "id": "ops-cd", "title": "Deployment strategies: blue-green, canary, rolling, feature flags" },
+        { "id": "ops-containers", "title": "Containers: images, layers, Dockerfile best practices" },
+        { "id": "ops-iac", "title": "Infrastructure as code: Terraform/Bicep, plan before apply" },
+        { "id": "ops-k8s", "title": "Kubernetes basics: pods, deployments, services, health probes" }
+      ] },
+    { "id": "INCIDENT", "name": "Production incidents and observability", "category": "Operations", "taskModule": true,
+      "concepts": [
+        { "id": "inc-triage", "title": "Incident triage: severity, mitigate first (rollback), then find the cause" },
+        { "id": "inc-observability", "title": "Observability: logs, metrics and traces; structured logging" },
+        { "id": "inc-slo", "title": "SLI, SLO and error budgets" },
+        { "id": "inc-postmortem", "title": "Blameless postmortem: timeline, root cause, action items" }
+      ] },
+    { "id": "SECURITY", "name": "Security", "category": "Quality", "taskModule": true,
+      "concepts": [
+        { "id": "sec-owasp", "title": "OWASP Top 10: injection, broken access control, XSS, SSRF" },
+        { "id": "sec-input", "title": "Input validation and output encoding; parameterised queries" },
+        { "id": "sec-secrets", "title": "Secrets management and least privilege" },
+        { "id": "sec-deps", "title": "Dependency vulnerabilities: lock files, scanning and patching" }
+      ] },
+    { "id": "Other", "name": "Other", "taskModule": true, "concepts": [] },
+    { "id": "LANGUAGES", "name": "Languages and frameworks", "category": "Languages",
+      "concepts": [
+        { "id": "lang-types", "title": "Static vs dynamic typing; type inference and generics" },
+        { "id": "lang-memory", "title": "Memory: stack vs heap, garbage collection, references vs values" },
+        { "id": "lang-async", "title": "Async models: event loop (JavaScript), async/await (C#, Python), goroutines (Go)" },
+        { "id": "lang-framework", "title": "How a web framework works: routing, middleware, dependency injection" }
+      ] },
+    { "id": "FUNDAMENTALS", "name": "CS fundamentals", "category": "Engineering",
+      "concepts": [
+        { "id": "cs-big-o", "title": "Big-O: time and space complexity of common operations" },
+        { "id": "cs-structures", "title": "Data structures: arrays, hash maps, trees, heaps, graphs" },
+        { "id": "cs-caching", "title": "Caching: cache-aside, TTL, invalidation and stampedes" },
+        { "id": "cs-networking", "title": "Networking basics: DNS, TCP vs UDP, TLS, load balancers" }
+      ] }
+  ],
+  "taskTypes": [
+    {
+      "name": "Feature",
+      "questions": [
+        { "k": "story", "q": "User story or ticket (who needs what, and why)", "d": "" },
+        { "k": "stack", "q": "Repo / service and tech stack", "d": "" },
+        { "k": "acceptance", "q": "Acceptance criteria", "d": "" },
+        { "k": "approach", "q": "Planned approach (components, endpoints, tables touched)", "d": "" }
+      ],
+      "openQuestions": [
+        "Are the acceptance criteria and edge cases agreed?",
+        "Does it need a feature flag or a migration?",
+        "Who reviews the PR?"
+      ],
+      "checklist": [
+        "Approach agreed",
+        "Code written",
+        "Unit and integration tests added",
+        "PR opened and reviewed",
+        "Merged and deployed",
+        "Verified in production"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Bug fix",
+      "questions": [
+        { "k": "symptom", "q": "What goes wrong (expected vs actual)", "d": "" },
+        { "k": "repro", "q": "Steps to reproduce / environment", "d": "" },
+        { "k": "impact", "q": "Who is affected and how badly", "d": "" },
+        { "k": "cause", "q": "Root cause (when found)", "d": "" }
+      ],
+      "openQuestions": [
+        "Can it be reproduced locally?",
+        "Is it a regression? Which change caused it?",
+        "Does the fix need a data correction too?"
+      ],
+      "checklist": [
+        "Bug reproduced",
+        "Failing test written",
+        "Root cause found",
+        "Fix implemented and test passes",
+        "PR reviewed and merged",
+        "Fix verified in production"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Incident",
+      "questions": [
+        { "k": "severity", "q": "Severity (SEV1-SEV4)", "d": "SEV3" },
+        { "k": "service", "q": "Affected service and users", "d": "" },
+        { "k": "detected", "q": "How it was detected (alert, customer, monitoring)", "d": "" },
+        { "k": "mitigation", "q": "Mitigation taken (rollback, restart, scale, hotfix)", "d": "" }
+      ],
+      "openQuestions": [
+        "Is the impact stopped?",
+        "What was the root cause?",
+        "Which alert or test would have caught it earlier?"
+      ],
+      "checklist": [
+        "Impact mitigated",
+        "Timeline written",
+        "Root cause found",
+        "Postmortem written",
+        "Action items created"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Code review",
+      "questions": [
+        { "k": "pr", "q": "Pull request (link or number) and author", "d": "" },
+        { "k": "scope", "q": "What the change does", "d": "" },
+        { "k": "focus", "q": "What to focus on (logic, tests, security, performance)", "d": "" }
+      ],
+      "openQuestions": [
+        "Are the tests enough for the risk?",
+        "Any breaking change for other teams?"
+      ],
+      "checklist": [
+        "Change understood and run locally",
+        "Comments left (blocking vs nit)",
+        "Follow-up review done",
+        "Approved or changes requested"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Design / ADR",
+      "questions": [
+        { "k": "problem", "q": "Problem and context", "d": "" },
+        { "k": "options", "q": "Options considered", "d": "" },
+        { "k": "decision", "q": "Decision and why", "d": "" },
+        { "k": "consequences", "q": "Consequences and trade-offs", "d": "" }
+      ],
+      "openQuestions": [
+        "Who must approve the decision?",
+        "What would make us revisit it?"
+      ],
+      "checklist": [
+        "Context and options written",
+        "Reviewed with the team",
+        "Decision recorded as an ADR",
+        "Follow-up tasks created"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Spike / research",
+      "questions": [
+        { "k": "question", "q": "Question the spike must answer", "d": "" },
+        { "k": "timebox", "q": "Timebox", "d": "2 days" },
+        { "k": "candidates", "q": "Libraries, tools or approaches to try", "d": "" }
+      ],
+      "openQuestions": [
+        "What result counts as a clear answer?",
+        "Is the prototype thrown away or kept?"
+      ],
+      "checklist": [
+        "Prototype built",
+        "Findings written",
+        "Recommendation shared"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Refactor / tech debt",
+      "questions": [
+        { "k": "target", "q": "Code or component to improve", "d": "" },
+        { "k": "why", "q": "Why now (pain, risk, upcoming feature)", "d": "" },
+        { "k": "safety", "q": "Safety net (existing tests, feature flag)", "d": "" }
+      ],
+      "openQuestions": [
+        "Is behaviour covered by tests before changing it?"
+      ],
+      "checklist": [
+        "Tests in place before the change",
+        "Refactor done in small steps",
+        "No behaviour change confirmed",
+        "PR reviewed and merged"
+      ],
+      "objects": []
+    },
+    {
+      "name": "Deployment / release",
+      "questions": [
+        { "k": "release", "q": "Release / version", "d": "" },
+        { "k": "environment", "q": "Environment (staging, production)", "d": "production" },
+        { "k": "rollback", "q": "Rollback plan", "d": "" }
+      ],
+      "openQuestions": [
+        "Any migrations or config changes in this release?",
+        "Who is on call during the release?"
+      ],
+      "checklist": [
+        "Release notes written",
+        "Deployed to staging and smoke tested",
+        "Deployed to production",
+        "Monitoring checked after release"
+      ],
+      "objects": []
+    },
+    { "name": "Other", "questions": [], "openQuestions": [], "checklist": [], "objects": [] }
+  ],
+  "extractors": [
+    {
+      "id": "dev-languages",
+      "kind": "term",
+      "files": [".txt", ".md", ".json", ".yml", ".yaml"],
+      "pattern": "(?<![\\w.])(?<key>TypeScript|JavaScript|Python|Java|Kotlin|C#|Golang|Rust|PHP|Ruby|Swift|Dart|SQL|React|Angular|Vue|Svelte|Next\\.js|Node\\.js|Express\\.js|NestJS|Django|Flask|FastAPI|Spring Boot|ASP\\.NET Core|\\.NET|Laravel|Rails|Flutter|GraphQL|gRPC)(?!\\w|\\.\\w)",
+      "group": "Languages",
+      "minCount": 1,
+      "maxCards": 4,
+      "cardTemplate": { "topic": "Tech: {key}", "fact": "Used in {taskId}: {context}" }
+    },
+    {
+      "id": "dev-concepts",
+      "kind": "term",
+      "files": [".txt", ".md"],
+      "pattern": "(?i)\\b(?<key>race condition|deadlock|memory leak|N\\+1|idempotenc(?:y|e)|idempotent|dependency injection|circuit breaker|retry with backoff|exponential backoff|rate limit(?:ing)?|cache invalidation|eventual consistency|optimistic locking|feature flags?|dead[- ]letter queue|event sourcing|CQRS|pagination|backward compatib(?:le|ility)|breaking change|technical debt|regression|flaky test|SOLID|ADR)\\b",
+      "group": "Engineering",
+      "minCount": 1,
+      "maxCards": 6,
+      "cardTemplate": { "topic": "Concept: {key}", "fact": "Met in {taskId}: {context}" }
+    },
+    {
+      "id": "dev-ops",
+      "kind": "term",
+      "files": [".txt", ".md", ".yml", ".yaml"],
+      "pattern": "(?i)\\b(?<key>Docker(?:file)?|Kubernetes|Helm|Terraform|GitHub Actions|GitLab CI|Jenkins|Azure DevOps|blue[- ]green|canary (?:release|deploy(?:ment)?)|rollback|postmortem|SLO|SLA|error budget|Prometheus|Grafana|OpenTelemetry|Sentry|Redis|Kafka|RabbitMQ|PostgreSQL|MySQL|MongoDB|Elasticsearch)\\b",
+      "group": "Operations",
+      "minCount": 1,
+      "maxCards": 4,
+      "cardTemplate": { "topic": "Tool: {key}", "fact": "Seen in {taskId}: {context}" }
+    }
+  ],
+  "starterLessons": [],
+  "skillMap": [
+    { "skill": "Frontend development", "area": "FRONTEND", "group": "Engineering" },
+    { "skill": "Backend development", "area": "BACKEND", "group": "Engineering" },
+    { "skill": "API design and integration", "area": "API", "group": "Architecture" },
+    { "skill": "Databases and SQL", "area": "DATA", "group": "Engineering" },
+    { "skill": "Debugging and root cause analysis", "area": "BUGFIX", "group": "Quality" },
+    { "skill": "Automated testing", "area": "TESTING", "group": "Quality" },
+    { "skill": "Code review", "area": "REVIEW", "group": "Quality" },
+    { "skill": "Software design and architecture", "area": "DESIGN", "group": "Architecture" },
+    { "skill": "CI/CD and DevOps", "area": "DEVOPS", "group": "Operations" },
+    { "skill": "Incident response and observability", "area": "INCIDENT", "group": "Operations" },
+    { "skill": "Application security", "area": "SECURITY", "group": "Quality" },
+    { "skill": "Programming languages and frameworks", "area": "LANGUAGES", "group": "Languages" },
+    { "skill": "Algorithms and data structures", "area": "FUNDAMENTALS", "group": "Engineering" }
+  ],
+  "onboardingQuestions": [
+    { "id": "role", "label": "Main focus", "type": "select", "options": ["Frontend", "Backend", "Full-stack", "Mobile", "DevOps / SRE", "Data"], "default": "Full-stack", "writesTo": "pack.focus" },
+    { "id": "languages", "label": "Main languages (e.g. TypeScript, C#, Python, Java)", "type": "text", "default": "", "writesTo": "pack.languages" },
+    { "id": "frameworks", "label": "Frameworks you use (e.g. React, .NET, Spring, Django)", "type": "text", "default": "", "writesTo": "pack.frameworks" },
+    { "id": "cloud", "label": "Cloud / hosting", "type": "select", "options": ["AWS", "Azure", "Google Cloud", "On-premise", "Other / none"], "default": "Other / none", "writesTo": "pack.cloud" },
+    { "id": "tracker", "label": "Ticket tracker (e.g. Jira, Linear, GitHub Issues)", "type": "text", "default": "", "writesTo": "pack.tracker" }
+  ],
+  "ui": {
+    "workspace": "Dev workspace",
+    "area": "Area",
+    "areas": "Areas",
+    "screenshotsTitle": "صور من الشغل",
+    "cvTitle": "Software developer",
+    "sample": { "id": "BUG-0142", "module": "BUGFIX", "type": "Bug fix", "title": "Checkout_double_charge", "code": "CHECKOUT_RETRY" },
+    "placeholders": {
+      "taskId": "BUG-0142",
+      "taskTitle": "Fix double charge when checkout request is retried",
+      "extraQuestions": "e.g. Should the payment API accept an idempotency key from the client?",
+      "cardTopic": "Concept: Idempotency",
+      "cardFact": "Repeating the same request has the same effect as sending it once; use an idempotency key so retries do not charge twice",
+      "cardTags": "API, Payments, Idempotency",
+      "scriptName": "fix_duplicate_orders.sql",
+      "scriptPurpose": "One-off data fix for orders created twice",
+      "checklistItem": "e.g. Failing test written",
+      "newArea": "e.g. Mobile",
+      "prefix": "ACME",
+      "role": "e.g. Backend Developer",
+      "target": "Senior Software Engineer, Tech Lead, Staff Engineer...",
+      "cvSkill": "Add a skill, e.g. Kubernetes"
+    },
+    "skills": {
+      "areaSkill": "{name}",
+      "areaGroup": "Engineering",
+      "groups": ["Languages", "Engineering", "Architecture", "Operations", "Quality", "Tools"],
+      "typeGroup": "Engineering",
+      "types": {
+        "Feature": "Feature development",
+        "Bug fix": "Debugging and bug fixing",
+        "Incident": "Incident response",
+        "Code review": "Code review",
+        "Design / ADR": "Technical design and ADRs",
+        "Spike / research": "Technical research and prototyping",
+        "Refactor / tech debt": "Refactoring and tech debt reduction",
+        "Deployment / release": "Release management"
+      },
+      "rules": [
+        { "key": "typescript", "name": "TypeScript", "group": "Languages", "details": "typescript|\\bts\\b", "tag": "^typescript$" },
+        { "key": "react", "name": "React", "group": "Languages", "details": "\\breact\\b|next\\.js", "tag": "^react$" },
+        { "key": "dotnet", "name": "C# / .NET", "group": "Languages", "details": "c#|\\.net|asp\\.net", "tag": "^(c#|\\.net)$" },
+        { "key": "python", "name": "Python", "group": "Languages", "details": "python|django|fastapi|flask", "tag": "^python$" },
+        { "key": "docker", "name": "Docker and Kubernetes", "group": "Operations", "details": "docker|kubernetes|k8s|helm", "tag": "^(docker|kubernetes)$" },
+        { "key": "cicd", "name": "CI/CD pipelines", "group": "Operations", "details": "github actions|gitlab ci|jenkins|azure devops|pipeline", "tag": "^ci/?cd$" },
+        { "key": "postmortem", "name": "Blameless postmortems", "group": "Operations", "types": ["Incident"], "checklist": "postmortem", "tag": "^postmortem$" },
+        { "key": "tdd", "name": "Test-driven development", "group": "Quality", "checklist": "failing test", "tag": "^tdd$" },
+        { "key": "sql", "name": "SQL and query tuning", "group": "Engineering", "details": "\\bsql\\b|postgres|mysql|index|query plan", "tag": "^sql$" },
+        { "key": "security", "name": "OWASP secure coding", "group": "Quality", "details": "owasp|xss|sql injection|csrf", "tag": "^(owasp|security)$" }
+      ],
+      "verbs": {
+        "Feature": "Built",
+        "Bug fix": "Fixed",
+        "Incident": "Resolved",
+        "Code review": "Reviewed",
+        "Design / ADR": "Designed",
+        "Spike / research": "Evaluated",
+        "Refactor / tech debt": "Refactored",
+        "Deployment / release": "Shipped"
+      },
+      "bullet": "{verb} {title} ({name}), [result: e.g. p95 latency cut from 800 to 200 ms / zero repeat incidents / test coverage up to N%]."
+    },
+    "cvTips": [
+      { "title": "Action, what, result.", "text": "Start with a verb (Built, Fixed, Shipped, Designed), say what and end with the result." },
+      { "title": "Numbers win.", "text": "Latency saved, users served, incidents reduced, deploy time cut, test coverage, PRs reviewed." },
+      { "title": "Name the stack.", "text": "Languages, frameworks, databases and cloud services. Recruiters and ATS search for these exact words." },
+      { "title": "Show impact, not tickets.", "text": "Say what changed for users or the team, not just which ticket you closed." },
+      { "title": "Keep it confidential.", "text": "No internal service names, customer names or private repo links. Stranote flags these in amber." },
+      { "title": "Keep it fresh.", "text": "Check this page every month and export a new version." }
+    ]
+  },
+  "settings": {
+    "phases": [
+      { "name": "Not started", "percent": 0 },
+      { "name": "Analysis", "percent": 15 },
+      { "name": "In progress", "percent": 40 },
+      { "name": "In review", "percent": 70 },
+      { "name": "Testing", "percent": 85 },
+      { "name": "On Hold", "percent": null },
+      { "name": "Done", "percent": 100 }
+    ],
+    "commonQuestions": [
+      "Who reviews this?",
+      "What is the deadline or target release?"
+    ],
+    "baseChecklist": [
+      "Requirements understood",
+      "Code written",
+      "Tests added",
+      "PR reviewed and merged",
+      "Deployed and verified",
+      "Notes saved in 01_Notes"
+    ],
+    "ticketFolders": ["01_Notes", "02_Code", "03_Tests", "04_Docs"],
+    "notesSections": ["Decisions", "Commands and snippets", "Free notes"],
+    "saveTargets": [
+      { "name": "Notes or analysis", "path": "{ticket}\\01_Notes", "prefix": false },
+      { "name": "Code snippet, script or patch", "path": "{ticket}\\02_Code", "prefix": false },
+      { "name": "Test case or test data", "path": "{ticket}\\03_Tests", "prefix": false },
+      { "name": "Design doc, ADR or diagram", "path": "{ticket}\\04_Docs", "prefix": false },
+      { "name": "Reusable snippet (Knowledge base)", "path": "04_Knowledge\\Snippets", "prefix": false },
+      { "name": "ADR or architecture note (Knowledge base)", "path": "04_Knowledge\\Architecture", "prefix": false }
+    ],
+    "workFolders": [
+      "00_Inbox",
+      "01_Tasks",
+      "04_Knowledge\\Snippets",
+      "04_Knowledge\\Architecture",
+      "04_Knowledge\\Company",
+      "05_Tools",
+      "06_Admin",
+      "99_Archive"
+    ],
+    "abbreviations": {
+      "APPLICATION": "APP", "AUTHENTICATION": "AUTH", "AUTHORIZATION": "AUTHZ", "CONFIGURATION": "CONFIG",
+      "DATABASE": "DB", "DEPLOYMENT": "DEPLOY", "ENVIRONMENT": "ENV", "FRONTEND": "FE", "BACKEND": "BE",
+      "INTEGRATION": "INTEG", "MIGRATION": "MIGR", "NOTIFICATION": "NOTIF", "NOTIFICATIONS": "NOTIF",
+      "PERFORMANCE": "PERF", "PRODUCTION": "PROD", "REPOSITORY": "REPO", "SERVICE": "SVC", "SERVICES": "SVC",
+      "DOCUMENTATION": "DOCS", "DEPENDENCY": "DEP", "DEPENDENCIES": "DEPS", "REFACTOR": "RFCT",
+      "REQUEST": "REQ", "RESPONSE": "RESP", "MESSAGE": "MSG", "MESSAGES": "MSG", "PAYMENT": "PMT"
+    },
+    "stopWords": [
+      "THE", "A", "AN", "OF", "FOR", "TO", "AND", "IN", "ON", "NEW", "FIX", "ISSUE",
+      "FROM", "INTO", "WITH", "BY", "WHEN"
+    ]
+  }
+}
