@@ -123,8 +123,7 @@ function Get-ShortHash([string]$s) {
 
 function Get-SnExtractors {
     <# Knowledge extractors of the active career pack (before migration: the Oracle EBS pack, as the old install was EBS). #>
-    $pack = Get-SnActivePack
-    if (-not $pack -and (Test-Path $script:SettingsPath)) { try { $pack = Get-SnPack -Id 'oracle-ebs-technical' } catch { } }
+    $pack = Get-SnPackOrLegacy
     if (-not $pack) { return @() }
     return @($pack.extractors | Where-Object { $_ })
 }
@@ -500,7 +499,7 @@ function Set-SnArabic {
 }
 
 # ---------------------------------------------------------------------------
-# EBS screenshots attached to a card's explanation (files in 04_Knowledge\Stranote\img)
+# Screenshots attached to a card's explanation (files in 04_Knowledge\Stranote\img)
 # entry.images = @( @{ title; nav; file; added } )  - an item without file is a requested screen (empty slot)
 # ---------------------------------------------------------------------------
 

@@ -738,7 +738,18 @@ function Get-SnMeta {
         career = $s.career
         appearance = $s.appearance
         saveTargets = @($s.saveTargets | ForEach-Object { [pscustomobject]@{ name = $_.name; path = $_.path; prefix = [bool]$_.prefix } })
+        pack = (Get-SnMetaPack)
     }
+}
+
+function Get-SnMetaPack {
+    # what the page needs from the career pack: its name, area names and the ui wording (labels, placeholders, skill rules)
+    $pack = $null
+    try { $pack = Get-SnPackOrLegacy } catch { }
+    if (-not $pack) { return $null }
+    $names = [ordered]@{}
+    foreach ($a in @($pack.areas | Where-Object { $_ })) { $names["$($a.id)"] = "$($a.name)" }
+    return [pscustomobject]@{ id = $pack.id; name = $pack.name; areaNames = [pscustomobject]$names; ui = $pack.ui }
 }
 
 function Get-SnDashboardHtml([switch]$Live) {
@@ -746,7 +757,7 @@ function Get-SnDashboardHtml([switch]$Live) {
     $json = ConvertTo-Json -InputObject $tasks -Depth 8 -Compress
     if (-not $tasks.Count) { $json = '[]' }
     $metaObj = Get-SnMeta
-    $meta = $metaObj | ConvertTo-Json -Depth 6 -Compress
+    $meta = $metaObj | ConvertTo-Json -Depth 12 -Compress
     $liveJs = if ($Live) { 'true' } else { 'false' }
     $tpl = [IO.File]::ReadAllText((Join-Path $script:ToolDir 'dashboard_template.html'))
     $learn = Get-SnLearn | ConvertTo-Json -Depth 8 -Compress
@@ -803,6 +814,6 @@ function Start-SnMenu {
 . (Join-Path $PSScriptRoot 'StranoteAliases.ps1')
 
 $script:SnExports = @(
-    'Test-SnPack', 'Get-SnPack', 'Get-SnPackList', 'Get-SnProfile', 'Save-SnProfile', 'Get-SnActivePack', 'Get-SnEffectiveSettings', 'Get-SnBaseSettings', 'Get-SnOverrides', 'Get-SnDiff', 'Merge-SnObject', 'ConvertTo-SnCanonicalJson', 'Get-SnConfigPath', 'Get-SnLearnDirFor', 'Invoke-SnMigration', 'Get-SnSnapshot', 'Compare-SnSnapshot', 'Get-SnExtractors', 'Copy-SnJson', 'Get-SnOnboarding', 'Save-SnOnboarding', 'Restart-SnOnboarding', 'Complete-SnOnboarding', 'New-SnFirstWeekPlan', 'Get-SnPlan', 'Set-SnPlanItem',
+    'Test-SnPack', 'Get-SnPack', 'Get-SnPackList', 'Get-SnProfile', 'Save-SnProfile', 'Get-SnActivePack', 'Get-SnPackOrLegacy', 'Get-SnEffectiveSettings', 'Get-SnBaseSettings', 'Get-SnOverrides', 'Get-SnDiff', 'Merge-SnObject', 'ConvertTo-SnCanonicalJson', 'Get-SnConfigPath', 'Get-SnLearnDirFor', 'Invoke-SnMigration', 'Get-SnSnapshot', 'Compare-SnSnapshot', 'Get-SnExtractors', 'Copy-SnJson', 'Get-SnOnboarding', 'Save-SnOnboarding', 'Restart-SnOnboarding', 'Complete-SnOnboarding', 'New-SnFirstWeekPlan', 'Get-SnPlan', 'Set-SnPlanItem',
     'Set-SnCard', 'Remove-SnCard', 'Set-SnCardKeep', 'Sync-SnKnowledge', 'Get-SnArabic', 'Set-SnArabic', 'Set-SnShotRequests', 'Add-SnShot', 'Remove-SnShot', 'Set-SnCardCategory', 'Test-SnQuestionReady', 'Set-SnConceptStatus', 'Set-SnLesson', 'Remove-SnLesson', 'Save-SnLessonProgress', 'Add-SnFollowup', 'Set-SnFollowupAnswer', 'Get-SnTeach', 'Get-SnPendingFollowups', 'Get-SnDailyReview', 'Save-SnReviewDay', 'Get-SnReviewStreak', 'Add-SnQuestions', 'Remove-SnQuestion', 'Submit-SnAnswer', 'Get-SnCv', 'Save-SnCv', 'Add-SnCvBullet', 'Export-SnCv', 'Get-SnLearn', 'Get-SnSuggestions', 'New-SnTask', 'Update-SnTask', 'Get-SnTask', 'Show-SnTask', 'Close-SnTask', 'Update-SnDashboard', 'Get-SnDashboardHtml', 'Start-SnMenu', 'Get-SnTaskList', 'Find-SnTask', 'Get-SnMeta', 'Get-SnConfig', 'Get-SnSettings', 'Save-SnSettings', 'Reset-SnSettings', 'Restore-SnSettingsBackup', 'Get-SnTargetFolders', 'Save-SnFile', 'Get-SnTaskFiles', 'Open-SnPath'
 )

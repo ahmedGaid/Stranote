@@ -99,7 +99,11 @@ description: "Task list for 001 career packs and first-day onboarding"
 
 **Independent Test**: quickstart §2 and §5.
 
-- [ ] T031 [US3] Grep `src\*.ps1` and `dashboard_template.html` for EBS words (FND_, XXCUST, GL_, Oracle, modules list) outside comments and packs; fix any leftover (Constitution I gate)
+- [x] T031 [US3] Grep `src\*.ps1` and `dashboard_template.html` for EBS words (FND_, XXCUST, GL_, Oracle, modules list) outside comments and packs; fix any leftover (Constitution I gate)
+  - Done 2026-10-19: new optional pack field `ui` (labels, placeholders, CV title/tips, skill rules, bullet) sent as
+    `META.pack`; EBS pack carries the old strings, so skills/CV drafts are identical (checked old vs new template
+    on the fixture). `.ps1` hits were comments + the intended legacy fallback (now `Get-SnPackOrLegacy`). Test gate in
+    `StranotePacks.Tests.ps1` keeps the template free of EBS words (only `X-EBS` and `ebsView` kept on purpose).
 - [ ] T032 [P] [US3] Write `packs\oracle-ebs-functional-financials.json` (GL/AP/AR/FA/CE setups, period close, configurations, test scripts)
 - [ ] T033 [P] [US3] Write `packs\accountant.json` (IFRS/GAAP terms, month-end close, reconciliations, accruals, tax)
 - [ ] T034 [P] [US3] Write `packs\software-developer.json` (languages, frameworks, PRs, incidents, design decisions)

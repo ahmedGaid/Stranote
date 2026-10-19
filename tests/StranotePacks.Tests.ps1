@@ -47,6 +47,20 @@ Describe 'Career pack validation' {
         $q = New-MinPack; $q | Add-Member -NotePropertyName 'x-draft' -NotePropertyValue $true
         (Test-SnPack -Pack $q).ok | Should Be $true
     }
+    It 'accepts a ui object and rejects any other ui value' {
+        $p = New-MinPack; $p | Add-Member -NotePropertyName ui -NotePropertyValue ([pscustomobject]@{ area = 'Unit'; areas = 'Units' })
+        (Test-SnPack -Pack $p).ok | Should Be $true
+        $q = New-MinPack; $q | Add-Member -NotePropertyName ui -NotePropertyValue 'Unit'
+        (Test-SnPack -Pack $q).errors -join ' ' | Should Match 'ui: must be an object'
+    }
+}
+
+Describe 'Dashboard wording comes from the pack (Constitution I)' {
+    It 'has no career-specific words in the template (except the kept X-EBS header and ebsView key)' {
+        $tpl = [IO.File]::ReadAllText((Join-Path $here '..\src\dashboard_template.html')).Replace('X-EBS', '').Replace('ebsView', '')
+        $hits = @([regex]::Matches($tpl, '(?i)\bEBS\b|Oracle|XXCUST|FND_|AP_INVOICES|GL_INTERFACE|MD0?50|FNDLOAD|PL/SQL') | ForEach-Object { $_.Value })
+        $hits -join ', ' | Should Be ''
+    }
 }
 
 Describe 'Effective settings = engine defaults <- pack <- overrides' {
@@ -63,6 +77,16 @@ Describe 'Effective settings = engine defaults <- pack <- overrides' {
             @($s.types | ForEach-Object { $_.name }) -contains 'Interface' | Should Be $true
             $s.knowledge.categories -join ',' | Should Be 'Technical,Financial,Business,SCM'
             $s.knowledge.areaCategory.GL | Should Be 'Financial'
+        }
+        It 'sends the pack wording (ui) to the page in META' {
+            $m = Get-SnMeta
+            $m.pack.id | Should Be 'oracle-ebs-technical'
+            $m.pack.ui.area | Should Be 'Module'
+            $m.pack.areaNames.GL | Should Be 'General Ledger'
+            $html = Get-SnDashboardHtml
+            $html | Should Match '"cvTitle":"Oracle EBS Technical Consultant"'
+            # deep skill rules must survive ConvertTo-Json (depth)
+            $html | Should Match '"types":\["Report","Interface","Conversion","Extension","Workflow"\]'
         }
         It 'stores only your changes in overrides.json' {
             $s = Get-SnSettings

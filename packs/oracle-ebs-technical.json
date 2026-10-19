@@ -970,6 +970,70 @@
                                     "writesTo":  "pack.ticketFormat"
                                 }
                             ],
+    "ui":  {
+               "workspace":  "EBS workspace",
+               "area":  "Module",
+               "areas":  "Modules",
+               "screenshotsTitle":  "صور من EBS",
+               "cvTitle":  "Oracle EBS Technical Consultant",
+               "sample":  { "id": "CR-1042", "module": "AP", "type": "Interface", "title": "Supplier_invoice_interface", "code": "SUPP_INV" },
+               "placeholders":  {
+                                    "taskId":  "CR-1042",
+                                    "taskTitle":  "Supplier invoice inbound interface",
+                                    "extraQuestions":  "e.g. Use AP_INVOICES_INTERFACE or the AP API?",
+                                    "cardTopic":  "API: FND_FLEX_VALUE_RULES_PKG.INSERT_ROW",
+                                    "cardFact":  "Creates a flexfield security rule; pair it with ...",
+                                    "cardTags":  "GL, FNDLOAD, Security rules",
+                                    "scriptName":  "create_invoice_api_test.sql",
+                                    "scriptPurpose":  "Test AP_INVOICES_PUB for one supplier",
+                                    "checklistItem":  "e.g. FNDLOAD ldt extracted",
+                                    "newArea":  "e.g. EAM",
+                                    "prefix":  "XXABC",
+                                    "role":  "e.g. Oracle EBS Technical Consultant",
+                                    "target":  "Oracle Fusion Financials, Solution Architect...",
+                                    "cvSkill":  "Add a skill, e.g. SQL Developer"
+                                },
+               "privateNames":  "\\bXX[A-Z0-9]{2,}_",
+               "skills":  {
+                              "areaSkill":  "Oracle EBS {MODULE}",
+                              "areaGroup":  "Oracle EBS modules",
+                              "groups":  [ "Oracle EBS modules", "Technical", "Oracle APIs", "Methods", "Tools" ],
+                              "typeGroup":  "Technical",
+                              "types":  {
+                                            "Report":  "Report development",
+                                            "Interface":  "EBS interfaces (open interfaces and APIs)",
+                                            "Conversion":  "Data conversion and migration",
+                                            "Extension":  "Forms personalization and CUSTOM.pll",
+                                            "OAF":  "OA Framework (OAF)",
+                                            "Workflow":  "Oracle Workflow",
+                                            "Support":  "Production support and troubleshooting",
+                                            "Analysis":  "Solution analysis and design"
+                                        },
+                              "rules":  [
+                                            { "key": "plsql", "name": "PL/SQL", "group": "Technical", "types": [ "Report", "Interface", "Conversion", "Extension", "Workflow" ], "tag": "^pl\\/?sql$" },
+                                            { "key": "bip", "name": "BI Publisher", "group": "Technical", "types": [ "Report" ], "details": "bi ?publisher|\\bbip\\b" },
+                                            { "key": "rdf", "name": "Oracle Reports", "group": "Technical", "types": [ "Report" ], "details": "oracle reports" },
+                                            { "key": "docs", "name": "Oracle AIM/OUM documentation (MD050, MD070, MD120)", "group": "Methods", "checklist": "MD0?50|MD0?70|MD120" },
+                                            { "key": "fndload", "name": "FNDLOAD / AOL migration", "group": "Technical", "checklist": "FNDLOAD", "tag": "^fndload$" }
+                                        ],
+                              "apis":  {
+                                           "group":  "Oracle APIs",
+                                           "patterns":  [ "\\b([a-z][a-z0-9_]*_(?:pkg|pub|pvt|api|grp))\\b", "\\b(fnd_request|fnd_global|fnd_program|fnd_file|fnd_profile|fnd_message|mo_global|fnd_flex_val_api)\\b" ],
+                                           "tag":  "_(pkg|pub|pvt|api|grp)$"
+                                       },
+                              "verbs":  { "Report": "Developed", "Interface": "Built", "Conversion": "Migrated", "Extension": "Extended", "OAF": "Extended", "Workflow": "Customized", "Support": "Resolved", "Analysis": "Designed" },
+                              "bullet":  "{verb} {title} for Oracle EBS {module}{api}, [result: e.g. N records loaded / X hours saved per month]."
+                          },
+               "cvTips":  [
+                              { "title": "Action, what, result.", "text": "Start with a verb (Built, Automated, Migrated, Designed), name the EBS object or API, end with the business result." },
+                              { "title": "Numbers win.", "text": "Records loaded, programs built, hours saved, users supported." },
+                              { "title": "Name the real technology.", "text": "FND_FLEX_VALUE_RULES_PKG, GL_INTERFACE, BI Publisher RTF. Recruiters and ATS filters search for these exact terms." },
+                              { "title": "Module and release.", "text": "\"Oracle EBS R12.2 GL\" says much more than \"Oracle\"." },
+                              { "title": "Show the full cycle.", "text": "MD050, MD070, build, UAT, MD120 deployment." },
+                              { "title": "Keep it confidential.", "text": "No client names, ticket IDs, internal custom object names or sensitive volumes. Stranote flags these in amber." },
+                              { "title": "Keep it fresh.", "text": "Check this page every month and export a new version." }
+                          ]
+           },
     "settings":  {
                      "prefix":  "XXCUST",
                      "phases":  [

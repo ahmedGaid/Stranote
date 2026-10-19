@@ -6,7 +6,7 @@
 # Spec: specs/001-career-packs-onboarding (contracts/pack-schema.md, research R1-R4)
 
 $script:PackFields = @('schemaVersion', 'id', 'name', 'field', 'version', 'levels', 'categories', 'categoryRules', 'areas', 'taskTypes',
-    'extractors', 'starterLessons', 'skillMap', 'onboardingQuestions', 'settings', 'description')
+    'extractors', 'starterLessons', 'skillMap', 'onboardingQuestions', 'settings', 'description', 'ui')
 $script:ExtractorKinds = @('api', 'table', 'term')
 $script:PackCache = @{}
 
@@ -100,6 +100,7 @@ function Test-SnPack {
             if ($slow -or $sw.ElapsedMilliseconds -ge 250) { & $err "extractors[$i].${pp}: too slow (over 250 ms on 50 KB)" }
         }
     }
+    if ($null -ne $Pack.ui -and -not (Test-SnIsObject $Pack.ui)) { & $err 'ui: must be an object' }
     foreach ($q in @($Pack.onboardingQuestions | Where-Object { $_ })) {
         if ("$($q.writesTo)" -and "$($q.writesTo)" -notmatch '^(settings|profile|pack)\.') { & $err "onboardingQuestions.$($q.id).writesTo: must start with settings., profile. or pack." }
     }
@@ -150,6 +151,13 @@ function Get-SnActivePack {
     $prof = Get-SnProfile
     if (-not $prof) { return $null }
     return Get-SnPack -Id (@($prof.roles)[0].packId)
+}
+
+function Get-SnPackOrLegacy {
+    <# The active pack; before migration the Oracle EBS pack (the old single-settings install was EBS); else $null. #>
+    $pack = Get-SnActivePack
+    if (-not $pack -and (Test-Path $script:SettingsPath)) { try { $pack = Get-SnPack -Id 'oracle-ebs-technical' } catch { } }
+    return $pack
 }
 
 # ---------------------------------------------------------------------------

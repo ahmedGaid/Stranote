@@ -82,4 +82,26 @@ default: "Technical" }`. A card's category = `byKind[card.kind]`, else the categ
 | `label` | `API` | `Table` | card topic prefix (`API: FND_PROGRAM`) |
 | `question` | template | - | `{members}`, `{ref}` placeholders for the fill-the-blank question |
 
+**ui** (optional, T031): the wording the dashboard shows, so the template holds no career words. Everything is
+optional; the page falls back to neutral defaults ("Area"/"Areas", "Workspace", generic placeholders and CV tips).
+Sent to the page as `META.pack = { id, name, areaNames, ui }` (before migration: the EBS pack).
+
+| Field | Meaning |
+|---|---|
+| `workspace` | sidebar line under the logo (`EBS workspace`) |
+| `area`, `areas` | the noun for areas/task modules (`Module`, `Modules`): sidebar, filters, task form, settings |
+| `screenshotsTitle` | heading of the screenshots section in the explanation window |
+| `cvTitle` | CV export heading (default: pack `name`) |
+| `sample` | `{ id, module, type, title, code }` used by the Settings previews (branch, folder, object names) |
+| `placeholders` | `taskId, taskTitle, extraQuestions, cardTopic, cardFact, cardTags, scriptName, scriptPurpose, checklistItem, newArea, prefix, role, target, cvSkill` |
+| `privateNames` | JS regex: text the CV checker flags as internal object names (besides the prefix) |
+| `skills.areaSkill` | skill name for an area; tokens `{module}`, `{MODULE}`, `{name}` (default `{name}`) |
+| `skills.areaGroup`, `skills.typeGroup` | CV groups for area and task-type skills |
+| `skills.groups` | CV group order |
+| `skills.types` | `{ taskType: skill name }` |
+| `skills.rules[]` | `{ key, name, group, types?, details?, checklist?, tag? }`: a task gets the skill when all given conditions hold (type in `types`, intake answers match `details`, a done checklist item matches `checklist`); a card/question tag matching `tag` maps to it. Regexes are JavaScript, case-insensitive |
+| `skills.apis` | `{ group, patterns[] (JS regex, group 1 = name), tag }`: API names found in intake answers or tags |
+| `skills.verbs`, `skills.bullet` | CV draft: `{ taskType: verb }` and a template with `{verb} {title} {module} {MODULE} {name} {api}` |
+| `cvTips[]` | `{ title, text }` CV writing hints |
+
 Card ids stay `A-<md5(taskId|topic)>` and question ids `QB-<md5(taskId|key)>`, so progress survives the upgrade.

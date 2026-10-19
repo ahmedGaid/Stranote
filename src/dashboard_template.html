@@ -818,7 +818,7 @@ try { var snT = localStorage.getItem('snTheme'); if (snT === 'light' || snT === 
     <button class="nav" data-view="quiz"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6v.6M12 17h.01"/></svg>Quiz<span class="n" id="nQuiz"></span></button>
     <button class="nav" data-view="skills"><svg class="i" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Skills<span class="n" id="nSkills"></span></button>
     <button class="nav" data-view="cv"><svg class="i" viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="9" r="2.5"/><path d="M8 17a4 4 0 0 1 8 0"/></svg>CV<span class="n" id="nCv"></span></button>
-    <div class="nav-h modnav">Modules</div>
+    <div class="nav-h modnav" data-ui="areas">Areas</div>
     <div class="modnav" id="modNav"></div>
     <div class="sp"></div>
     <div class="foot">
@@ -831,7 +831,7 @@ try { var snT = localStorage.getItem('snTheme'); if (snT === 'light' || snT === 
       <h1 id="viewTitle">Board <span class="c" id="viewCount"></span></h1>
       <div class="tools">
         <div class="search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="q" type="search" placeholder="Search tasks"><kbd>/</kbd></div>
-        <select id="fm" class="pill-sel"><option value="">All modules</option></select>
+        <select id="fm" class="pill-sel"><option value="">All areas</option></select>
         <select id="ft" class="pill-sel"><option value="">All types</option></select>
         <select id="fp" class="pill-sel"><option value="">All priorities</option><option>P1</option><option>P2</option><option>P3</option><option>P4</option></select>
       </div>
@@ -848,10 +848,10 @@ try { var snT = localStorage.getItem('snTheme'); if (snT === 'light' || snT === 
   <form id="newForm" autocomplete="off">
     <h4>Basics</h4>
     <div class="grid">
-      <div class="f"><label>Ticket ID (blank = auto T-0001)</label><input name="id" placeholder="CR-1042"></div>
+      <div class="f"><label>Ticket ID (blank = auto T-0001)</label><input name="id" placeholder="CR-1042" data-ph="taskId"></div>
       <div class="f"><label>Priority</label><select name="priority"></select></div>
-      <div class="f full"><label>Title <span class="req">*</span></label><input name="title" required placeholder="Supplier invoice inbound interface"></div>
-      <div class="f"><label>Module <span class="req">*</span></label><select name="module" required></select></div>
+      <div class="f full"><label>Title <span class="req">*</span></label><input name="title" required placeholder="e.g. Monthly sales report" data-ph="taskTitle"></div>
+      <div class="f"><label><span data-ui="area">Area</span> <span class="req">*</span></label><select name="module" required></select></div>
       <div class="f"><label>Type <span class="req">*</span></label><select name="type" required></select></div>
       <div class="f"><label>Due date</label><input name="due" type="date"></div>
       <div class="f"><label>Requester / business owner</label><input name="requester"></div>
@@ -859,7 +859,7 @@ try { var snT = localStorage.getItem('snTheme'); if (snT === 'light' || snT === 
     </div>
     <div id="typeBlock"></div>
     <h4>Extra questions to confirm with the business (one per line, optional)</h4>
-    <textarea name="extraQuestions" placeholder="e.g. Use AP_INVOICES_INTERFACE or the AP API?"></textarea>
+    <textarea name="extraQuestions" placeholder="e.g. Which data source should we use?" data-ph="extraQuestions"></textarea>
     <div class="actions"><span class="msg" id="newMsg"></span>
       <button type="button" class="btn ghost" onclick="$('newDlg').close()">Cancel</button>
       <button class="btn" id="newSubmit">Create task</button></div>
@@ -913,6 +913,16 @@ let TASKS = /*__DATA__*/[];
 const META = /*__META__*/{};
 const LIVE = /*__LIVE__*/false;
 const PHASES = META.phases || ['Requirements','Design','Development','Testing','UAT','Deployment','On Hold','Done'];
+/* career pack wording (META.pack.ui); every use has a neutral default for packs without it */
+const PACK = META.pack || {};
+const UI = PACK.ui || {};
+const PH = UI.placeholders || {};
+const AREA = UI.area || 'Area', AREAS = UI.areas || 'Areas';
+const fill = (s, tok) => String(s || '').replace(/\{(\w+)\}/g, (m, k) => tok[k] != null ? tok[k] : m);
+const rx = (src, flags) => { try { return src ? new RegExp(src, flags) : null; } catch (e) { return null; } };
+document.querySelectorAll('[data-ph]').forEach(el => { if (PH[el.dataset.ph]) el.placeholder = PH[el.dataset.ph]; });
+document.querySelectorAll('[data-ui="area"]').forEach(el => el.textContent = AREA);
+document.querySelectorAll('[data-ui="areas"]').forEach(el => el.textContent = AREAS);
 const d0 = new Date(); const today = new Date(d0 - d0.getTimezoneOffset() * 60000).toISOString().slice(0,10);
 const $ = id => document.getElementById(id);
 const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -961,7 +971,7 @@ function setView(v){ VIEW = v; try { localStorage.setItem('ebsView', v); } catch
 document.querySelectorAll('.nav[data-view]').forEach(b => b.onclick = () => setView(b.dataset.view));
 
 function refreshFilters(){
-  for (const [id, key, label] of [['fm','module','All modules'], ['ft','type','All types']]){
+  for (const [id, key, label] of [['fm','module','All ' + AREAS.toLowerCase()], ['ft','type','All types']]){
     const s = $(id), cur = s.value;
     s.innerHTML = `<option value="">${label}</option>` + [...new Set(TASKS.map(t => t[key]))].filter(Boolean).sort().map(v => `<option>${esc(v)}</option>`).join('');
     s.value = cur;
@@ -998,7 +1008,7 @@ function render(){
   $('nBoard').textContent = live.length || ''; $('nList').textContent = live.length || ''; $('nArch').textContent = TASKS.filter(t => t._archived).length || '';
   const mods = {}; live.forEach(t => mods[t.module] = (mods[t.module] || 0) + 1);
   $('modNav').innerHTML = Object.keys(mods).sort().map(m => `<button class="nav ${fm === m ? 'on' : ''}" data-mod="${esc(m)}"><span class="dot" style="background:${fm === m ? 'var(--accent)' : 'var(--faint)'}"></span>${esc(m)}<span class="n">${mods[m]}</span></button>`).join('')
-    || '<div class="meta">No modules yet</div>';
+    || `<div class="meta">No ${esc(AREAS.toLowerCase())} yet</div>`;
   $('modNav').querySelectorAll('[data-mod]').forEach(b => b.onclick = () => { $('fm').value = $('fm').value === b.dataset.mod ? '' : b.dataset.mod; render(); });
 
   updateLearnCounts();
@@ -1091,7 +1101,7 @@ function show(id){
       <dl class="props">
         ${P(PI.status, 'Status', `${ring(t)} ${esc(t.phase)} <span class="progress"><i style="width:${+t.percent || 0}%"></i></span> <span style="color:var(--muted);font-size:12.5px">${+t.percent || 0}%</span>`)}
         ${P(PI.prio, 'Priority', `${prioIcon(t.priority)} ${esc(t.priority)}`)}
-        ${P(PI.mod, 'Module', `<span class="chip">${esc(t.module)}</span>`)}
+        ${P(PI.mod, AREA, `<span class="chip">${esc(t.module)}</span>`)}
         ${P(PI.type, 'Type', `<span class="chip">${esc(t.type)}</span>`)}
         ${P(PI.cal, 'Due', t.due ? `<span class="chip ${overdue(t) ? 'bad' : ''}">${esc(t.due)}</span>` : '<span style="color:var(--faint)">Empty</span>')}
         ${P(PI.user, 'Requester', t.requester ? esc(t.requester) : '<span style="color:var(--faint)">Empty</span>')}
@@ -1313,7 +1323,7 @@ function mdAr(src){
   }
   return h;
 }
-/* ---------- EBS screenshots in the explanation window ---------- */
+/* ---------- screenshots in the explanation window ---------- */
 let AXO = null, SHOT_SLOT = 'new';
 const shotsOf = id => arr(((LEARN.ar || {})[id] || {}).images);
 function shotsHtml(o){
@@ -1321,7 +1331,7 @@ function shotsHtml(o){
   const imgs = shotsOf(o.imgId);
   if (!imgs.length && !LIVE) return '';
   const cam = '<svg class="i" viewBox="0 0 24 24" style="width:16px;height:16px"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></svg>';
-  return `<section class="ax-shots"><h3>صور من EBS</h3>
+  return `<section class="ax-shots"><h3>${esc(UI.screenshotsTitle || 'صور من الشغل')}</h3>
     <p class="sg" style="margin:0 0 8px">خد screenshot بـ <kbd>Win</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd>، اضغط على الخانة، واعمل <kbd>Ctrl</kbd>+<kbd>V</kbd>. أو اسحب ملف الصورة عليها.</p>
     <div class="shots">${imgs.map((m, i) => m.file
       ? `<figure class="shot"><img src="/img/${encodeURIComponent(m.file)}" alt="${esc(m.title)}" data-zoom="${esc(m.file)}" loading="lazy">
@@ -1768,44 +1778,46 @@ function openFollowups(){
 }
 
 /* ---------- skills (computed from tasks, cards and quiz results) ---------- */
-const TYPE_SKILL = { Report: 'Report development', Interface: 'EBS interfaces (open interfaces and APIs)', Conversion: 'Data conversion and migration',
-  Extension: 'Forms personalization and CUSTOM.pll', OAF: 'OA Framework (OAF)', Workflow: 'Oracle Workflow', Support: 'Production support and troubleshooting', Analysis: 'Solution analysis and design' };
-const PLSQL_TYPES = ['Report','Interface','Conversion','Extension','Workflow'];
+// skill rules come from the career pack (META.pack.ui.skills); see contracts/pack-schema.md "ui"
+const SK = UI.skills || {};
+const TYPE_SKILL = SK.types || {};
+const AREA_GROUP = SK.areaGroup || AREAS;
+const API = SK.apis || {}, API_GROUP = API.group || 'APIs';
+const SKILL_RULES = arr(SK.rules).map(r => ({ ...r, types: r.types ? arr(r.types) : null, dRx: rx(r.details, 'i'), cRx: rx(r.checklist, 'i'), tRx: rx(r.tag, 'i') }));
+const API_RX = arr(API.patterns).map(p => rx(p, 'gi')).filter(Boolean), API_TAG = rx(API.tag, 'i');
 const PRIO_XP = { P1: 40, P2: 30, P3: 20, P4: 10 };
 const LEVELS = [0, 30, 100, 250, 500];
 const LEVEL_NAMES = ['Aware', 'Practiced', 'Skilled', 'Advanced', 'Expert'];
 function apiNames(text){
   const out = new Set();
-  String(text || '').replace(/\b([a-z][a-z0-9_]*_(?:pkg|pub|pvt|api|grp))\b/gi, (m, p) => { out.add(p.toUpperCase()); return m; });
-  String(text || '').replace(/\b(fnd_request|fnd_global|fnd_program|fnd_file|fnd_profile|fnd_message|mo_global|fnd_flex_val_api)\b/gi, (m, p) => { out.add(p.toUpperCase()); return m; });
+  API_RX.forEach(r => String(text || '').replace(r, (m, p) => { out.add(String(p || m).toUpperCase()); return m; }));
   return [...out];
 }
 function computeSkills(){
   const S = new Map();
   const get = (k, name, group) => { if (!S.has(k)) S.set(k, { key: k, name, group, tasks: new Set(), done: new Set(), companies: new Set(), cards: 0, right: 0, seen: 0, xp: 0 }); return S.get(k); };
   const mods = arr(META.modules).map(m => String(m).toLowerCase());
-  const prefix = (META.prefix || 'XX').toUpperCase() + '_';
-  const modKey = m => ['mod:' + m.toLowerCase(), 'Oracle EBS ' + m.toUpperCase(), 'Oracle EBS modules'];
-  const typeKey = t => ['type:' + t.toLowerCase(), TYPE_SKILL[t], 'Technical'];
+  const prefix = META.prefix ? META.prefix.toUpperCase() + '_' : null;
+  const areaNames = PACK.areaNames || {};
+  const modKey = m => ['mod:' + m.toLowerCase(), fill(SK.areaSkill || '{name}', { module: m, MODULE: m.toUpperCase(), name: areaNames[m] || m }), AREA_GROUP];
+  const typeKey = t => ['type:' + t.toLowerCase(), TYPE_SKILL[t], SK.typeGroup || 'Technical'];
   const taskKeys = t => {
     const ks = [];
     if (t.module && t.module !== 'Other') ks.push(modKey(t.module));
     if (TYPE_SKILL[t.type]) ks.push(typeKey(t.type));
-    if (PLSQL_TYPES.includes(t.type)) ks.push(['plsql', 'PL/SQL', 'Technical']);
     const txt = arr(t.details).map(d => d && d.a).join(' ');
-    if (t.type === 'Report' && /bi ?publisher|\bbip\b/i.test(txt)) ks.push(['bip', 'BI Publisher', 'Technical']);
-    if (t.type === 'Report' && /oracle reports/i.test(txt)) ks.push(['rdf', 'Oracle Reports', 'Technical']);
-    apiNames(txt).filter(a => !a.startsWith(prefix)).forEach(a => ks.push(['api:' + a.toLowerCase(), a, 'Oracle APIs']));
-    if (arr(t.checklist).some(c => c && c.done && /MD0?50|MD0?70|MD120/i.test(c.item))) ks.push(['docs', 'Oracle AIM/OUM documentation (MD050, MD070, MD120)', 'Methods']);
-    if (arr(t.checklist).some(c => c && c.done && /FNDLOAD/i.test(c.item))) ks.push(['fndload', 'FNDLOAD / AOL migration', 'Technical']);
+    const doneItems = arr(t.checklist).filter(c => c && c.done).map(c => c.item);
+    // a rule needs at least one task condition (types / details / checklist); all given conditions must hold
+    SKILL_RULES.filter(r => (r.types || r.dRx || r.cRx) && (!r.types || r.types.includes(t.type)) && (!r.dRx || r.dRx.test(txt)) && (!r.cRx || doneItems.some(i => r.cRx.test(i))))
+      .forEach(r => ks.push([r.key, r.name, r.group || 'Technical']));
+    apiNames(txt).filter(a => !prefix || !a.startsWith(prefix)).forEach(a => ks.push(['api:' + a.toLowerCase(), a, API_GROUP]));
     return ks;
   };
   const tagKey = g => {
     const u = String(g || '').trim(); if (!u) return null;
     if (mods.includes(u.toLowerCase()) && u.toLowerCase() !== 'other') return modKey(u);
-    if (/_(pkg|pub|pvt|api|grp)$/i.test(u)) return ['api:' + u.toLowerCase(), u.toUpperCase(), 'Oracle APIs'];
-    if (/^pl\/?sql$/i.test(u)) return ['plsql', 'PL/SQL', 'Technical'];
-    if (/^fndload$/i.test(u)) return ['fndload', 'FNDLOAD / AOL migration', 'Technical'];
+    if (API_TAG && API_TAG.test(u)) return ['api:' + u.toLowerCase(), u.toUpperCase(), API_GROUP];
+    const r = SKILL_RULES.find(x => x.tRx && x.tRx.test(u)); if (r) return [r.key, r.name, r.group || 'Technical'];
     return ['tag:' + u.toLowerCase(), u, 'Technical'];
   };
   const itemKeys = it => {
@@ -1838,17 +1850,20 @@ function cvHints(skills){
 const lvDots = l => `<span class="lv">${[1,2,3,4,5].map(i => `<i class="${i <= l ? 'on' : ''}"></i>`).join('')}</span>`;
 
 /* ---------- CV helpers ---------- */
-const VERB = { Report: 'Developed', Interface: 'Built', Conversion: 'Migrated', Extension: 'Extended', OAF: 'Extended', Workflow: 'Customized', Support: 'Resolved', Analysis: 'Designed' };
+const VERB = SK.verbs || {};
 function draftBullet(t){
   const api = apiNames(arr(t.details).map(d => d && d.a).join(' '))[0];
   const title = String(t.title || '').replace(/^\w/, c => c.toLowerCase());
-  return `${VERB[t.type] || 'Delivered'} ${title} for Oracle EBS ${t.module}${api ? ', using ' + api : ''}, [result: e.g. N records loaded / X hours saved per month].`;
+  const m = String(t.module || '');
+  return fill(SK.bullet || '{verb} {title} ({name}){api}, [result: e.g. what improved, with a number].',
+    { verb: VERB[t.type] || 'Delivered', title, module: m, MODULE: m.toUpperCase(), name: (PACK.areaNames || {})[m] || m, api: api ? ', using ' + api : '' });
 }
 function cvWarnings(text){
   const w = [], s = String(text || '');
   arr((META.career || {}).companies).forEach(c => { if (c.name && new RegExp('\\b' + c.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').test(s)) w.push(`mentions ${c.name}`); });
   if (/\b[A-Z]{1,6}-\d{2,}\b/.test(s)) w.push('contains a ticket ID');
-  if (new RegExp('\\b' + (META.prefix || 'XXCUST') + '_?[A-Z0-9_]*', 'i').test(s) || /\bXX[A-Z0-9]{2,}_/i.test(s)) w.push('contains internal custom object names');
+  const priv = rx(UI.privateNames, 'i');
+  if ((META.prefix && new RegExp('\\b' + META.prefix + '_?[A-Z0-9_]*', 'i').test(s)) || (priv && priv.test(s))) w.push('contains internal custom object names');
   if (/\[result/i.test(s)) w.push('result placeholder not filled in');
   return w;
 }
@@ -1889,15 +1904,15 @@ function cardEditor(c, after, preset = {}){
     <h3>${c ? 'Edit knowledge card' : 'New knowledge card'}</h3>
     <p style="color:var(--muted);font-size:13px;margin:0 0 12px">One fact you want to remember. Each card also becomes a flashcard in your quiz.</p>
     <div class="grid">
-      <div class="f full"><label>Topic <span class="req">*</span></label><input id="kTopic" value="${esc(preset.topic != null ? preset.topic : x.topic)}" placeholder="API: FND_FLEX_VALUE_RULES_PKG.INSERT_ROW"></div>
-      <div class="f full"><label>What I learned</label><textarea id="kFact" placeholder="Creates a flexfield security rule; pair it with ...">${esc(preset.fact != null ? preset.fact : x.fact)}</textarea></div>
+      <div class="f full"><label>Topic <span class="req">*</span></label><input id="kTopic" value="${esc(preset.topic != null ? preset.topic : x.topic)}" placeholder="${esc(PH.cardTopic || 'e.g. Month-end close checklist')}"></div>
+      <div class="f full"><label>What I learned</label><textarea id="kFact" placeholder="${esc(PH.cardFact || 'The one thing to remember, in your own words')}">${esc(preset.fact != null ? preset.fact : x.fact)}</textarea></div>
       <div class="f full"><label>ببساطة (شرح بالعربي، سيب الـ keywords بالإنجليزي)</label><textarea id="kAr" dir="rtl" class="ar-in">${esc((c && arFor(c.id) || {}).text || '')}</textarea></div>
       <div class="f full"><label>مثال</label><textarea id="kArEx" dir="rtl" class="ar-in" style="min-height:48px">${esc((c && arFor(c.id) || {}).example || '')}</textarea></div>
       <div class="f full"><label>بالتفصيل (يظهر في نافذة الشرح؛ تقدر تستخدم ## عنوان، - نقط، > قاعدة، وثلاث backticks حوالين الكود)</label><textarea id="kArDet" dir="rtl" class="ar-in" style="min-height:120px">${esc((c && arFor(c.id) || {}).detail || '')}</textarea></div>
       <div class="f full"><label>Code / query (optional)</label><textarea id="kCode" class="code" style="min-height:90px" spellcheck="false">${esc(x.code || '')}</textarea></div>
       <div class="f"><label>Task</label><select id="kTask"><option value="">(none)</option>${tasks.map(t => `<option value="${esc(t.id)}" ${t.id === (x.taskId || preset.taskId) ? 'selected' : ''}>${esc(t.id)} - ${esc(t.title)}</option>`).join('')}</select></div>
       <div class="f"><label>Category</label><select id="kCat">${CATS().map(k => `<option value="${esc(k)}" ${k === ((c && c.category) || preset.category || 'Technical') ? 'selected' : ''}>${esc(k)} - ${esc(CAT_AR[k] || '')}</option>`).join('')}</select></div>
-      <div class="f"><label>Tags (comma separated)</label><input id="kTags" value="${esc(arr(preset.tags || x.tags).join(', '))}" placeholder="GL, FNDLOAD, Security rules"></div>
+      <div class="f"><label>Tags (comma separated)</label><input id="kTags" value="${esc(arr(preset.tags || x.tags).join(', '))}" placeholder="${esc(PH.cardTags || 'e.g. reporting, month-end')}"></div>
     </div>
     <div class="actions"><span class="msg" id="kMsg"></span><button class="btn ghost" onclick="$('kDlg').close()">Cancel</button><button class="btn accent" id="kSave">Save card</button></div>`;
   d.showModal(); $('kTopic').focus();
@@ -1977,7 +1992,7 @@ function renderQuiz(B){
         <button class="btn ghost" data-mode="weak">Weak topics</button>
         <button class="btn ghost" data-mode="all">Practice all</button>
         <select id="qzCat" class="pill-sel"><option value="">Any category</option>${CATS().map(k => `<option value="${esc(k)}">${esc(k)} - ${esc(CAT_AR[k] || '')} (${LEARN.questions.filter(q => q.category === k).length})</option>`).join('')}</select>
-        <select id="qzMod" class="pill-sel"><option value="">Any module</option>${mods.map(m => `<option>${esc(m)}</option>`).join('')}</select>
+        <select id="qzMod" class="pill-sel"><option value="">Any ${esc(AREA.toLowerCase())}</option>${mods.map(m => `<option>${esc(m)}</option>`).join('')}</select>
         <select id="qzTask" class="pill-sel"><option value="">Any task</option>${tids.map(m => `<option>${esc(m)}</option>`).join('')}</select>
       </div>` : ''}
       <div class="tipbox"><b>Get more questions from Claude.</b> In any Claude session, say <code>Make a quiz for T-0001</code> or <code>Quiz me on GL</code>. Claude reads that task's cards, notes and scripts and adds multiple-choice, true/false, fill-the-blank and write-the-query questions here. Every knowledge card also adds a flashcard automatically.</div>
@@ -2228,7 +2243,14 @@ function renderSkills(B){
 }
 
 /* ---------- CV view ---------- */
-const CV_GROUPS = ['Oracle EBS modules', 'Technical', 'Oracle APIs', 'Methods', 'Tools'];
+const CV_GROUPS = SK.groups ? arr(SK.groups) : [AREA_GROUP, 'Technical', 'Methods', 'Tools'];
+const CV_TITLE = UI.cvTitle || PACK.name || 'Curriculum vitae';
+const CV_TIPS = UI.cvTips ? arr(UI.cvTips) : [
+  { title: 'Action, what, result.', text: 'Start with a verb (Built, Improved, Reduced, Led), say what you worked on, end with the result for the business or the people you serve.' },
+  { title: 'Numbers win.', text: 'How many, how much, how fast: cases handled, hours saved, errors cut, people supported.' },
+  { title: 'Name the real tools and methods.', text: 'Recruiters and ATS filters search for the exact names used in your field.' },
+  { title: 'Keep it confidential.', text: 'No client names, ticket IDs, internal object names or sensitive volumes. Stranote flags these in amber.' },
+  { title: 'Keep it fresh.', text: 'Check this page every month and export a new version.' }];
 function renderCv(B){
   const skills = computeSkills(), hints = cvHints(skills);
   const done = TASKS.filter(t => t.phase === 'Done' && !LEARN.cv.bullets.some(b => b.taskId === t.id));
@@ -2243,7 +2265,7 @@ function renderCv(B){
       ${LIVE ? `<div><button class="btn ghost small" data-skip="${esc(s.key)}">Not yet</button> <button class="btn accent small" data-add="${esc(s.key)}">Add to CV</button></div>` : ''}</div>`).join('')}</div>` : ''}
     <div class="sec"><h4>Skills on your CV</h4>
       ${LEARN.cv.skills.length ? CV_GROUPS.concat(Object.keys(grouped).filter(g => !CV_GROUPS.includes(g))).filter(g => grouped[g]).map(g => `<div class="cvg"><span class="sg">${esc(g)}</span><div class="chips">${grouped[g].map(s => `<span class="chip">${esc(s.name)}${LIVE ? ` <button class="x0" data-srm="${esc(s.name)}" title="Remove">&times;</button>` : ''}</span>`).join('')}</div></div>`).join('') : '<div class="sg">None yet. Add skills from the hints above or below.</div>'}
-      ${LIVE ? `<div class="addrow"><input id="cvSkill" placeholder="Add a skill, e.g. SQL Developer"><select id="cvGroup" class="pill-sel">${CV_GROUPS.map(g => `<option ${g === 'Technical' ? 'selected' : ''}>${g}</option>`).join('')}</select><button class="btn ghost small" id="cvAddSkill">Add</button></div>` : ''}
+      ${LIVE ? `<div class="addrow"><input id="cvSkill" placeholder="${esc(PH.cvSkill || 'Add a skill, e.g. Excel')}"><select id="cvGroup" class="pill-sel">${CV_GROUPS.map(g => `<option ${g === 'Technical' ? 'selected' : ''}>${g}</option>`).join('')}</select><button class="btn ghost small" id="cvAddSkill">Add</button></div>` : ''}
     </div>
     ${done.length ? `<div class="sec"><h4>Drafts from finished tasks <span class="n">${done.length}</span></h4><p class="sg">Edit the draft, replace the [result] part with a real number, then add it.</p>
       ${done.map(t => `<div class="cvb"><textarea class="cvt" data-draft="${esc(t.id)}">${esc(draftBullet(t))}</textarea><div class="cvm"><span class="chip">${esc(t.id)}</span><span class="chip">${esc(t.company || '')}</span>${LIVE ? `<button class="btn accent small" data-dadd="${esc(t.id)}">Add to CV</button>` : ''}</div></div>`).join('')}</div>` : ''}
@@ -2253,13 +2275,7 @@ function renderCv(B){
       ${LIVE ? `<div class="addrow"><select id="cvBCo" class="pill-sel">${comps.map(({ c }) => `<option>${esc(c.name)}</option>`).join('')}</select><input id="cvBText" placeholder="Built ..., using ..., cutting ... by ..."><button class="btn ghost small" id="cvAddB">Add bullet</button></div>` : ''}
     </div>
     <details class="sec tips"><summary><h4 style="display:inline">CV writing hints</h4></summary><ol>
-      <li><b>Action, what, result.</b> Start with a verb (Built, Automated, Migrated, Designed), name the EBS object or API, end with the business result.</li>
-      <li><b>Numbers win.</b> Records loaded, programs built, hours saved, users supported.</li>
-      <li><b>Name the real technology.</b> FND_FLEX_VALUE_RULES_PKG, GL_INTERFACE, BI Publisher RTF. Recruiters and ATS filters search for these exact terms.</li>
-      <li><b>Module and release.</b> "Oracle EBS R12.2 GL" says much more than "Oracle".</li>
-      <li><b>Show the full cycle.</b> MD050, MD070, build, UAT, MD120 deployment.</li>
-      <li><b>Keep it confidential.</b> No client names, ticket IDs, internal custom object names or sensitive volumes. Stranote flags these in amber.</li>
-      <li><b>Keep it fresh.</b> Check this page every month and export a new version.</li></ol></details>`;
+      ${CV_TIPS.map(x => `<li><b>${esc(x.title)}</b> ${esc(x.text)}</li>`).join('')}</ol></details>`;
   B.querySelectorAll('[data-open-task]').forEach(b => b.onclick = () => show(b.dataset.openTask));
   if (!LIVE) return;
   const after = async (msg) => { await saveCv(); if (msg) toast(msg); render(); };
@@ -2281,11 +2297,11 @@ function buildCvDocs(){
   LEARN.cv.skills.forEach(s => (grouped[s.group || 'Technical'] = grouped[s.group || 'Technical'] || []).push(s.name));
   const groups = CV_GROUPS.concat(Object.keys(grouped).filter(g => !CV_GROUPS.includes(g))).filter(g => grouped[g]);
   const roleLine = ({ c, x }) => `${c.name} - ${c.role || ''} (${fmtD(x.s)} to ${x.current ? 'present' : fmtD(x.e)})`;
-  let md = `# Oracle EBS Technical Consultant\n\n_Generated by Stranote on ${today}. Review before sending._\n\n## Skills\n\n` + groups.map(g => `- **${g}:** ${grouped[g].join(', ')}`).join('\n') + '\n\n## Experience\n';
+  let md = `# ${CV_TITLE}\n\n_Generated by Stranote on ${today}. Review before sending._\n\n## Skills\n\n` + groups.map(g => `- **${g}:** ${grouped[g].join(', ')}`).join('\n') + '\n\n## Experience\n';
   comps.forEach(r => { const bs = LEARN.cv.bullets.filter(b => b.company === r.c.name); md += `\n### ${roleLine(r)}\n\n` + (bs.map(b => `- ${b.text}`).join('\n') || '- ') + '\n'; });
   const h = s => esc(s);
   let html = `<html><head><meta charset="utf-8"><style>body{font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#111}h1{font-size:20pt;margin:0 0 4pt}h2{font-size:13pt;border-bottom:1px solid #C74634;padding-bottom:2pt;margin-top:16pt}h3{font-size:11.5pt;margin:10pt 0 4pt}li{margin:2pt 0}.n{color:#777;font-size:9pt}</style></head><body>
-    <h1>Oracle EBS Technical Consultant</h1><div class="n">Generated by Stranote on ${today}. Review before sending.</div><h2>Skills</h2><ul>${groups.map(g => `<li><b>${h(g)}:</b> ${h(grouped[g].join(', '))}</li>`).join('')}</ul><h2>Experience</h2>`;
+    <h1>${h(CV_TITLE)}</h1><div class="n">Generated by Stranote on ${today}. Review before sending.</div><h2>Skills</h2><ul>${groups.map(g => `<li><b>${h(g)}:</b> ${h(grouped[g].join(', '))}</li>`).join('')}</ul><h2>Experience</h2>`;
   comps.forEach(r => { const bs = LEARN.cv.bullets.filter(b => b.company === r.c.name); html += `<h3>${h(roleLine(r))}</h3><ul>${bs.map(b => `<li>${h(b.text)}</li>`).join('')}</ul>`; });
   html += '</body></html>';
   return { md, html };
@@ -2363,8 +2379,8 @@ function initFiles(t){
       </div>
       <div id="fsPaste" hidden>
         <div class="grid">
-          <div class="f"><label>File name</label><input id="fsName" placeholder="create_invoice_api_test.sql"></div>
-          <div class="f"><label>Purpose (goes in the header)</label><input id="fsPurpose" placeholder="Test AP_INVOICES_PUB for one supplier"></div>
+          <div class="f"><label>File name</label><input id="fsName" placeholder="${esc(PH.scriptName || 'e.g. checklist.txt')}"></div>
+          <div class="f"><label>Purpose (goes in the header)</label><input id="fsPurpose" placeholder="${esc(PH.scriptPurpose || 'e.g. What this file is for')}"></div>
         </div>
         <textarea class="code" id="fsText" placeholder="Paste your script here..." spellcheck="false" style="margin-top:8px"></textarea>
         <label style="display:flex;gap:8px;align-items:center;margin-top:4px;font-size:13px"><input type="checkbox" id="fsHeader" checked> Add a header comment (ticket, purpose, date) to SQL files</label>
@@ -2591,9 +2607,9 @@ function listEditor(el, arr, o = {}){
   draw();
 }
 
-const sample = { id: 'CR-1042', module: 'AP', type: 'Interface', title: 'Supplier_invoice_interface', code: 'SUPP_INV' };
-const expand = (p, tok) => String(p || '').replace(/\{(\w+)\}/g, (m, k) => tok[k] != null ? tok[k] : m);
-function objTokens(){ const p = S.prefix || 'XX'; return { prefix: p, prefixLower: p.toLowerCase(), module: sample.module, code: sample.code, base: `${p}_${sample.module}_${sample.code}`, id: sample.id, type: sample.type }; }
+const sample = Object.assign({ id: 'T-0001', module: arr(META.modules)[0] || 'GEN', type: arr(META.types)[0] || 'Task', title: 'Monthly_sales_report', code: 'MTH_SALES' }, UI.sample || {});
+const expand = fill;
+function objTokens(){ const p = S.prefix || 'PFX'; return { prefix: p, prefixLower: p.toLowerCase(), module: sample.module, code: sample.code, base: `${p}_${sample.module}_${sample.code}`, id: sample.id, type: sample.type }; }
 
 function renderSettings(){
   document.querySelectorAll('#setNav [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === setTab));
@@ -2601,7 +2617,7 @@ function renderSettings(){
   if (setTab === 'general'){
     B.innerHTML = `<h3>General</h3><p class="hint">Basic naming used when a new task is created.</p>
       <div class="grid">
-        <div class="f"><label>Custom object prefix</label><input id="sPrefix" value="${esc(S.prefix)}" placeholder="XXABC"></div>
+        <div class="f"><label>Custom object prefix</label><input id="sPrefix" value="${esc(S.prefix)}" placeholder="${esc(PH.prefix || 'ABC')}"></div>
         <div class="f"><label>Default priority</label><select id="sDefPri">${opts(S.priorities.filter(Boolean), S.defaultPriority)}</select></div>
         <div class="f"><label>Auto ticket ID prefix (when you leave the ID blank)</label><input id="sAuto" value="${esc(S.autoIdPrefix)}"></div>
         <div class="f"><label>Git branch pattern</label><input id="sBranch" value="${esc(S.branchPattern)}"></div>
@@ -2617,10 +2633,10 @@ function renderSettings(){
   }
   else if (setTab === 'lists'){
     B.innerHTML = `<h3>Lists</h3>
-      <h4>Modules</h4><p class="hint">Shown in the Module dropdown.</p><div id="leMod"></div>
+      <h4>${esc(AREAS)}</h4><p class="hint">Shown in the ${esc(AREA)} dropdown.</p><div id="leMod"></div>
       <h4>Priorities</h4><p class="hint">Sorted top = most urgent.</p><div id="lePri"></div>
       <h4>Phases (board columns, in order)</h4><p class="hint">Percent = progress set automatically when a task enters the phase (blank = don't change). The first phase is where new tasks start. "Done" is required. Renaming a phase does not rename it on existing tasks.</p><div id="lePh"></div>`;
-    listEditor($('leMod'), S.modules, { ph: 'e.g. EAM', addLabel: 'Add module' });
+    listEditor($('leMod'), S.modules, { ph: PH.newArea || 'e.g. Reporting', addLabel: 'Add ' + AREA.toLowerCase() });
     listEditor($('lePri'), S.priorities, { ph: 'e.g. P5', addLabel: 'Add priority' });
     listEditor($('lePh'), S.phases, { cols: [{ k: 'name', label: 'Phase', w: 3, ph: 'e.g. Code Review' }, { k: 'percent', label: 'Auto %', w: 1, type: 'number' }], locked: p => p.name === 'Done', addLabel: 'Add phase' });
   }
@@ -2649,7 +2665,7 @@ function renderSettings(){
     $('tDel').onclick = () => { if (S.types.length < 2) return alert('Keep at least one type.'); if (confirm(`Delete type "${t.name}"? Existing tasks of this type are not affected.`)){ S.types.splice(typeIdx, 1); typeIdx = 0; renderSettings(); } };
     listEditor($('leQ'), t.questions, { cols: [{ k: 'k', label: 'Key', w: 1, ph: 'key' }, { k: 'q', label: 'Question', w: 4, ph: 'Question text' }, { k: 'd', label: 'Default', w: 1.5 }], addLabel: 'Add question' });
     listEditor($('leOQ'), t.openQuestions, { ph: 'e.g. Sample file received?', addLabel: 'Add question' });
-    listEditor($('leCk'), t.checklist, { ph: 'e.g. FNDLOAD ldt extracted', addLabel: 'Add item' });
+    listEditor($('leCk'), t.checklist, { ph: PH.checklistItem || 'e.g. Peer review done', addLabel: 'Add item' });
     const prev = () => { const tok = objTokens(); $('objPrev').textContent = t.objects.filter(Boolean).map(p => expand(p, tok)).join('\n') || '(no objects)'; };
     listEditor($('leObj'), t.objects, { ph: '{base}_PKG (package)', addLabel: 'Add object pattern', onChange: prev });
     prev();
@@ -2717,23 +2733,23 @@ function renderSettings(){
     B.innerHTML = `<h3>Career</h3><p class="hint">Your companies. Leave <b>End</b> empty for the company you work at now; its counter shows in the header and new tasks are tagged with it.</p>
       <h4>Companies</h4><div id="leCo"></div>
       <h4>Weekend days (not counted as working days)</h4><div class="wk" id="wkDays"></div>`;
-    listEditor($('leCo'), S.career.companies, { cols: [{ k: 'name', label: 'Company', w: 2, ph: 'e.g. Acme' }, { k: 'role', label: 'Role', w: 2.5, ph: 'e.g. Oracle EBS Technical Consultant' }, { k: 'start', label: 'Start', w: 1.4, type: 'date' }, { k: 'end', label: 'End (empty = now)', w: 1.4, type: 'date' }], addLabel: 'Add company' });
+    listEditor($('leCo'), S.career.companies, { cols: [{ k: 'name', label: 'Company', w: 2, ph: 'e.g. Acme' }, { k: 'role', label: 'Role', w: 2.5, ph: PH.role || 'e.g. Your job title' }, { k: 'start', label: 'Start', w: 1.4, type: 'date' }, { k: 'end', label: 'End (empty = now)', w: 1.4, type: 'date' }], addLabel: 'Add company' });
     $('wkDays').innerHTML = WEEKDAYS.map(d => `<label><input type="checkbox" value="${d}" ${S.career.weekend.includes(d) ? 'checked' : ''}> ${d}</label>`).join('');
     $('wkDays').onchange = () => { S.career.weekend = [...$('wkDays').querySelectorAll('input:checked')].map(i => i.value); };
   }
   else if (setTab === 'naming'){
-    B.innerHTML = `<h3>Naming</h3><p class="hint">Used to build the short code in object names from the task title, e.g. "Supplier invoice interface" &rarr; SUPP_INV. Words not listed are cut to 4 letters.</p>
+    B.innerHTML = `<h3>Naming</h3><p class="hint">Used to build the short code in object names from the task title, e.g. "${esc(String(sample.title).replace(/_/g, ' '))}" &rarr; ${esc(sample.code)}. Words not listed are cut to 4 letters.</p>
       <h4>Abbreviations</h4><div id="leAb"></div>
       <h4>Words to skip</h4><div id="leSW"></div>
-      <h4>Try it</h4><input id="tryTitle" style="width:100%" value="Supplier invoice inbound interface"><div class="preview" id="tryOut" style="margin-top:6px"></div>`;
+      <h4>Try it</h4><input id="tryTitle" style="width:100%" value="${esc(PH.taskTitle || String(sample.title).replace(/_/g, ' '))}"><div class="preview" id="tryOut" style="margin-top:6px"></div>`;
     const tryIt = () => {
       const ab = {}; S.__abbr.forEach(r => { if (r.w) ab[r.w.toUpperCase()] = r.a; });
       const stop = S.stopWords.map(w => String(w).toUpperCase());
       const words = $('tryTitle').value.toUpperCase().replace(/[^A-Z0-9 ]/g, ' ').split(/\s+/).filter(w => w && !stop.includes(w));
       const parts = [...new Set(words.map(w => ab[w] != null ? ab[w] : (w.length > 5 ? w.slice(0, 4) : w)))].slice(0, 3);
-      $('tryOut').textContent = `${S.prefix}_AP_${parts.join('_') || 'TASK'}_PKG`;
+      $('tryOut').textContent = `${S.prefix}_${sample.module}_${parts.join('_') || 'TASK'}_PKG`;
     };
-    listEditor($('leAb'), S.__abbr, { cols: [{ k: 'w', label: 'Word', w: 2, ph: 'SUPPLIER' }, { k: 'a', label: 'Abbreviation', w: 1, ph: 'SUPP' }], addLabel: 'Add abbreviation', onChange: tryIt });
+    listEditor($('leAb'), S.__abbr, { cols: [{ k: 'w', label: 'Word', w: 2, ph: 'MONTHLY' }, { k: 'a', label: 'Abbreviation', w: 1, ph: 'MTH' }], addLabel: 'Add abbreviation', onChange: tryIt });
     listEditor($('leSW'), S.stopWords, { ph: 'e.g. ENHANCEMENT', addLabel: 'Add word', onChange: tryIt });
     $('tryTitle').oninput = tryIt; tryIt();
   }
@@ -2797,10 +2813,10 @@ $('setSave').onclick = () => settingsAction('/api/settings', { settings: cleanSe
 $('setReset').onclick = () => settingsAction('/api/settings/reset', {}, 'Replace all lists with the original defaults? (Your prefix is kept. You can undo this with "Undo last save".)');
 $('setUndo').onclick = () => settingsAction('/api/settings/undo', {}, 'Go back to the settings as they were before your last save?');
 
-$('metaLine').textContent = `EBS workspace · ${META.prefix || ''}`;
+$('metaLine').textContent = `${UI.workspace || 'Workspace'}${META.prefix ? ' · ' + META.prefix : ''}`;
 
 /* ---------- appearance: one accent color (+ optional light tint) ---------- */
-const ACCENTS = [['Oracle red', '#C74634'], ['Blue', '#2563EB'], ['Indigo', '#4F46E5'], ['Violet', '#7C3AED'], ['Teal', '#0D9488'],
+const ACCENTS = [['Red', '#C74634'], ['Blue', '#2563EB'], ['Indigo', '#4F46E5'], ['Violet', '#7C3AED'], ['Teal', '#0D9488'],
   ['Emerald', '#059669'], ['Amber', '#D97706'], ['Rose', '#E11D48'], ['Graphite', '#3F3F46']];
 function applyAppearance(a){
   a = a || {}; const c = /^#[0-9a-f]{6}$/i.test(a.accent || '') ? a.accent : '#4F46E5';
@@ -2908,7 +2924,7 @@ function obStepBody(){
     const order = ['new', 'basic'];
     const sorted = areas.slice().sort((x, y) => (order.indexOf(a.ratings[x.id]) + 1 || 9) - (order.indexOf(a.ratings[y.id]) + 1 || 9));
     return `<div class="ob-f"><label>Focus for the next 3 months</label><div class="ob-chips">${sorted.slice(0, 24).map(ar => `<button class="ob-chip ${a.focusAreas.includes(ar.id) ? 'on' : ''}" data-obm="focusAreas" data-v="${esc(ar.id)}">${esc(ar.name)}</button>`).join('')}</div></div>
-      <div class="ob-f"><label>A target role or certification (optional)</label><input data-ob="target" value="${esc(a.target || '')}" placeholder="Oracle Fusion Financials, Solution Architect..."></div>
+      <div class="ob-f"><label>A target role or certification (optional)</label><input data-ob="target" value="${esc(a.target || '')}" placeholder="${esc(PH.target || 'e.g. a certification or a senior role')}"></div>
       <div class="ob-row"><div class="ob-f"><label>Learning time per day</label><div class="ob-chips">${[5, 10, 20, 30].map(m => `<button class="ob-chip ${+a.dailyMinutes === m ? 'on' : ''}" data-obset="dailyMinutes" data-v="${m}">${m} min</button>`).join('')}</div></div>
         <div class="ob-f"><label>Daily review opens at</label><input type="time" data-ob="reviewTime" value="${esc(a.reviewTime || '09:00')}"></div></div>`;
   }
