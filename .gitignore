@@ -8,3 +8,7 @@ packs/custom/
 *.bak
 # agent scratch files (agents write them to %TEMP%\stranote-<agent>; this is only a safety net)
 _tmp_*
+# task-board lock and last-write copy (board.ps1)
+.board.lock
+.board.last
+STATE.md.tmp
