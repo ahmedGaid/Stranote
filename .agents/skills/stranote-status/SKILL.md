@@ -19,6 +19,7 @@ change any file. If the user passed an argument (e.g. "blockers"), focus the rep
 - ⬜ not started
 **Blockers** (n)
 **Next action:** ...
+**Agent fit:** ...
 ---
 
 If no CURRENT STATE block exists, say so and suggest `/stranote_resume update`.

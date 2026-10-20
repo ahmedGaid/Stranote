@@ -29,6 +29,7 @@ file or a skill, so the next agent sees them. The repo is public: no secrets, cl
 | `/stranote_status [focus]` (Codex: also `$stranote-status`) | STATUS: read-only report | `.agents/skills/stranote-status/SKILL.md` |
 
 If your agent does not run these as commands, treat the typed text as the request and follow the procedure file.
+GitHub Copilot gets the same commands from `.github/prompts/*.prompt.md`.
 
 **Hand-off (any agent can take the lead):**
 - **Claim first:** before starting ANY task here (changing files, running builds/tests), write the
@@ -40,6 +41,21 @@ If your agent does not run these as commands, treat the typed text as the reques
   agents must do it themselves). Uncommitted work must be listed in `STATE.md`, so the next agent knows what it is.
 - Only one agent at a time does the live upgrade of `D:\Work`, and only when the task says so.
 - A new procedure used twice becomes a skill in `.agents/skills/` (shared), not a private one.
+
+## Agents on this project and "Agent fit"
+| Agent | Models | Fits |
+|---|---|---|
+| Claude Code | Opus 5.5 (default); Sonnet 5.5 routine coding; Haiku 5.5 trivial edits | planning, specs, playbook, product decisions with the owner, multi-file engine work, live upgrade, Arabic teaching content |
+| Codex | gpt-6-luna (xhigh) | multi-file coding, tests, performance work, independent review of another agent's branch |
+| GitHub Copilot (VS Code Chat, free plan, Auto model) | small models, monthly limit | one-file fixes (CSS, wording, pack JSON labels), explaining code, one Pester test, read-only review |
+
+How to choose: needs an owner decision, a spec, more than ~3 files, engine PowerShell or `D:\Work` -> Claude Code or
+Codex (strongest model). One file with a clear "done" -> Copilot is fine. A review -> an agent other than the author.
+
+**Rule:** whenever you finish a task (or write a Next action / new open item), state which agent fits the NEXT task,
+in your reply and in `STATE.md`, in this format:
+`**Agent fit:** Claude Code > Opus 5.5 (best) · Codex > gpt-6-luna (ok) · GitHub Copilot (no: needs planning)`
+Open items in `STATE.md` carry a short tag: `[fit: Claude/Codex]`, `[fit: any]`, `[fit: Copilot ok]`, `[fit: owner]`.
 
 ## Skills (use the skill when its task comes up)
 Your agent may load these on its own. If not, open the SKILL.md and follow it before the task. "Load skill X" anywhere

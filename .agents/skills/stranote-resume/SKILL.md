@@ -30,7 +30,8 @@ probably loaded it; if not, read it once).
 **Last agent:** [who, when, branch, uncommitted work]
 **Last completed:** [1-3 bullets]
 **Next action:** [single most important next step, specific]
-**Open items / blockers:** [real ones only]
+**Agent fit:** [from STATE.md; if you are not the best fit, say so before starting]
+**Open items / blockers:** [real ones only, with their fit tags]
 ---
 
 4. **Claim the task** (see "Claim before any work" below), then start executing the Next action immediately (it is
@@ -64,8 +65,11 @@ reads it). Keep it COMPACT:
 - Reset **Last completed** to the current session only.
 - **Next action** = the next goal: one specific task the next agent can start without questions (task ids, files,
   what done looks like). Never leave it empty or vague.
+- **Agent fit:** right under Next action, which agent and model fits it (format and rules in `AGENTS.md`,
+  "Agents on this project"). Give every open item a `[fit: ...]` tag.
 - Remove finished items from **Open items**.
 - Stable rules, run/test and the file map belong in `AGENTS.md`; change them there only when a decision changes.
 - Hard cap ~80 lines. History lives in `specs/*/tasks.md` (checked tasks + notes) and git, not here.
 
-Output one line: "Stranote state updated - /stranote_resume will load [summary]."
+Output two lines: "Stranote state updated - /stranote_resume will load [summary]." and the **Agent fit** line of
+the Next action.
