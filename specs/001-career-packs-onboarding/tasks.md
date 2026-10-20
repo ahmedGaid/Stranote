@@ -152,7 +152,16 @@ description: "Task list for 001 career packs and first-day onboarding"
     tools answers are pre-filled). Custom packs live in `<learn dir>\packs` (read first by `Get-SnPacksDirs`), not `packs\custom\`.
     Fix found on the way: completing onboarding on any non-EBS pack threw (packs list `01_Tasks`, engine requires `01_Tickets`);
     `Get-SnBaseSettings` now always adds the required work folders. 106 tests pass.
-- [ ] T040 [US4] `Get-SnPackRequest`, `Approve-SnPackDraft` (validate, copy to `<learn dir>\packs\`, switch role) and `POST /api/packs/accept`
+- [x] T040 [US4] `Get-SnPackRequest`, `Approve-SnPackDraft` (validate, copy to `<learn dir>\packs\`, switch role) and `POST /api/packs/accept`
+  - Done 2026-10-20 (StranotePacks.ps1): `Get-SnPackRequest [-Slug] [-WithDraft]` (newest first; draft preview with `Test-SnPack`
+    result); `Approve-SnPackDraft -Slug` validates the draft (request.draftPath or `<learn dir>\packs\<slug>.json`), refuses a
+    shipped pack id, copies it to `<learn dir>\packs\<id>.json`, switches the request's role, status `accepted` (+ packId,
+    previousPackId); invalid -> `{ ok:false, error, errors[] }` and nothing changes. Override keys the new pack owns (types,
+    phases, folders...) are dropped so they cannot hide the new pack; old file kept as `overrides.before-pack-switch.json`.
+    `Deny-SnPackDraft -Slug` -> `rejected`, draft moved to `pack-requests\rejected\` (never deleted). Routes
+    `GET /api/packs/requests`, `POST /api/packs/accept { slug }`, `POST /api/packs/reject { slug }`.
+    Fix found on the way: `Assert-SnSettings` rejected a task type without `questions` (PS 5.1 counted `$null` as a key).
+    111 tests pass.
 - [ ] T041 [US4] Settings > Roles: pending request, draft preview (areas, task types), Accept / Reject
 - [ ] T042 [US4] Write the `ops-pack-builder` Claude skill: read `pack-requests/<slug>.json`, draft `<learn dir>/packs/<slug>.json`, run `Test-SnPack`, set status `drafted`
 
