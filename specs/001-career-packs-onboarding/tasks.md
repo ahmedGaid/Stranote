@@ -137,7 +137,8 @@ description: "Task list for 001 career packs and first-day onboarding"
     category + tag; `Test-SnPack` rejects a `group` that is not a category id. `samples\<pack-id>\` holds 5 fictional work
     files for each of the 6 packs. `tests\StranoteSamples.Tests.ps1`: one task per sample, Sync-SnKnowledge, >= 10 cards
     per pack (got 25-43), every card in a pack category + term-extractor unit tests. 102 tests pass.
-- [ ] T038 [US3] Write `docs\pack-authoring.md` (how to write and validate a pack)
+- [x] T038 [US3] Write `docs\pack-authoring.md` (how to write and validate a pack)
+  - Done 2026-10-20: where packs live, settings layering, every top-level field with an example, extractor kinds + worked `term` example, speed rule (250 ms / 50 KB), `Test-SnPack`, 5 samples + samples test, dev-server check, checklist. Notes `skillMap`/`starterLessons` are not read by the engine yet. Contract speed rule corrected to 250 ms.
 
 ---
 

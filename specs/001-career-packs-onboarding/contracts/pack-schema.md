@@ -43,7 +43,7 @@ Minimal valid pack:
 1. `schemaVersion` = 1; `id` matches `^[a-z0-9]+(-[a-z0-9]+)*$` and the file name.
 2. `areas[].id` unique; every `areas[].category` exists in `categories[].id`.
 3. `taskTypes[].name` unique; `checklist` items non-empty strings.
-4. `extractors[].pattern` compiles as .NET regex, has a `key` group, and matches a 50 KB sample in < 200 ms.
+4. `extractors[].pattern` compiles as .NET regex, has a `key` group (`pkg` + `member` for `api`), and runs over a 50 KB sample in < 250 ms (200 ms match timeout). Guide: `docs/pack-authoring.md`.
 5. `extractors[].kind` in `api | table | term | decision | answer`.
 6. `starterLessons[]` pass `Set-SnLesson` validation (check questions mcq/tf only).
 7. `onboardingQuestions[].writesTo` starts with `settings.`, `profile.` or `pack.`.
