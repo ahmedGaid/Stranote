@@ -11,7 +11,9 @@ All POST requests require header `X-EBS: 1` (unchanged). JSON in/out, UTF-8.
 | POST | `/api/onboarding/complete` | `{}` (uses saved answers) | `{ ok, profile, createdFolders[], conceptsSet, plan:{items[]}, reviewTime }` |
 | POST | `/api/onboarding/restart` | `{}` | `{ ok, state: "in-progress" }` (data kept) |
 | POST | `/api/packs/request` | `{ career, field, level, freeAreas, freeTasks, tools }` (lists or one-per-line text) | `{ ok, slug, path, request }` |
-| POST | `/api/packs/accept` | `{ requestId }` | `{ ok, packId }` or 400 `{ error, errors[] }` |
+| GET | `/api/packs/requests` | - | `[{ ...PackRequest, draft: { id, name, field, path, areas[], taskTypes[], ok, errors[] } or null }]` (newest first) |
+| POST | `/api/packs/accept` | `{ slug }` (`requestId` also accepted) | `{ ok, packId, slug, roleId, createdFolders[] }` or 400 `{ ok:false, error, errors[] }` (nothing changed) |
+| POST | `/api/packs/reject` | `{ slug }` | `{ ok, slug, status: "rejected" }` (draft moved to `pack-requests/rejected/`) |
 | POST | `/api/profile/role` | `{ packId, level, years, company }` | `{ ok, role }` |
 | GET | `/api/plan` | - | first-week plan with statuses |
 

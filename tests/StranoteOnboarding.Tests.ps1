@@ -178,3 +178,78 @@ Describe 'Onboarding: my career is not listed (US4, T039)' {
         }
     } finally { Remove-SnTestEnv $root }
 }
+
+Describe 'Accepting or rejecting a drafted pack (US4, T040)' {
+    $root = New-SnTestEnv
+    try {
+        $a = New-Answers $root
+        $a.packId = 'general'; $a.taskTypes = @('Task'); $a.ratings = [pscustomobject]@{}; $a.focusAreas = @(); $a.packAnswers = [pscustomobject]@{}
+        Save-SnOnboarding -Step 7 -Answers $a | Out-Null
+        Complete-SnOnboarding -Today '2026-10-22' | Out-Null
+        $gTypes = @((Get-SnSettings).types | ForEach-Object { $_.name })
+        New-SnTask -NonInteractive -Id 'T-0001' -Title 'Pour slab level 2' -Type $gTypes[0] | Out-Null
+        $learn = $env:STRANOTE_LEARN_DIR
+        [IO.File]::WriteAllText((Join-Path $learn 'cards.json'), '[{"id":"c1","front":"Slump test","back":"Checks concrete workability"}]', (New-Object Text.UTF8Encoding $false))
+        $cardsBefore = [IO.File]::ReadAllText((Join-Path $learn 'cards.json'))
+        New-SnPackRequest -Career 'Civil Site Engineer' -FreeAreas 'Site supervision' -FreeTasks 'Daily site report' | Out-Null
+        $draftDir = Join-Path $learn 'packs'; New-Item -ItemType Directory -Force $draftDir | Out-Null
+        function Write-Draft([string]$Slug, [scriptblock]$Change) {
+            $d = (Get-Content -Raw (Join-Path $here '..\packs\general.json')) | ConvertFrom-Json
+            $d.id = $Slug; $d.name = 'Civil site engineer'
+            $d.taskTypes = @([pscustomobject]@{ name = 'Site report'; checklist = @('Photos taken') })
+            if ($Change) { & $Change $d }
+            [IO.File]::WriteAllText((Join-Path $draftDir "$Slug.json"), ($d | ConvertTo-Json -Depth 20), (New-Object Text.UTF8Encoding $false))
+        }
+
+        It 'lists requests with a preview of the draft' {
+            Write-Draft 'civil-site-engineer' { param($d) $d.areas = @() }   # invalid: no areas
+            $list = @(Get-SnPackRequest -WithDraft)
+            $list.Count | Should Be 1
+            $list[0].slug | Should Be 'civil-site-engineer'
+            $list[0].draft.ok | Should Be $false
+            (@($list[0].draft.errors) -join ' ') | Should Match 'areas'
+        }
+        It 'an invalid draft returns errors and leaves the role on General' {
+            $r = Approve-SnPackDraft -Slug 'civil-site-engineer'
+            $r.ok | Should Be $false
+            @($r.errors).Count | Should BeGreaterThan 0
+            (Get-SnActivePack).id | Should Be 'general'
+            (Get-SnPackRequest -Slug 'civil-site-engineer').status | Should Be 'pending'
+        }
+        It 'a valid draft switches the role and keeps tasks and cards' {
+            Write-Draft 'civil-site-engineer'
+            $r = Approve-SnPackDraft -Slug 'civil-site-engineer'
+            $r.ok | Should Be $true
+            $r.packId | Should Be 'civil-site-engineer'
+            (Get-SnProfile).roles[0].packId | Should Be 'civil-site-engineer'
+            (Get-SnActivePack).id | Should Be 'civil-site-engineer'
+            @((Get-SnSettings).types | ForEach-Object { $_.name }) -join '|' | Should Be 'Site report'   # old General override no longer hides the new pack
+            (Get-SnSettings).career.companies[0].name | Should Be 'Acme'                               # personal settings kept
+            @(Get-SnTaskList | Where-Object { $_.id -eq 'T-0001' }).Count | Should Be 1
+            [IO.File]::ReadAllText((Join-Path $learn 'cards.json')) | Should Be $cardsBefore
+            (Get-SnPackRequest -Slug 'civil-site-engineer').status | Should Be 'accepted'
+        }
+        It 'refuses a draft that takes a shipped pack id' {
+            New-SnPackRequest -Career 'Teacher' -FreeTasks 'Lesson plan' | Out-Null
+            Write-Draft 'teacher' { param($d) $d.id = 'nurse' }
+            $r = Approve-SnPackDraft -Slug 'teacher'
+            $r.ok | Should Be $false
+            (@($r.errors) -join ' ') | Should Match 'shipped'
+            (Get-SnActivePack).id | Should Be 'civil-site-engineer'
+        }
+        It 'rejecting keeps the current pack and moves the draft out of the pack list' {
+            $r = Deny-SnPackDraft -Slug 'teacher'
+            $r.status | Should Be 'rejected'
+            (Get-SnPackRequest -Slug 'teacher').status | Should Be 'rejected'
+            Test-Path (Join-Path $draftDir 'teacher.json') | Should Be $false
+            Test-Path (Join-Path $learn 'pack-requests\rejected\teacher.json') | Should Be $true
+            (Get-SnActivePack).id | Should Be 'civil-site-engineer'
+            (Approve-SnPackDraft -Slug 'teacher').ok | Should Be $false
+            $all = @(Get-SnPackRequest)
+            $all.Count | Should Be 2   # a flat list, newest first
+            @($all | ForEach-Object { $_.slug }) -join '|' | Should Match 'teacher'
+            { Deny-SnPackDraft -Slug 'civil-site-engineer' } | Should Throw
+            { Get-SnPackRequest -Slug '..\profile' } | Should Throw
+        }
+    } finally { Remove-SnTestEnv $root }
+}

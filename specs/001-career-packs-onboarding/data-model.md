@@ -52,6 +52,7 @@ JSON merge patch over (engine defaults + pack settings). Written by Save Setting
 
 ## PackRequest (`pack-requests/<slug>.json`)
 `{ slug, career, field, level, freeAreas[], freeTasks[], tools[], roleId, status: pending|drafted|accepted|rejected, draftPath, createdAt, updatedAt }`
+(+ `packId`, `previousPackId` once accepted)
 
 ## State transitions
 - Profile.onboarding: `required` -> `in-progress` (first step saved) -> `done` (Complete-SnOnboarding); re-run:

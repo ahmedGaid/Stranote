@@ -83,6 +83,7 @@ while ($listener.IsListening) {
                 }
                 '/api/review' { Send $ctx 200 (Get-SnDailyReview | ConvertTo-Json -Depth 6 -Compress) }
                 '/api/packs' { Send $ctx 200 (ConvertTo-Json -InputObject @(Get-SnPackList) -Depth 6 -Compress) }
+                '/api/packs/requests' { Send $ctx 200 (ConvertTo-Json -InputObject @(Get-SnPackRequest -WithDraft) -Depth 8 -Compress) }
                 '/api/packs/get' {
                     try { Send $ctx 200 (Get-SnPack -Id $req.QueryString['id'] | ConvertTo-Json -Depth 20 -Compress) }
                     catch { Send $ctx 404 (@{ error = $_.Exception.Message } | ConvertTo-Json -Compress) }
@@ -214,6 +215,12 @@ while ($listener.IsListening) {
                 $r = New-SnPackRequest -Career (Str $b.career) -Field (Str $b.field) -Level (Str $b.level) -FreeAreas $b.freeAreas -FreeTasks $b.freeTasks -Tools $b.tools
                 Send $ctx 200 ($r | ConvertTo-Json -Depth 6 -Compress)
             }
+            '/api/packs/accept' {
+                $slug = Str $b.slug; if (-not $slug) { $slug = Str $b.requestId }
+                $r = Approve-SnPackDraft -Slug $slug
+                Send $ctx $(if ($r.ok) { 200 } else { 400 }) ($r | ConvertTo-Json -Depth 6 -Compress)
+            }
+            '/api/packs/reject' { $r = Deny-SnPackDraft -Slug (Str $b.slug); Send $ctx 200 ($r | ConvertTo-Json -Compress) }
             '/api/onboarding/restart' { $r = Restart-SnOnboarding; Send $ctx 200 ($r | ConvertTo-Json -Compress) }
             '/api/onboarding/complete' {
                 $r = Complete-SnOnboarding

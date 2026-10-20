@@ -317,3 +317,129 @@ function New-SnPackRequest {
     Write-Utf8 $p ($req | ConvertTo-Json -Depth 5)
     return [pscustomobject]@{ ok = $true; slug = $slug; path = $p; request = $req }
 }
+
+function Get-SnPackDraftPath($Req) {
+    # where the pack-builder skill put the draft: request.draftPath, else <learn dir>\packs\<slug>.json
+    if ("$($Req.draftPath)") { return "$($Req.draftPath)" }
+    return Join-Path (Join-Path (Get-LearnDir) 'packs') "$($Req.slug).json"
+}
+
+function Get-SnPackRequest {
+    <# All pack requests (newest first) or one by -Slug. -WithDraft adds draft = { id, name, field, areas[], taskTypes[], ok, errors[] } or $null. #>
+    [CmdletBinding()]
+    param([string]$Slug, [switch]$WithDraft)
+    $dir = Join-Path (Get-LearnDir) 'pack-requests'
+    if ($Slug) {
+        $p = Join-Path $dir "$Slug.json"
+        if ($Slug -notmatch '^[a-z0-9]+(-[a-z0-9]+)*$' -or -not (Test-Path $p)) { throw "Unknown pack request '$Slug'." }
+        $list = @([IO.File]::ReadAllText($p) | ConvertFrom-Json)
+    } else {
+        if (-not (Test-Path $dir)) { return @() }
+        $list = @(Get-ChildItem -Path $dir -Filter '*.json' -File | ForEach-Object { try { [IO.File]::ReadAllText($_.FullName) | ConvertFrom-Json } catch { } } |
+                Where-Object { $_ -and "$($_.slug)" } | Sort-Object { "$($_.updatedAt)" } -Descending)
+    }
+    if ($WithDraft) {
+        foreach ($r in $list) {
+            $d = $null; $f = Get-SnPackDraftPath $r
+            if (Test-Path $f) {
+                try {
+                    $pk = [IO.File]::ReadAllText($f) | ConvertFrom-Json
+                    $v = Test-SnPack -Pack $pk
+                    $d = [pscustomobject]@{ id = "$($pk.id)"; name = "$($pk.name)"; field = "$($pk.field)"; path = $f
+                        areas = @(@($pk.areas) | Where-Object { $_ } | ForEach-Object { "$($_.name)" }); taskTypes = @(@($pk.taskTypes) | Where-Object { $_ } | ForEach-Object { "$($_.name)" })
+                        ok = $v.ok; errors = @($v.errors) }
+                } catch { $d = [pscustomobject]@{ id = ''; name = ''; field = ''; path = $f; areas = @(); taskTypes = @(); ok = $false; errors = @("file: not valid JSON ($($_.Exception.Message))") } }
+            }
+            $r | Add-Member -NotePropertyName draft -NotePropertyValue $d -Force
+        }
+    }
+    if ($Slug) { return $list[0] }
+    return $list   # callers wrap in @(), like Get-SnPackList
+}
+
+function Save-SnPackRequest($Req) {
+    $Req.updatedAt = Get-Now
+    $Req.PSObject.Properties.Remove('draft')   # -WithDraft view only, never stored
+    Write-Utf8 (Join-Path (Join-Path (Get-LearnDir) 'pack-requests') "$($Req.slug).json") ($Req | ConvertTo-Json -Depth 5)
+}
+
+function Approve-SnPackDraft {
+    <# Accepts the drafted pack of a request: validates it, copies it to <learn dir>\packs\<id>.json and switches the
+       request's role to it. Tasks, cards and questions are untouched. Override keys the new pack owns (phases, task types,
+       folders, ...) are dropped so the new pack shows; the old overrides are kept in overrides.before-pack-switch.json.
+       Returns { ok, packId, slug, roleId, createdFolders } or { ok = $false, error, errors[] } (then nothing changed). #>
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Slug)
+    $fail = { param($m, $e) [pscustomobject]@{ ok = $false; error = $m; errors = @($e) } }
+    $req = Get-SnPackRequest -Slug $Slug
+    if ("$($req.status)" -eq 'rejected') { return (& $fail 'This request was rejected. Send the career again to start a new one.' @()) }
+    $prof = Get-SnProfile
+    if (-not $prof) { return (& $fail 'Finish onboarding first.' @()) }
+    $src = Get-SnPackDraftPath $req
+    if (-not (Test-Path $src)) { return (& $fail 'There is no draft pack for this career yet. Ask Claude to draft it first.' @()) }
+    try { $raw = [IO.File]::ReadAllText($src); $pack = $raw | ConvertFrom-Json }
+    catch { return (& $fail 'The draft pack is not valid.' @("file: not valid JSON ($($_.Exception.Message))")) }
+    $v = Test-SnPack -Pack $pack
+    $errs = @($v.errors)
+    $custom = Join-Path (Get-LearnDir) 'packs'
+    $dest = Join-Path $custom "$($pack.id).json"
+    if ($v.ok) {
+        $shipped = @(Get-SnPackList | Where-Object { $_.id -eq "$($pack.id)" -and -not $_.path.StartsWith($custom, [StringComparison]::OrdinalIgnoreCase) })
+        if ($shipped.Count) { $errs += "id: '$($pack.id)' is a shipped pack; the draft needs its own id" }
+    }
+    if ($errs.Count) { return (& $fail 'The draft pack is not valid.' $errs) }
+
+    # the new settings must be valid before anything is written
+    $roles = @($prof.roles); $ri = 0
+    for ($i = 0; $i -lt $roles.Count; $i++) { if ("$($roles[$i].id)" -eq "$($req.roleId)") { $ri = $i; break } }
+    $ov = Copy-SnJson (Get-SnOverrides)
+    if ($ri -eq 0) {
+        foreach ($k in @((Get-SnPackSettings $pack).PSObject.Properties | ForEach-Object { $_.Name })) { $ov.PSObject.Properties.Remove($k) }
+        try { Assert-SnSettings (Merge-SnObject (Get-SnBaseSettings $pack) $ov) }
+        catch { return (& $fail "The draft pack's settings are not valid: $($_.Exception.Message)" @()) }
+    }
+
+    if (-not (Test-Path $custom)) { New-Item -ItemType Directory -Path $custom -Force | Out-Null }
+    if ([IO.Path]::GetFullPath($src) -ne [IO.Path]::GetFullPath($dest)) { Write-Utf8 $dest $raw }
+    $oldPack = "$($roles[$ri].packId)"
+    $roles[$ri].packId = "$($pack.id)"
+    $created = @()
+    if ($ri -eq 0) {
+        $ovPath = Join-Path (Get-LearnDir) 'overrides.json'
+        if (Test-Path $ovPath) { Copy-Item $ovPath (Join-Path (Get-LearnDir) 'overrides.before-pack-switch.json') -Force }
+        Write-Utf8 $ovPath ($ov | ConvertTo-Json -Depth 20)
+    }
+    Save-SnProfile -SnProfile $prof | Out-Null
+    if ($ri -eq 0) { $created = @((Save-SnSettings -Settings (Get-SnSettings)).createdFolders) }   # creates the new pack's folders
+    $req.status = 'accepted'; $req.draftPath = $dest
+    $req | Add-Member -NotePropertyName packId -NotePropertyValue "$($pack.id)" -Force
+    $req | Add-Member -NotePropertyName previousPackId -NotePropertyValue $oldPack -Force
+    Save-SnPackRequest $req
+    return [pscustomobject]@{ ok = $true; packId = "$($pack.id)"; slug = $req.slug; roleId = "$($roles[$ri].id)"; createdFolders = $created }
+}
+
+function Deny-SnPackDraft {
+    <# Rejects a pack request. Its draft (if in <learn dir>\packs and not used by a role) moves to pack-requests\rejected\,
+       so it leaves the pack list; nothing is deleted. The role keeps its current pack. #>
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Slug)
+    $req = Get-SnPackRequest -Slug $Slug
+    if ("$($req.status)" -eq 'accepted') { throw 'This pack is already accepted. Pick another career pack for the role instead.' }
+    $f = Get-SnPackDraftPath $req
+    $custom = [IO.Path]::GetFullPath((Join-Path (Get-LearnDir) 'packs'))
+    if ((Test-Path $f) -and [IO.Path]::GetFullPath($f).StartsWith($custom, [StringComparison]::OrdinalIgnoreCase)) {
+        $id = [IO.Path]::GetFileNameWithoutExtension($f)
+        $prof = Get-SnProfile
+        if (-not ($prof -and @($prof.roles | Where-Object { "$($_.packId)" -eq $id }).Count)) {
+            $bin = Join-Path (Join-Path (Get-LearnDir) 'pack-requests') 'rejected'
+            if (-not (Test-Path $bin)) { New-Item -ItemType Directory -Path $bin -Force | Out-Null }
+            $to = Join-Path $bin ([IO.Path]::GetFileName($f))
+            if (Test-Path $to) { $to = Join-Path $bin ($id + '-' + (Get-Date).ToString('yyyyMMddHHmmss') + '.json') }
+            Move-Item -LiteralPath $f -Destination $to
+            $req.draftPath = $to
+        }
+    }
+    $req.status = 'rejected'
+    Save-SnPackRequest $req
+    return [pscustomobject]@{ ok = $true; slug = $req.slug; status = 'rejected' }
+}
