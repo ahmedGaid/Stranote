@@ -22,16 +22,30 @@ take a `claimed` row, start a `blocked` row, merge (Mode C only), push, touch `D
 
 ## Mode A - RESUME (automatic)
 1. Read `STATE.md` (skip it if a session hook already injected it). Do NOT explore the codebase to rebuild context.
-2. **Pick, in this order, the first that fits** (your agent name/kind must be in the row's **Fit**, or Fit says `any`):
-   1. The task the user named (`/stranote_resume S2`, or a request in the same message). If it is claimed by another
-      agent, say so in one line and fall through to the next rule.
-   2. **A review:** a row in `review` whose Branch is a task branch (`<agent>/<id>`) and whose author is a different
-      agent kind than you. Reviews come first because they unblock merges.
-   3. **New work:** the first row in `open` (table order = priority) whose **Touches** do not overlap any `claimed` row.
-   Skip every `claimed`, `blocked`, `approved` and `done` row, including rows claimed under your own agent name in an
-   older session (they may still be running). Uncommitted files in the home folder are not a reason to stop: you work
-   in your own worktree.
-   Nothing fits -> print the brief with "Nothing for <agent> now", name the agent that fits the first open row, stop.
+2. **Pick a task. Never answer "nothing for me": go down this ladder until a step gives you a task.**
+   1. **Named:** the task the user named (`/stranote_resume S2`, or a request in the same message). Claimed by
+      another agent -> say so in one line and go on down the ladder.
+   2. **A review:** a row in `review` whose Branch is a task branch (`<agent>/<id>`) written by a different agent kind
+      than you. Reviews come first because they unblock merges. Agents on a small model (Copilot, or any agent on a
+      Flash / mini / small model) review only branches that change docs, skills or pack text; branches that change
+      `src/` or `tests/` need Claude, Codex or Antigravity on a strong model.
+   3. **Best fit:** the first `open` row (table order = priority) whose Fit names you or says `any`, and whose
+      **Touches** do not overlap a `claimed` row.
+   4. **Any open row:** the first `open` row you can do even if its Fit names other agents (Fit is advice: say "not
+      the best fit"). Rows whose Fit is only `owner` stay with the owner.
+   5. **Prepare an owner decision:** the first `blocked: owner` row without a memo -> write
+      `docs/decisions/<id>.md` (the question, 2-3 options with cost and risk, your recommendation, what it unblocks) on
+      branch `<agent>/<id>-memo`, then set the row to `blocked: owner (memo: <branch>)`. Never decide for the owner.
+   6. **Find new work:** look, in this order, at unchecked tasks in `specs/*/tasks.md` not blocked by a board row,
+      items in `PHASE_REVIEW.md` marked "fix when the file is next edited", engine functions without a Pester test,
+      `TODO`s in `src/`, gaps in `README.md` / `docs/`. Add the smallest useful one as a new board row (next free id,
+      Fit, Touches) and claim it. It must stay inside the current rules: no new playbook phase, no Phase A code before
+      P3 is approved, no stack change, never `D:\Work`.
+   7. **Health check** (only if 1-6 gave nothing): in a detached worktree of `main`, run the full Pester suite and
+      check that `STATE.md`, `AGENTS.md` and the skills agree; add every problem as a new `open` row; log the result.
+   Always skip `claimed`, `reviewing`, `blocked`, `approved` and `done` rows, including rows claimed under your own
+   agent name in an older session (they may still be running). Uncommitted files in the home folder are not a reason
+   to stop: you work in your own worktree.
 3. **Claim it (FIRST action, before any file change, build or test):** in that row set Status `claimed` (a review:
    `reviewing`), Claimed by `<agent + model> <yyyy-MM-dd HH:mm>`, and for new work Branch `<agent>/<id>` (e.g.
    `codex/U2`). Change nothing else, save (UTF-8 without BOM), re-read the row: if another agent's name is there, you
@@ -41,13 +55,14 @@ take a `claimed` row, start a `blocked` row, merge (Mode C only), push, touch `D
    - Review: `... worktree add --detach D:\Projects\Stranote-wt\<id>-review <branch>` (the author's worktree keeps the branch)
    Do ALL file work there. Files not committed on `main` are not in your worktree: read them from
    `D:\Projects\Stranote\...` by absolute path. Test server: first free port from 8767 (8765 is live, never use it).
-   Tests use temp data only.
+   Tests use temp data only. Scratch files (diffs, notes, command output) go to `%TEMP%\stranote-<agent>\`, never
+   into the repo or the home folder.
 5. Print the brief, then start immediately (no "should I start?"):
 
 ---
 ## Stranote - Session Brief
-**My task:** [id - title - branch - worktree path]   (or "Nothing for <agent> now - run <agent> next")
-**Why this one:** [named by user / review of another agent's work / first open row that fits me]
+**My task:** [id - title - branch - worktree path]
+**Why this one:** [ladder step: named / review / best fit / any open row / owner-decision memo / new work found in <source> / health check]
 **Others working now:** [claimed/reviewing rows: who, which task, since]
 **Last completed:** [latest 1-3 log lines]
 **Blocked on owner:** [ids only]

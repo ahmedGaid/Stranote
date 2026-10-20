@@ -6,3 +6,5 @@ src/settings.backup.json
 packs/custom/
 *.log
 *.bak
+# agent scratch files (agents write them to %TEMP%\stranote-<agent>; this is only a safety net)
+_tmp_*

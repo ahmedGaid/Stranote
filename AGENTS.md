@@ -34,8 +34,9 @@ GitHub Copilot gets the same commands from `.github/prompts/*.prompt.md`.
 
 **Several agents at once (task board):**
 - `STATE.md` has a **Task board**. `/stranote_resume` = choose and start your next task **without asking the owner**:
-  the task the owner named, else a `review` of another agent's branch, else the first `open` row that fits you and
-  does not touch the same files as a `claimed` row. Never take a `claimed` or `blocked` row. Owner questions found
+  the task the owner named, else a `review` of another agent's branch, else the best-fit `open` row, else any `open`
+  row, else a decision memo for a `blocked: owner` row, else new work found in the backlog, else a health check.
+  Never answer "nothing for me". Never take a `claimed` or `blocked` row. Owner questions found
   while working become new `blocked: owner` rows; take the conservative option and continue.
 - **Claim first:** before ANY file change, build or test, mark the row `claimed` with your agent, time and branch.
 - **Own worktree:** work in `D:\Projects\Stranote-wt\<id>` on branch `<agent>/<id>` (from `main`), never in the home
@@ -48,6 +49,8 @@ GitHub Copilot gets the same commands from `.github/prompts/*.prompt.md`.
   agents must do it themselves). Uncommitted work in the home folder must be listed in `STATE.md`.
 - Only one agent at a time does the live upgrade of `D:\Work`, and only when the task says so.
 - A new procedure used twice becomes a skill in `.agents/skills/` (shared), not a private one.
+- Scratch files (diffs, command output, notes to yourself) go to `%TEMP%\stranote-<agent>\`, never into the repo or
+  the home folder (`_tmp_*` is git-ignored as a safety net, not as permission).
 
 ## Agents on this project and "Agent fit"
 | Agent | Models | Fits |
@@ -55,6 +58,7 @@ GitHub Copilot gets the same commands from `.github/prompts/*.prompt.md`.
 | Claude Code | Opus 5.5 (default); Sonnet 5.5 routine coding; Haiku 5.5 trivial edits | planning, specs, playbook, product decisions with the owner, multi-file engine work, live upgrade, Arabic teaching content |
 | Codex | gpt-6-luna (xhigh) | multi-file coding, tests, performance work, independent review of another agent's branch |
 | Google Antigravity | Gemini (model picked in the app) | multi-file coding, UI work checked in its built-in browser (light/dark/390px), tests; a second reviewer next to Codex |
+| Cline (VS Code extension) | the model set in Cline (today MiniMax-M3.1-Flash, a small model) | one-file fixes, docs, pack JSON text, reviews of docs/skill/pack-text branches only (code reviews need Claude, Codex or Antigravity) |
 | GitHub Copilot (VS Code Chat, free plan, Auto model) | small models, monthly limit | one-file fixes (CSS, wording, pack JSON labels), explaining code, one Pester test, read-only review |
 
 How to choose: needs an owner decision, a spec, more than ~3 files, engine PowerShell or `D:\Work` -> Claude Code,
