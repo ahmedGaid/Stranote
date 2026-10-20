@@ -310,3 +310,14 @@ CV page and the Learn page (cards from a sample task). Check light and dark mode
 - [ ] `Test-SnPack -Path ...` returns `ok = True`
 - [ ] 5 fictional samples in `samples\<id>\` and the samples test passes (>= 10 cards)
 - [ ] No real people, customers, patients or secrets anywhere
+
+## A pack for one person's career (pack requests)
+
+When someone picks **My career is not listed** in onboarding, Stranote saves a request in
+`<learn dir>\pack-requests\<slug>.json` and keeps them on the General pack. Then:
+
+1. The Claude skill `stranote-pack-builder` ("build my Stranote pack") drafts `<learn dir>\packs\<slug>.json` from the
+   request and a few questions. Anything it adds that the person did not say is listed in `"x-unconfirmed"`.
+2. `Submit-SnPackDraft -Slug <slug>` validates the draft and marks the request `drafted`.
+3. The person reviews it in **Settings > Roles** and clicks **Accept and switch role** (`Approve-SnPackDraft`) or
+   **Reject** (`Deny-SnPackDraft`; the draft moves to `pack-requests\rejected\`). Tasks, cards and progress are kept.

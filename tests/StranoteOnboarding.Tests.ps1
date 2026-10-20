@@ -253,3 +253,30 @@ Describe 'Accepting or rejecting a drafted pack (US4, T040)' {
         }
     } finally { Remove-SnTestEnv $root }
 }
+
+Describe 'The pack builder hands in a draft (US4, T042)' {
+    $root = New-SnTestEnv
+    try {
+        New-SnPackRequest -Career 'Landscape Architect' -FreeAreas 'Planting design' -FreeTasks 'Site survey' | Out-Null
+        $packs = Join-Path $env:STRANOTE_LEARN_DIR 'packs'; New-Item -ItemType Directory -Force $packs | Out-Null
+        $d = (Get-Content -Raw (Join-Path $here '..\packs\general.json')) | ConvertFrom-Json
+        $d.id = 'landscape-architect'; $d.name = 'Landscape architect'
+        $f = Join-Path $packs 'landscape-architect.json'
+        It 'a missing or invalid draft is reported and the request stays pending' {
+            (Submit-SnPackDraft -Slug 'landscape-architect').ok | Should Be $false
+            $bad = Copy-SnJson $d; $bad.categories = @()
+            [IO.File]::WriteAllText($f, ($bad | ConvertTo-Json -Depth 20), (New-Object Text.UTF8Encoding $false))
+            $r = Submit-SnPackDraft -Slug 'landscape-architect'
+            $r.ok | Should Be $false
+            (@($r.errors) -join ' ') | Should Match 'categories'
+            (Get-SnPackRequest -Slug 'landscape-architect').status | Should Be 'pending'
+        }
+        It 'a valid draft sets the request to drafted with its path' {
+            [IO.File]::WriteAllText($f, ($d | ConvertTo-Json -Depth 20), (New-Object Text.UTF8Encoding $false))
+            (Submit-SnPackDraft -Slug 'landscape-architect').ok | Should Be $true
+            $q = Get-SnPackRequest -Slug 'landscape-architect'
+            $q.status | Should Be 'drafted'
+            $q.draftPath | Should Be $f
+        }
+    } finally { Remove-SnTestEnv $root }
+}

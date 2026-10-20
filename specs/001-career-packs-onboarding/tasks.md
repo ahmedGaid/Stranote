@@ -169,7 +169,14 @@ description: "Task list for 001 career packs and first-day onboarding"
     (enabled only for a valid draft; confirm; `POST /api/packs/accept`, 400 errors shown inline, reload on success) and
     "Reject" (confirm; `POST /api/packs/reject`). Checked in Edge headless: light, dark, 390 px; reject then accept switches
     the pack and the task types. 111 tests pass.
-- [ ] T042 [US4] Write the `ops-pack-builder` Claude skill: read `pack-requests/<slug>.json`, draft `<learn dir>/packs/<slug>.json`, run `Test-SnPack`, set status `drafted`
+- [x] T042 [US4] Write the `ops-pack-builder` Claude skill: read `pack-requests/<slug>.json`, draft `<learn dir>/packs/<slug>.json`, run `Test-SnPack`, set status `drafted`
+  - Done 2026-10-20: skill is `stranote-pack-builder` (global `~/.claude/skills/stranote-pack-builder/SKILL.md`; renamed from
+    `ops-pack-builder` with the product). It reads the request (`Get-SnPackRequest`), asks max 5 questions (phases,
+    checklists, files, terms, private names), drafts from `packs\general.json` + the person's words, puts everything it
+    added itself in `"x-unconfirmed"` (never invents domain facts), writes `<learn dir>\packs\<slug>.json` (UTF-8, no BOM),
+    runs `Test-SnPack`, then `Submit-SnPackDraft -Slug` (new: validates, sets `drafted` + draftPath; invalid -> errors, request
+    unchanged). The person accepts in Settings > Roles. New exported `Get-SnLearnDir` (skills need the learn dir).
+    Dry run of the whole recipe on temp data: valid, drafted, accepted, modules/types switched, Arabic kept. 113 tests pass.
 
 ---
 

@@ -17,6 +17,7 @@ function Get-LearnDir {
     if (-not (Test-Path $d)) { New-Item -ItemType Directory -Force -Path $d | Out-Null }
     return $d
 }
+function Get-SnLearnDir { return Get-LearnDir }   # exported name for skills (e.g. where custom packs go: <learn dir>\packs)
 
 function Read-LearnList([string]$Name) {
     $p = Join-Path (Get-LearnDir) $Name

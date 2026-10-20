@@ -443,3 +443,20 @@ function Deny-SnPackDraft {
     Save-SnPackRequest $req
     return [pscustomobject]@{ ok = $true; slug = $req.slug; status = 'rejected' }
 }
+
+function Submit-SnPackDraft {
+    <# The pack builder hands in its draft: validates <learn dir>\packs\<slug>.json (or -Path; the file name must be the pack id)
+       and sets the request to 'drafted' with its draftPath. Invalid -> { ok = $false, errors[] } and the request is unchanged.
+       Accepting stays with the person (Settings > Roles, or Approve-SnPackDraft). #>
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Slug, [string]$Path)
+    $req = Get-SnPackRequest -Slug $Slug
+    if (@('accepted', 'rejected') -contains "$($req.status)") { throw "This request is already $($req.status)." }
+    if (-not $Path) { $Path = Join-Path (Join-Path (Get-LearnDir) 'packs') "$Slug.json" }
+    if (-not (Test-Path $Path)) { return [pscustomobject]@{ ok = $false; errors = @("file: '$Path' not found") } }
+    $v = Test-SnPack -Path $Path
+    if (-not $v.ok) { return [pscustomobject]@{ ok = $false; errors = @($v.errors) } }
+    $req.status = 'drafted'; $req.draftPath = [IO.Path]::GetFullPath($Path)
+    Save-SnPackRequest $req
+    return [pscustomobject]@{ ok = $true; errors = @(); slug = $req.slug; draftPath = $req.draftPath }
+}
