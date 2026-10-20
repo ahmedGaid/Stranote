@@ -29,6 +29,7 @@ open row > owner-decision memo > new work from the backlog > health check.
 |---|---|---|---|---|---|---|
 | P1 | Complete PHASE_BASELINE.md: method, template vs data bytes, browser metrics via headless Edge, full Pester run; result: 100-duty baseline, 113/0/0 Pester; old temp cleanup blocked by automatic review | Codex | done | Codex (gpt-6-luna) 2026-10-20 15:49 - complete | main (home, before the board) | home: PHASE_BASELINE.md, tests/perf/ |
 | P2 | Playbook step 2 written up in `PHASE_REVIEW.md`: (a) conflicts with constitution/specs, (b) backlog -> playbook phase map, (c) unclear points + EBS-specific names list for Phase I (playbook section 10.3) | Claude Opus, Codex | done | Claude Code (Opus 5.5) 2026-10-20 16:12 - 4 conflicts, phase map, 6 unclear points, EBS names list; owner decisions in D3-D5 | main (home) | home: PHASE_REVIEW.md |
+| X4 | Cline slash commands: `.clinerules/workflows/stranote_resume.md` + `stranote_status.md` (point to the shared skills) | Claude Opus | done | Claude Code (Opus 5.5) 2026-10-20 17:15 - committed to main | main (home) | home: .clinerules/, AGENTS.md, STATE.md |
 | X3 | `/stranote_resume` never answers "nothing for me" (fallback ladder); Cline in agents table; scratch files out of the repo | Claude Opus | done | Claude Code (Opus 5.5) 2026-10-20 17:08 - rules committed to main | main (home) | home: .agents/skills/stranote-resume, AGENTS.md, .gitignore, STATE.md |
 | X1 | Add Google Antigravity as a 4th agent (global skills + rules, AGENTS.md agents table, board Fit) | Claude Opus | done | Claude Code (Opus 5.5) 2026-10-20 16:35 - done; owner to run the Antigravity check | main (home, uncommitted) | home: AGENTS.md, STATE.md; ~/.gemini |
 | X2 | `/stranote_resume` picks and starts the next task with no questions (auto reviews, `approved` status, `/stranote_resume merge`) | Claude Opus | done | Claude Code (Opus 5.5) 2026-10-20 17:10 - rules committed to main | main (home) | home: .agents/skills/stranote-resume, AGENTS.md, STATE.md |
@@ -42,14 +43,15 @@ open row > owner-decision memo > new work from the backlog > health check.
 | S2 | T046: `ebs-task`, `ebs-dashboard-guide`, `stranote-learn` skills read the active pack | Claude Opus, Codex, Antigravity | reviewing | Cline (MiniMax-M3.1-Flash) 2026-10-20 16:56 - reviewing claude/S2 (12f5f6c + f544e51) | claude/S2 (review wt: D:\Projects\Stranote-wt\S2-review) | .agents/skills/ |
 | S3 | T047 docs + T049 release checks/results for Spec 001 | any | blocked: S1, S2 | | | docs/, specs/001-*/ |
 | U1 | Dark mode: board horizontal scrollbar track renders white | Antigravity (best: browser check), Copilot ok, any | claimed | Antigravity (Gemini 3.8 Flash) 2026-10-20 16:18 | antigravity/U1 | src/dashboard_template.html (CSS) |
-| U2 | CV `privateNames` warning text pack-driven (now says "internal custom object names") | Antigravity (best: browser check), Copilot ok, any | open | | | src/dashboard_template.html, packs/*.json |
+| U2 | CV `privateNames` warning text pack-driven (now says "internal custom object names") | Antigravity (best: browser check), Copilot ok, any | claimed | Codex (gpt-6-luna) 2026-10-20 17:04 | codex/U2 | src/dashboard_template.html, packs/*.json |
 | E1 | Engine uses pack `skillMap` / `starterLessons`; starter lessons are empty in all packs | Claude Opus, Codex, Antigravity | blocked: needs spec | | | src/StranoteLearn.ps1, packs/ |
 | D1 | Decide `01_Tasks` (listed by packs, unused) vs `01_Tickets` | owner | blocked: owner | | | |
 | D2 | Brand gaps: logo bar `#4F46E5` ignores accent, CV export Oracle red, learn-accent fallback, 3 inline logos, Google Fonts, EBS categories fallback | owner, then any | blocked: owner | | | |
-| E2 | Optional: right-click context menu, styled tooltips (spec 001 section 13) | Antigravity, any | open | | | src/dashboard_template.html |
+| E2 | Optional: right-click context menu, styled tooltips (spec 001 section 13) | Antigravity, any | claimed | GitHub Copilot (Copilot SDK in VS Code) 2026-10-20 17:05 | copilot/E2 | src/dashboard_template.html |
 | O1 | T-0001 EBS screenshots | owner | blocked: owner | | | |
 
 ### Log (latest first, max 8)
+- 2026-10-20 Claude Code: X4 Cline gets `/stranote_resume` and `/stranote_status` from `.clinerules/workflows/` (pointers to the shared skills).
 - 2026-10-20 Claude Code: X3 pick ladder (named > review > best fit > any open > owner memo > new work > health check; never "nothing"); Cline added (small model: no code reviews); scratch files to %TEMP%, `_tmp_*` git-ignored.
 - 2026-10-20 Codex: P1 complete: reproducible 100-duty baseline, page/data split, headless Edge timings; Pester 113/0/0. Recursive cleanup of old temp dirs was blocked by automatic review (main).
 - 2026-10-20 Claude Code: X2 `/stranote_resume` is fully automatic (named task > review of another agent's branch > first open row; owner questions become `blocked: owner` rows); new statuses `reviewing`/`approved`; `/stranote_resume merge`; board rules committed to main.

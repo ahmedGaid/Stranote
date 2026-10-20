@@ -30,7 +30,7 @@ file or a skill, so the next agent sees them. The repo is public: no secrets, cl
 | `/stranote_resume merge` | MERGE every `approved` row into `main` (tests first, never push) | `.agents/skills/stranote-resume/SKILL.md` |
 
 If your agent does not run these as commands, treat the typed text as the request and follow the procedure file.
-GitHub Copilot gets the same commands from `.github/prompts/*.prompt.md`.
+GitHub Copilot gets the same commands from `.github/prompts/*.prompt.md`, Cline from `.clinerules/workflows/*.md`.
 
 **Several agents at once (task board):**
 - `STATE.md` has a **Task board**. `/stranote_resume` = choose and start your next task **without asking the owner**:
