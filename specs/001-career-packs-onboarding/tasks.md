@@ -162,7 +162,13 @@ description: "Task list for 001 career packs and first-day onboarding"
     `GET /api/packs/requests`, `POST /api/packs/accept { slug }`, `POST /api/packs/reject { slug }`.
     Fix found on the way: `Assert-SnSettings` rejected a task type without `questions` (PS 5.1 counted `$null` as a key).
     111 tests pass.
-- [ ] T041 [US4] Settings > Roles: pending request, draft preview (areas, task types), Accept / Reject
+- [x] T041 [US4] Settings > Roles: pending request, draft preview (areas, task types), Accept / Reject
+  - Done 2026-10-20 (dashboard_template.html `renderRolesTab`): new Settings tab "Roles" lists your roles (pack name, level)
+    and every pack request from `GET /api/packs/requests` as a card: career, status (Waiting for a draft / Draft needs fixing /
+    Draft ready / Accepted / Rejected), draft pack name, areas and task types, validation errors. "Accept and switch role"
+    (enabled only for a valid draft; confirm; `POST /api/packs/accept`, 400 errors shown inline, reload on success) and
+    "Reject" (confirm; `POST /api/packs/reject`). Checked in Edge headless: light, dark, 390 px; reject then accept switches
+    the pack and the task types. 111 tests pass.
 - [ ] T042 [US4] Write the `ops-pack-builder` Claude skill: read `pack-requests/<slug>.json`, draft `<learn dir>/packs/<slug>.json`, run `Test-SnPack`, set status `drafted`
 
 ---
