@@ -1,7 +1,7 @@
 # Stranote - rules for every agent
 
-Shared rulebook for any coding agent working on Stranote (Claude Code, Codex, or another). Claude Code loads it through
-`CLAUDE.md`; Codex reads it directly. It wins over your tool's defaults. The constitution
+Shared rulebook for any coding agent working on Stranote (Claude Code, Codex, Antigravity, Copilot or another). Claude
+Code loads it through `CLAUDE.md`; Codex and Antigravity read it directly (Antigravity also loads `.agents/skills/`). It wins over your tool's defaults. The constitution
 (`.specify/memory/constitution.md`) wins over this file; the owner can change either one in writing.
 
 Stranote turns anyone's daily work (any career) into lasting knowledge: tasks -> auto knowledge cards -> teach before
@@ -27,18 +27,25 @@ file or a skill, so the next agent sees them. The repo is public: no secrets, cl
 | `/stranote_resume` (Codex: also `$stranote-resume`) | RESUME: brief + start the Next action | `.agents/skills/stranote-resume/SKILL.md` |
 | `/stranote_resume update "<what changed>"` | UPDATE: rewrite `STATE.md` | same file |
 | `/stranote_status [focus]` (Codex: also `$stranote-status`) | STATUS: read-only report | `.agents/skills/stranote-status/SKILL.md` |
+| `/stranote_resume merge` | MERGE every `approved` row into `main` (tests first, never push) | `.agents/skills/stranote-resume/SKILL.md` |
 
 If your agent does not run these as commands, treat the typed text as the request and follow the procedure file.
 GitHub Copilot gets the same commands from `.github/prompts/*.prompt.md`.
 
-**Hand-off (any agent can take the lead):**
-- **Claim first:** before starting ANY task here (changing files, running builds/tests), write the
-  `**Working now:**` line in `STATE.md` (agent, task, start time, branch). If another agent or session holds it, do not
-  start: ask the user. Release it (`free`) in UPDATE. Full rule: `.agents/skills/stranote-resume/SKILL.md`.
-- One agent at a time in `D:\Projects\Stranote`. To work in parallel, the second agent uses its own git worktree and
-  branch (`git worktree add D:\Projects\Stranote-<agent> -b <agent>/<task>`), never the same folder.
+**Several agents at once (task board):**
+- `STATE.md` has a **Task board**. `/stranote_resume` = choose and start your next task **without asking the owner**:
+  the task the owner named, else a `review` of another agent's branch, else the first `open` row that fits you and
+  does not touch the same files as a `claimed` row. Never take a `claimed` or `blocked` row. Owner questions found
+  while working become new `blocked: owner` rows; take the conservative option and continue.
+- **Claim first:** before ANY file change, build or test, mark the row `claimed` with your agent, time and branch.
+- **Own worktree:** work in `D:\Projects\Stranote-wt\<id>` on branch `<agent>/<id>` (from `main`), never in the home
+  folder `D:\Projects\Stranote` (exception: rows whose Touches say `home`). Test port: first free from 8767.
+- **Finish:** commit on your task branch (never `main`, never push), set the row to `review` and add a log line.
+  Another agent reviews it (`approved` or back to `open` with fixes). Merging happens only when the owner types
+  `/stranote_resume merge` (merges every `approved` row after a green suite). Full procedure:
+  `.agents/skills/stranote-resume/SKILL.md`.
 - Before ending any turn that changed project files, run UPDATE (Claude Code has a Stop hook that forces it; other
-  agents must do it themselves). Uncommitted work must be listed in `STATE.md`, so the next agent knows what it is.
+  agents must do it themselves). Uncommitted work in the home folder must be listed in `STATE.md`.
 - Only one agent at a time does the live upgrade of `D:\Work`, and only when the task says so.
 - A new procedure used twice becomes a skill in `.agents/skills/` (shared), not a private one.
 
@@ -47,15 +54,15 @@ GitHub Copilot gets the same commands from `.github/prompts/*.prompt.md`.
 |---|---|---|
 | Claude Code | Opus 5.5 (default); Sonnet 5.5 routine coding; Haiku 5.5 trivial edits | planning, specs, playbook, product decisions with the owner, multi-file engine work, live upgrade, Arabic teaching content |
 | Codex | gpt-6-luna (xhigh) | multi-file coding, tests, performance work, independent review of another agent's branch |
+| Google Antigravity | Gemini (model picked in the app) | multi-file coding, UI work checked in its built-in browser (light/dark/390px), tests; a second reviewer next to Codex |
 | GitHub Copilot (VS Code Chat, free plan, Auto model) | small models, monthly limit | one-file fixes (CSS, wording, pack JSON labels), explaining code, one Pester test, read-only review |
 
-How to choose: needs an owner decision, a spec, more than ~3 files, engine PowerShell or `D:\Work` -> Claude Code or
-Codex (strongest model). One file with a clear "done" -> Copilot is fine. A review -> an agent other than the author.
+How to choose: needs an owner decision, a spec, more than ~3 files, engine PowerShell or `D:\Work` -> Claude Code,
+Codex or Antigravity (strongest model). UI that must be seen in a browser -> Antigravity fits well. One file with a clear "done" -> Copilot is fine. A review -> an agent other than the author.
 
-**Rule:** whenever you finish a task (or write a Next action / new open item), state which agent fits the NEXT task,
-in your reply and in `STATE.md`, in this format:
+**Rule:** every board row has a **Fit** column (who may take it). When you finish a task, end your reply with the
+Agent fit line of the next open task, in this format:
 `**Agent fit:** Claude Code > Opus 5.5 (best) · Codex > gpt-6-luna (ok) · GitHub Copilot (no: needs planning)`
-Open items in `STATE.md` carry a short tag: `[fit: Claude/Codex]`, `[fit: any]`, `[fit: Copilot ok]`, `[fit: owner]`.
 
 ## Skills (use the skill when its task comes up)
 Your agent may load these on its own. If not, open the SKILL.md and follow it before the task. "Load skill X" anywhere
@@ -103,7 +110,8 @@ ask in chat, write the file as UTF-8 without BOM.
   changes). Check UI changes in light, dark and 390px width.
 - Live upgrade = back up, copy `src\*` (except config/settings json) + `packs\` into `D:\Work\05_Tools\Stranote`,
   restart the server. Backups go to `D:\Work\06_Admin\Backups\stranote-upgrade-<timestamp>`.
-- Commit or push only when the owner asks. Mark finished tasks `[X]` in `tasks.md` with the commit id.
+- Commits: agents commit only on their own task branch; commits to `main`, merges and pushes only when the owner
+  asks. Mark finished tasks `[X]` in `tasks.md` with the commit id.
 
 ## Run and test
 - Live: `D:\Work\stranote.cmd` -> http://localhost:8765 (do not use 8765 for testing). Live install

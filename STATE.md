@@ -2,48 +2,54 @@
 
 Shared by every agent. Read by `/stranote_resume` (RESUME/STATUS), rewritten by `/stranote_resume update`.
 Rules, run/test, agents and file map are in `AGENTS.md`; history is in `specs/*/tasks.md` and git.
+Several agents can work at once: each claims ONE board row and works in its own worktree
+(`D:\Projects\Stranote-wt\<id>`, branch `<agent>/<id>`). Procedure: `.agents/skills/stranote-resume/SKILL.md`.
 
 ## CURRENT STATE
-<!-- Last updated: 2026-10-20 by Claude Code (Opus 5.5) - agent fit labels, Copilot prompts, merged to main -->
-**Working now:** free
-**Last agent:** Claude Code (Opus 5.5), 2026-10-20. Branch `main` (agent-shared setup merged from
-`agent-shared-setup`, not pushed). Uncommitted: only the playbook files (`STRANOTE_LINEAR_PLAYBOOK.md`,
-`LOCAL_FIRST_AUDIT.md`, `PHASE_A_NOTES.md`, untracked on purpose).
-**Tests:** 113 pass on main (not re-run: no code changed).
-**Phase:** rename, GitHub, Linear-style UI, US2, US3 (T031-T038), US4 (T039-T042) done. Now: `STRANOTE_LINEAR_PLAYBOOK.md`
-steps 2-4 (review, baseline, Phase A spec).
+<!-- Last updated: 2026-10-20 17:20 by Claude Code (Opus 5.5) - automatic task picking (X2) -->
+**Phase:** US4 (T039-T042) done. Playbook: server baseline + Phase A spec (`specs/002-phase-a-safety/`) drafted by
+Codex; Phase A waits for owner approval of its scope.
+**Tests:** 113 pass, 0 fail on main (Codex, 2026-10-20). Candidate `phase-a-wip` f30150d not run.
+**Performance:** 100 synthetic duties: cold `GET /` 1338.62 ms (budget 1000), warm median 585.02 ms; page 344994
+bytes of which template 283409. Browser metrics not measured yet (P1).
+**Uncommitted in home** (not in worktrees until committed): `.specify/feature.json` (active spec -> 002),
+`PHASE_BASELINE.md`, `specs/002-phase-a-safety/`, `STRANOTE_LINEAR_PLAYBOOK.md`, `LOCAL_FIRST_AUDIT.md`,
+`PHASE_A_NOTES.md`, Codex scratch `_tmp_*.txt` (Codex to delete), `tests/perf/` (P1). Task-board rules and
+`PHASE_REVIEW.md` are committed on main.
 
-### Last completed
-- Project made agent-shared (Claude Code, Codex, GitHub Copilot): rules `AGENTS.md` (+ `CLAUDE.md`,
-  `.github/copilot-instructions.md`), state in this file, procedures + Stranote skills in `.agents/skills/`
-  (junctions from `~/.claude/skills`, `~/.codex/skills`), Copilot commands `.github/prompts/stranote_{resume,status}`.
-  Codex check passed.
-- Rules added: claim first (`Working now`), Agent fit line after every task + `[fit: ...]` tags on open items.
+### Task board
+Status: `open` · `claimed` · `review` (done on its branch, any other agent reviews it next) · `reviewing` ·
+`approved` (owner: `/stranote_resume merge`) · `done` · `blocked: <why>`. Order = priority. Touches `home` = edit in
+`D:\Projects\Stranote`, no worktree. `/stranote_resume` picks automatically: named task > review > first open row.
 
-### Next action
-Playbook step 2 (no code): read `STRANOTE_LINEAR_PLAYBOOK.md` + `.specify/memory/constitution.md` + `LOCAL_FIRST_AUDIT.md`
-+ `specs/001-*` and reply with (a) conflicts with constitution/specs, (b) open items/backlog -> playbook phase map,
-(c) what is wrong/unclear for this codebase. Then step 3: run tests + record the section 4 performance baseline (numbers
-only, e.g. in `PHASE_BASELINE.md`), then step 4: Phase A spec only (review parked `phase-a-wip` f30150d +
-`PHASE_A_NOTES.md`), wait for approval.
-**Agent fit:** Claude Code > Opus 5.5 (best) · Codex > gpt-6-luna (ok; step 3 baseline fits it well) · GitHub Copilot (no: long cross-document review)
+| ID | Task | Fit | Status | Claimed by | Branch | Touches |
+|---|---|---|---|---|---|---|
+| P1 | Complete `PHASE_BASELINE.md`: method, template vs data bytes, browser metrics via headless Edge, full Pester run | Codex | claimed | Codex (gpt-6-luna) 2026-10-20 15:49 | main (home, before the board) | home: PHASE_BASELINE.md, tests/perf/ |
+| P2 | Playbook step 2 written up in `PHASE_REVIEW.md`: (a) conflicts with constitution/specs, (b) backlog -> playbook phase map, (c) unclear points + EBS-specific names list for Phase I (playbook section 10.3) | Claude Opus, Codex | done | Claude Code (Opus 5.5) 2026-10-20 16:12 - 4 conflicts, phase map, 6 unclear points, EBS names list; owner decisions in D3-D5 | main (home) | home: PHASE_REVIEW.md |
+| X1 | Add Google Antigravity as a 4th agent (global skills + rules, AGENTS.md agents table, board Fit) | Claude Opus | done | Claude Code (Opus 5.5) 2026-10-20 16:35 - done; owner to run the Antigravity check | main (home, uncommitted) | home: AGENTS.md, STATE.md; ~/.gemini |
+| X2 | `/stranote_resume` picks and starts the next task with no questions (auto reviews, `approved` status, `/stranote_resume merge`) | Claude Opus | done | Claude Code (Opus 5.5) 2026-10-20 17:10 - rules committed to main | main (home) | home: .agents/skills/stranote-resume, AGENTS.md, STATE.md |
+| P3 | Approve Phase A scope in `specs/002-phase-a-safety/spec.md` (Explorer edits, stale browser saves, multi-file atomicity) | owner | blocked: owner | | | |
+| P4 | Forward-port `phase-a-wip` f30150d onto main incl. T040-T042 pack-request/custom-pack writes + tests | Claude Opus, Codex, Antigravity | blocked: P3 | | | src/*.ps1 writers, tests/ |
+| P5 | Reconcile playbook Phase C change journal with the anti-goal "no single-PC sync log" | owner | blocked: owner | | | |
+| D3 | Decide: Spec 001 remainder now or after Phase A (`PHASE_REVIEW.md` C4; recommendation S2 now, S1 after Phase A) | owner | blocked: owner | | | |
+| D4 | Decide how to mark unreviewed packs (accountant, nurse, developer, EBS functional) + who reviews them (C3) | owner, then any | blocked: owner | | | packs/*.json, onboarding |
+| D5 | Constitution §III: neutral write header instead of `X-EBS` (C2; can wait for Phase I); and what "inline payload < 150 KB" measures (U2) | owner | blocked: owner | | | |
+| S1 | Spec 001 US5 T043-T045: second role / role switching | Claude Opus, Codex, Antigravity | blocked: D3 | | | src/StranotePacks.ps1, src/StranoteOnboarding.ps1, src/dashboard_template.html, tests/ |
+| S2 | T046: `ebs-task`, `ebs-dashboard-guide`, `stranote-learn` skills read the active pack | Claude Opus, Codex, Antigravity | review | Claude Code (Opus 5.5) 2026-10-20 16:50 - done 12f5f6c + f544e51; review by Codex or Antigravity, then owner merge | claude/S2 (D:\Projects\Stranote-wt\S2) | .agents/skills/ |
+| S3 | T047 docs + T049 release checks/results for Spec 001 | any | blocked: S1, S2 | | | docs/, specs/001-*/ |
+| U1 | Dark mode: board horizontal scrollbar track renders white | Antigravity (best: browser check), Copilot ok, any | claimed | Antigravity (Gemini 3.8 Flash) 2026-10-20 16:18 | antigravity/U1 | src/dashboard_template.html (CSS) |
+| U2 | CV `privateNames` warning text pack-driven (now says "internal custom object names") | Antigravity (best: browser check), Copilot ok, any | open | | | src/dashboard_template.html, packs/*.json |
+| E1 | Engine uses pack `skillMap` / `starterLessons`; starter lessons are empty in all packs | Claude Opus, Codex, Antigravity | blocked: needs spec | | | src/StranoteLearn.ps1, packs/ |
+| D1 | Decide `01_Tasks` (listed by packs, unused) vs `01_Tickets` | owner | blocked: owner | | | |
+| D2 | Brand gaps: logo bar `#4F46E5` ignores accent, CV export Oracle red, learn-accent fallback, 3 inline logos, Google Fonts, EBS categories fallback | owner, then any | blocked: owner | | | |
+| E2 | Optional: right-click context menu, styled tooltips (spec 001 section 13) | Antigravity, any | open | | | src/dashboard_template.html |
+| O1 | T-0001 EBS screenshots | owner | blocked: owner | | | |
 
-### Open items / blockers
-- [fit: owner] Push `main` to GitHub when happy (repo is public).
-- [fit: Claude/Codex] Spec 001 left: US5 T043-T045 (second role), T046 skills read the active pack, T047.
-- [fit: owner, then Copilot ok] Brand gaps found 2026-10-20 (owner to pick): logo bar hard-coded `#4F46E5` (does not
-  follow accent); CV export hard-codes Oracle red `#C74634`; learn-accent fallback differs (`#4F46E5` in CSS/JS vs
-  `#2563EB` default); 3 inline logo copies; fonts from Google CDN; EBS categories Technical/Financial/Business/SCM as
-  core fallback.
-- [fit: owner, then any] Packs (general, accountant, nurse, developer) list `01_Tasks` that the engine never uses
-  (tasks go to `01_Tickets`): remove it or make the tasks folder pack-driven (product decision).
-- [fit: Claude/Codex] `skillMap` / `starterLessons` pack fields are not used by the engine yet; `starterLessons` are
-  empty in all packs (onboarding first-week plan needs starter lessons).
-- [fit: Claude/Codex] T046: `ebs-task`, `ebs-dashboard-guide`, `stranote-learn` skills (in `.agents/skills/`) still
-  assume EBS; must read the active pack.
-- [fit: Copilot ok] CV warning text for `privateNames` hits says "internal custom object names" (fits EBS, not nurse
-  patient ids): make it pack-driven.
-- [fit: Copilot ok] UI nit: dark mode board horizontal scrollbar track renders white (template CSS, not pack).
-- [fit: any] Design follow-ups (optional, spec section 13): right-click context menu on rows/cards, styled tooltips
-  instead of `title`.
-- [fit: owner] T-0001 EBS screenshots pending from the user.
+### Log (latest first, max 8)
+- 2026-10-20 Claude Code: X2 `/stranote_resume` is fully automatic (named task > review of another agent's branch > first open row; owner questions become `blocked: owner` rows); new statuses `reviewing`/`approved`; `/stranote_resume merge`; board rules committed to main.
+- 2026-10-20 Claude Code: S2/T046 done: 3 skills read the active pack (EBS rules only for `oracle-ebs-*`), checked on temp data with the nurse pack (claude/S2 12f5f6c + f544e51, tests 113/113).
+- 2026-10-20 Claude Code: X1 Antigravity added (reads AGENTS.md + `.agents/skills/` natively; global skills `~/.gemini/config/skills` junctions, rules `~/.gemini/GEMINI.md` -> `~/.claude/CLAUDE.md`); Fit columns updated.
+- 2026-10-20 Claude Code: P2 review -> `PHASE_REVIEW.md` (4 conflicts, backlog->phase map, 6 unclear points, EBS names in core); added owner rows D3-D5 (home, uncommitted).
+- 2026-10-20 Claude Code: task board for parallel agents (claim a row + own worktree), replaces single "Working now".
+- 2026-10-20 Codex: playbook review notes, Pester 113/0/0, server baseline, drafted `specs/002-phase-a-safety/spec.md`.
+- 2026-10-20 Claude Code: agent-shared setup (AGENTS.md, STATE.md, `.agents/skills/`, Copilot prompts) merged to main c0c0aa2.
