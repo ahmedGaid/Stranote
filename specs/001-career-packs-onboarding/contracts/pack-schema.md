@@ -99,7 +99,8 @@ Sent to the page as `META.pack = { id, name, areaNames, ui }` (before migration:
 | `cvTitle` | CV export heading (default: pack `name`) |
 | `sample` | `{ id, module, type, title, code }` used by the Settings previews (branch, folder, object names) |
 | `placeholders` | `taskId, taskTitle, extraQuestions, cardTopic, cardFact, cardTags, scriptName, scriptPurpose, checklistItem, newArea, prefix, role, target, cvSkill` |
-| `privateNames` | JS regex: text the CV checker flags as internal object names (besides the prefix) |
+| `privateNames` | JS regex: private names or identifiers the CV checker flags (besides the prefix) |
+| `privateNamesWarning` | CV warning text shown when the pack prefix or `privateNames` pattern matches (default: a neutral private name/identifier warning) |
 | `skills.areaSkill` | skill name for an area; tokens `{module}`, `{MODULE}`, `{name}` (default `{name}`) |
 | `skills.areaGroup`, `skills.typeGroup` | CV groups for area and task-type skills |
 | `skills.groups` | CV group order |

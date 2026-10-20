@@ -126,6 +126,7 @@ career words here and never in `dashboard_template.html`.
   "workspace": "Nursing workspace",
   "area": "Unit area", "areas": "Unit areas",
   "cvTitle": "Registered Nurse",
+  "privateNamesWarning": "contains a patient identifier",
   "sample": { "id": "CASE-0142", "module": "MEDS", "type": "Medication administration",
               "title": "Heparin_infusion_titration", "code": "HEP_INF" },
   "placeholders": { "taskTitle": "e.g. Heparin infusion titration" },
@@ -135,8 +136,9 @@ career words here and never in `dashboard_template.html`.
 }
 ```
 
-`privateNames` and the `skills.*` patterns are **JavaScript** regexes, because they run in the browser. Extractor
-patterns are .NET regexes. The schema contract lists every `ui` key.
+`privateNames` and the `skills.*` patterns are **JavaScript** regexes, because they run in the browser.
+`privateNamesWarning` is the pack-specific CV warning shown when the prefix or `privateNames` pattern matches; it
+falls back to a neutral message when omitted. Extractor patterns are .NET regexes. The schema contract lists every `ui` key.
 
 ### `onboardingQuestions`
 

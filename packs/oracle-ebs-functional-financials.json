@@ -340,6 +340,7 @@
     "areas": "Modules",
     "screenshotsTitle": "صور من EBS",
     "cvTitle": "Oracle EBS Functional Consultant (Financials)",
+    "privateNamesWarning": "contains an internal EBS object name",
     "sample": { "id": "FIN-2051", "module": "GL", "type": "Setup", "title": "Fiscal_calendar_for_new_ledger", "code": "FY_CAL" },
     "placeholders": {
       "taskId": "FIN-2051",
