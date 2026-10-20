@@ -144,10 +144,17 @@ description: "Task list for 001 career packs and first-day onboarding"
 
 ## Phase 6: User Story 4 - A pack for any other career (Priority: P3)
 
-- [ ] T039 [US4] "My career is not listed" path in the wizard: free-text areas and tasks -> `POST /api/packs/request`; General pack active meanwhile
-- [ ] T040 [US4] `Get-SnPackRequest`, `Approve-SnPackDraft` (validate, copy to `packs\custom\`, switch role) and `POST /api/packs/accept`
+- [x] T039 [US4] "My career is not listed" path in the wizard: free-text areas and tasks -> `POST /api/packs/request`; General pack active meanwhile
+  - Done 2026-10-20: wizard card "My career is not listed" (step 2) opens job title, field, work areas, typical tasks, tools; Next
+    calls `POST /api/packs/request` -> `New-SnPackRequest` writes `<learn dir>\pack-requests\<slug>.json` { slug, career, field,
+    level, freeAreas[], freeTasks[], tools[], roleId, status: pending, draftPath, createdAt, updatedAt }; same career again
+    updates the pending request; slug never shadows a shipped pack id (`-custom`). Role stays on `general` (its job / workAreas /
+    tools answers are pre-filled). Custom packs live in `<learn dir>\packs` (read first by `Get-SnPacksDirs`), not `packs\custom\`.
+    Fix found on the way: completing onboarding on any non-EBS pack threw (packs list `01_Tasks`, engine requires `01_Tickets`);
+    `Get-SnBaseSettings` now always adds the required work folders. 106 tests pass.
+- [ ] T040 [US4] `Get-SnPackRequest`, `Approve-SnPackDraft` (validate, copy to `<learn dir>\packs\`, switch role) and `POST /api/packs/accept`
 - [ ] T041 [US4] Settings > Roles: pending request, draft preview (areas, task types), Accept / Reject
-- [ ] T042 [US4] Write the `ops-pack-builder` Claude skill: read `pack-requests/<slug>.json`, draft `packs/custom/<slug>.json`, run `Test-SnPack`, set status `drafted`
+- [ ] T042 [US4] Write the `ops-pack-builder` Claude skill: read `pack-requests/<slug>.json`, draft `<learn dir>/packs/<slug>.json`, run `Test-SnPack`, set status `drafted`
 
 ---
 

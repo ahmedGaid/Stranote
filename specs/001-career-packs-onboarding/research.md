@@ -46,7 +46,7 @@
 
 ## R7. Unlisted careers
 - **Decision**: Wizard saves `pack-requests/<slug>.json` (answers + free-text areas and tasks). The `ops-pack-builder`
-  Claude skill (T042) drafts `packs/custom/<slug>.json`, runs `Test-SnPack`, and the
+  Claude skill (T042) drafts `<learn dir>/packs/<slug>.json`, runs `Test-SnPack`, and the
   user accepts it in Settings > Roles. Until then the General pack is used.
 - **Rationale**: No API keys in the app (Constitution III); the person's own Claude session does the drafting.
 

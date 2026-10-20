@@ -137,3 +137,44 @@ Describe 'Onboarding for an existing (migrated) user' {
         }
     } finally { Remove-SnTestEnv $root }
 }
+
+Describe 'Onboarding: my career is not listed (US4, T039)' {
+    $root = New-SnTestEnv
+    try {
+        $r = New-SnPackRequest -Career 'Civil Site Engineer' -Field 'Engineering' -Level 'Mid' -FreeAreas "Site supervision`r`nQuantity surveying, Safety`nSafety" -FreeTasks @('Daily site report', ' ') -Tools 'AutoCAD, Excel'
+        $p = Join-Path $env:STRANOTE_LEARN_DIR 'pack-requests\civil-site-engineer.json'
+        $req = [IO.File]::ReadAllText($p) | ConvertFrom-Json
+        It 'writes pack-requests/<slug>.json with the free-text areas and tasks as lists' {
+            $r.slug | Should Be 'civil-site-engineer'
+            $req.career | Should Be 'Civil Site Engineer'
+            $req.field | Should Be 'Engineering'
+            @($req.freeAreas) -join '|' | Should Be 'Site supervision|Quantity surveying|Safety'
+            @($req.freeTasks) -join '|' | Should Be 'Daily site report'
+            @($req.tools) -join '|' | Should Be 'AutoCAD|Excel'
+            $req.status | Should Be 'pending'
+        }
+        It 'sending the same career again updates the pending request (no duplicate)' {
+            $r2 = New-SnPackRequest -Career 'Civil site engineer' -FreeAreas 'Planning'
+            $r2.slug | Should Be 'civil-site-engineer'
+            @(Get-ChildItem (Join-Path $env:STRANOTE_LEARN_DIR 'pack-requests') -Filter '*.json').Count | Should Be 1
+            $r2.request.createdAt | Should Be $req.createdAt
+        }
+        It 'never takes the id of a shipped pack, and rejects an empty request' {
+            (New-SnPackRequest -Career 'Nurse' -FreeTasks 'Night shift handover').slug | Should Be 'nurse-custom'
+            { New-SnPackRequest -Career ' ' -FreeAreas 'x' } | Should Throw
+            { New-SnPackRequest -Career 'Teacher' } | Should Throw
+        }
+        It 'completing onboarding keeps the role on the General pack meanwhile' {
+            $a = New-Answers $root
+            $a.packId = 'general'; $a.taskTypes = @(); $a.ratings = [pscustomobject]@{}; $a.focusAreas = @()
+            $a.packAnswers = [pscustomobject]@{ job = 'Civil Site Engineer'; workAreas = 'Site supervision, Quantity surveying'; tools = 'AutoCAD' }
+            $a | Add-Member -NotePropertyName packRequest -NotePropertyValue ([pscustomobject]@{ career = 'Civil Site Engineer'; slug = 'civil-site-engineer' })
+            Save-SnOnboarding -Step 7 -Answers $a | Out-Null
+            Complete-SnOnboarding -Today '2026-10-22' | Out-Null
+            $prof = Get-SnProfile
+            $prof.roles[0].packId | Should Be 'general'
+            $prof.packAnswers.jobTitle | Should Be 'Civil Site Engineer'
+            (Get-SnActivePack).id | Should Be 'general'
+        }
+    } finally { Remove-SnTestEnv $root }
+}

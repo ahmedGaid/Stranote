@@ -210,6 +210,10 @@ while ($listener.IsListening) {
                 Send $ctx 200 ($r | ConvertTo-Json -Depth 5 -Compress)
             }
             '/api/onboarding/save' { $r = Save-SnOnboarding -Step ([int]$b.step) -Answers $b.answers; Send $ctx 200 ($r | ConvertTo-Json -Compress) }
+            '/api/packs/request' {
+                $r = New-SnPackRequest -Career (Str $b.career) -Field (Str $b.field) -Level (Str $b.level) -FreeAreas $b.freeAreas -FreeTasks $b.freeTasks -Tools $b.tools
+                Send $ctx 200 ($r | ConvertTo-Json -Depth 6 -Compress)
+            }
             '/api/onboarding/restart' { $r = Restart-SnOnboarding; Send $ctx 200 ($r | ConvertTo-Json -Compress) }
             '/api/onboarding/complete' {
                 $r = Complete-SnOnboarding

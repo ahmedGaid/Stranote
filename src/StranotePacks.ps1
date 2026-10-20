@@ -235,7 +235,12 @@ function Get-SnPackSettings($Pack) {
 function Get-SnBaseSettings($Pack) {
     $d = Get-SnEngineDefaults
     if (-not $Pack) { return $d }
-    return Merge-SnObject $d (Get-SnPackSettings $Pack)
+    $s = Merge-SnObject $d (Get-SnPackSettings $Pack)
+    # the engine keeps tasks in 01_Tickets and archives in 99_Archive, whatever the pack lists
+    $wf = @(@($s.workFolders) | Where-Object { $_ })
+    foreach ($r in $script:RequiredWorkFolders) { if ($wf -notcontains $r) { $wf += $r } }
+    $s.workFolders = $wf
+    return $s
 }
 
 function Get-SnOverrides {
@@ -264,4 +269,51 @@ function Save-SnOverrides {
     if (Test-Path $p) { Copy-Item $p (Join-Path $dir 'overrides.backup.json') -Force }
     Write-Utf8 $p ($diff | ConvertTo-Json -Depth 20)
     return $diff
+}
+
+# ---------------------------------------------------------------------------
+# Pack requests (US4): "My career is not listed"
+#   <learn dir>\pack-requests\<slug>.json  { slug, career, field, level, freeAreas[], freeTasks[], tools[], roleId,
+#                                           status: pending|drafted|accepted|rejected, draftPath, createdAt, updatedAt }
+#   The pack-builder Claude skill drafts <learn dir>\packs\<slug>.json; until it is accepted the role uses 'general'.
+# ---------------------------------------------------------------------------
+
+function ConvertTo-SnFreeList($Value) {
+    # free text (one per line, or comma separated) or a list -> trimmed unique items
+    $raw = @(@($Value) | Where-Object { $null -ne $_ } | ForEach-Object { "$_" -split '[\r\n,;]+' })
+    $out = @(); foreach ($x in $raw) { $t = $x.Trim(); if ($t.Length -gt 120) { $t = $t.Substring(0, 120) }; if ($t -and $out -notcontains $t) { $out += $t } }
+    return , @($out | Select-Object -First 40)
+}
+
+function New-SnPackRequest {
+    <# Saves what the person told us about a career that has no pack. Re-sending the same career updates a pending request. #>
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Career, [string]$Field = '', [string]$Level = '', $FreeAreas, $FreeTasks, $Tools)
+    $Career = $Career.Trim()
+    if (-not $Career) { throw 'Write your job title first.' }
+    $areas = ConvertTo-SnFreeList $FreeAreas; $tasks = ConvertTo-SnFreeList $FreeTasks
+    if (-not $areas.Count -and -not $tasks.Count) { throw 'Add at least one work area or typical task.' }
+    $base = ($Career.ToLowerInvariant() -replace '[^a-z0-9]+', '-').Trim('-')
+    if ($base.Length -gt 40) { $base = $base.Substring(0, 40).Trim('-') }
+    if (-not $base) { $base = 'career-' + (Get-Date).ToString('yyyyMMddHHmm') }
+    if (@(Get-SnPackList | Where-Object { $_.id -eq $base }).Count) { $base += '-custom' }   # never shadow a shipped pack
+    $dir = Join-Path (Get-LearnDir) 'pack-requests'
+    if (-not (Test-Path $dir)) { New-Item -ItemType Directory -Path $dir -Force | Out-Null }
+    $slug = $base; $n = 1; $old = $null
+    while ($true) {
+        $p = Join-Path $dir "$slug.json"
+        if (-not (Test-Path $p)) { break }
+        $o = [IO.File]::ReadAllText($p) | ConvertFrom-Json
+        if ("$($o.status)" -eq 'pending') { $old = $o; break }   # same career again: update it
+        $n++; $slug = "$base-$n"
+    }
+    $prof = Get-SnProfile
+    $roleId = if ($prof -and @($prof.roles).Count) { "$(@($prof.roles)[0].id)" } else { 'r1' }
+    $req = [pscustomobject][ordered]@{
+        slug = $slug; career = $Career; field = $Field.Trim(); level = $Level.Trim()
+        freeAreas = $areas; freeTasks = $tasks; tools = (ConvertTo-SnFreeList $Tools); roleId = $roleId
+        status = 'pending'; draftPath = ''; createdAt = $(if ($old) { "$($old.createdAt)" } else { Get-Now }); updatedAt = (Get-Now)
+    }
+    Write-Utf8 $p ($req | ConvertTo-Json -Depth 5)
+    return [pscustomobject]@{ ok = $true; slug = $slug; path = $p; request = $req }
 }

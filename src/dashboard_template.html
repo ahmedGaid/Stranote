@@ -2867,7 +2867,8 @@ async function openOnboarding(opts = {}){
   OB.packs = arr(OB.packs); OB.a = OB.answers || {}; OB.rerun = !!opts.rerun || OB.state === 'done';
   const a = OB.a;
   ['style','weekend','taskTypes','focusAreas','localOnly','neverOnCv'].forEach(k => a[k] = arr(a[k]));
-  a.ratings = a.ratings || {}; a.packAnswers = a.packAnswers || {};
+  a.ratings = a.ratings || {}; a.packAnswers = a.packAnswers || {}; a.packRequest = a.packRequest || {};
+  OB.notListed = !!a.packRequest.career && a.packId === 'general';
   OB.i = OB.rerun ? 0 : Math.min(+OB.step || 0, OB_STEPS.length - 1); OB.done = null;
   if (!$('obDlg').open) $('obDlg').showModal();
   drawOb();
@@ -2884,9 +2885,17 @@ function obStepBody(){
   if (i === 1){
     const fields = [...new Set(OB.packs.map(x => x.field))].sort();
     OB.field = OB.field || (p ? p.field : fields[0]);
+    const rq = a.packRequest;
     return `<div class="ob-f"><label>Field</label><div class="ob-chips">${fields.map(f => `<button class="ob-chip ${OB.field === f ? 'on' : ''}" data-obfield="${esc(f)}">${esc(f)}</button>`).join('')}</div></div>
-      <div class="ob-f"><label>Career</label><div class="ob-cards">${OB.packs.filter(x => x.field === OB.field).map(x => `<button class="ob-card ${a.packId === x.id ? 'on' : ''}" data-obpack="${esc(x.id)}"><b>${esc(x.name)}</b><span>${esc(x.description || '')}</span></button>`).join('')}
-        <div class="ob-card off" title="Coming soon"><b>My career is not listed</b><span>Soon: answer a few questions and Claude builds a pack for your career.</span></div></div></div>
+      <div class="ob-f"><label>Career</label><div class="ob-cards">${OB.packs.filter(x => x.field === OB.field).map(x => `<button class="ob-card ${a.packId === x.id && !OB.notListed ? 'on' : ''}" data-obpack="${esc(x.id)}"><b>${esc(x.name)}</b><span>${esc(x.description || '')}</span></button>`).join('')}
+        <button class="ob-card ${OB.notListed ? 'on' : ''}" data-obnotlisted="1"><b>My career is not listed</b><span>Tell us about your work. Claude builds a pack for your career; you start on the General pack meanwhile.</span></button></div></div>
+      ${OB.notListed ? `<div class="ob-grp">Your career</div>
+        <div class="ob-row"><div class="ob-f"><label>Job title</label><input data-obrq="career" value="${esc(rq.career || '')}" placeholder="e.g. Civil site engineer, Teacher, Pharmacist"></div>
+          <div class="ob-f"><label>Field (optional)</label><input data-obrq="field" value="${esc(rq.field || '')}" placeholder="e.g. Engineering, Education"></div></div>
+        <div class="ob-row"><div class="ob-f"><label>Main areas of your work (one per line)</label><textarea data-obrq="freeAreas" style="min-height:96px" placeholder="Site supervision&#10;Quantity surveying&#10;Safety">${esc(rq.freeAreas || '')}</textarea></div>
+          <div class="ob-f"><label>Typical tasks (one per line)</label><textarea data-obrq="freeTasks" style="min-height:96px" placeholder="Daily site report&#10;Check concrete pour&#10;Review subcontractor invoice">${esc(rq.freeTasks || '')}</textarea></div></div>
+        <div class="ob-f"><label>Tools you use every day (optional)</label><input data-obrq="tools" value="${esc(rq.tools || '')}" placeholder="e.g. AutoCAD, Excel, Primavera"></div>
+        <div class="ob-note">${rq.slug ? `Request saved as <b>${esc(rq.slug)}</b>. ` : ''}Next, ask Claude to "build my Stranote pack". When the draft is ready, accept it in Settings &gt; Roles. Until then the General pack is used and nothing is lost when you switch.</div>` : ''}
       ${p ? `<div class="ob-row"><div class="ob-f"><label>Level</label><div class="ob-chips">${arr(p.levels).map(l => `<button class="ob-chip ${a.level === l ? 'on' : ''}" data-obset="level" data-v="${esc(l)}">${esc(l)}</button>`).join('')}</div></div>
         <div class="ob-f"><label>Years of experience</label><input type="number" min="0" max="60" data-ob="years" value="${a.years == null ? '' : esc(a.years)}"></div></div>` : ''}`;
   }
@@ -2934,6 +2943,7 @@ function obStepBody(){
     <div class="ob-f"><label>Paste your CV or LinkedIn summary (optional)</label><textarea data-ob="cvText" style="min-height:110px" placeholder="Helps Stranote skip what you already know. It stays in this PC's onboarding file and is never copied into your CV.">${esc(a.cvText || '')}</textarea></div>`;
   const cnt = v => Object.values(a.ratings).filter(x => x === v).length;
   return `<div class="ob-sum">
+    ${OB.notListed && a.packRequest.slug ? `<div><b>Your own pack</b><span>Requested for ${esc(a.packRequest.career)} · using ${esc(p ? p.name : 'General')} until you accept the draft</span></div>` : ''}
     <div><b>Career</b><span>${esc(p ? p.name : '-')}${a.level ? ' · ' + esc(a.level) : ''}${a.years ? ' · ' + esc(a.years) + ' years' : ''}</span></div>
     <div><b>Language</b><span>${esc((OB_LANG.find(x => x[0] === a.language) || ['', a.language])[1])}</span></div>
     <div><b>Your areas</b><span>${OB_RATES.map(([v, l]) => `${cnt(v)} ${l.toLowerCase()}`).join(' · ')}</span></div>
@@ -2975,7 +2985,9 @@ function bindOb(){
   B.querySelectorAll('[data-obm]').forEach(el => el.onclick = () => { a[el.dataset.obm] = obToggle(arr(a[el.dataset.obm]), el.dataset.v); drawOb(); });
   B.querySelectorAll('[data-obset]').forEach(el => el.onclick = () => { const k = el.dataset.obset; a[k] = k === 'dailyMinutes' ? +el.dataset.v : el.dataset.v; drawOb(); });
   B.querySelectorAll('[data-obfield]').forEach(el => el.onclick = () => { OB.field = el.dataset.obfield; drawOb(); });
-  B.querySelectorAll('[data-obpack]').forEach(el => el.onclick = () => { if (a.packId !== el.dataset.obpack) { a.packId = el.dataset.obpack; a.taskTypes = []; a.ratings = {}; a.focusAreas = []; } drawOb(); });
+  B.querySelectorAll('[data-obrq]').forEach(el => el.oninput = () => { a.packRequest[el.dataset.obrq] = el.value; });
+  B.querySelectorAll('[data-obnotlisted]').forEach(el => el.onclick = () => { OB.notListed = true; if (a.packId !== 'general') { a.packId = 'general'; a.taskTypes = []; a.ratings = {}; a.focusAreas = []; } drawOb(); });
+  B.querySelectorAll('[data-obpack]').forEach(el => el.onclick = () => { OB.notListed = false; if (a.packId !== el.dataset.obpack) { a.packId = el.dataset.obpack; a.taskTypes = []; a.ratings = {}; a.focusAreas = []; } drawOb(); });
   B.querySelectorAll('[data-obrate]').forEach(el => el.onclick = () => { a.ratings[el.dataset.obrate] = el.dataset.v; drawOb(); });
   B.querySelectorAll('[data-obbulk]').forEach(el => el.onclick = () => { const p = obPack(); arr(p && p.areas).forEach(x => { if (!a.ratings[x.id]) a.ratings[x.id] = 'new'; }); drawOb(); });
   B.querySelectorAll('[data-obgo]').forEach(el => el.onclick = () => { OB.i = +el.dataset.obgo; drawOb(); });
@@ -2986,16 +2998,27 @@ function bindOb(){
 function obCheck(){
   const a = OB.a, i = OB.i;
   if (i === 1 && !a.packId) return 'Pick your career to continue.';
+  if (i === 1 && OB.notListed && !(a.packRequest.career || '').trim()) return 'Write your job title.';
+  if (i === 1 && OB.notListed && !((a.packRequest.freeAreas || '') + (a.packRequest.freeTasks || '')).trim()) return 'Add at least one work area or typical task.';
   if (i === 3 && a.start && !/^\d{4}-\d{2}-\d{2}$/.test(a.start)) return 'Start date must be a full date.';
   if (i === 3 && a.weekend.length > 3) return 'Pick at most 3 weekend days.';
   if (i === 4 && !a.taskTypes.length) return 'Keep at least one task type.';
   if (i === 4 && !OB.rerun && a.workRoot && !/^[A-Za-z]:\\/.test(a.workRoot)) return 'Work folder must be a full path, like D:\\Work.';
   return '';
 }
+async function obRequestPack(){
+  // "not listed": save the request for the pack-builder skill; the General pack's questions get the same answers
+  const a = OB.a, rq = a.packRequest;
+  const r = await api('/api/packs/request', { career: rq.career, field: rq.field || '', level: a.level || '', freeAreas: rq.freeAreas || '', freeTasks: rq.freeTasks || '', tools: rq.tools || '' });
+  rq.slug = r.slug;
+  a.packAnswers.job = rq.career; a.packAnswers.workAreas = arr(r.request && r.request.freeAreas).join(', '); a.packAnswers.tools = arr(r.request && r.request.tools).join(', ');
+  if (!a.title) a.title = rq.career;
+}
 async function obNext(){
   const err = obCheck(); if (err) { $('obErr').textContent = err; return; }
   const last = OB_STEPS.length - 1, btn = $('obNext'); btn.disabled = true;
   try {
+    if (OB.i === 1 && OB.notListed) await obRequestPack();
     await api('/api/onboarding/save', { step: Math.min(OB.i + 1, last), answers: OB.a });
     if (OB.i < last) { OB.i++; drawOb(); return; }
     btn.textContent = 'Setting up...';
