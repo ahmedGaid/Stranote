@@ -49,6 +49,7 @@
   --shadow-floating:0 0 0 1px rgb(255 255 255/.05),0 4px 40px rgb(0 0 0/.1),0 3px 20px rgb(0 0 0/.125),0 3px 12px rgb(0 0 0/.125),0 1px 1px rgb(0 0 0/.125);
   --ok:#32ae4b; --warn:#e0b100; --bad:#ef5a61; --strong:#f2f3f5; --on-strong:#111214;
   --accent-soft:color-mix(in srgb,var(--accent) 20%,var(--color-surface-raised));
+  color-scheme:dark;
 } }
 :root[data-theme=dark]{
   --color-app-bg:#09090a; --color-panel:#121213; --color-surface-raised:#1a1a1b; --color-surface-floating:#212122;
@@ -66,7 +67,12 @@
   color-scheme:dark;
 }
 :root[data-theme=light]{color-scheme:light}
-*{box-sizing:border-box}
+*{box-sizing:border-box;scrollbar-width:thin;scrollbar-color:var(--color-border-control) transparent}
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--color-border-control);border-radius:999px}
+::-webkit-scrollbar-thumb:hover{background:var(--color-border-hover)}
+::-webkit-scrollbar-corner{background:transparent}
 html,body{height:100%}
 body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 "Inter","Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-feature-settings:"cv11","ss01"}
 button{font:inherit;color:inherit}
@@ -665,7 +671,11 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);box-shadow:no
 .toast{left:auto;right:16px;bottom:16px;transform:none;max-width:360px;background:var(--color-surface-floating);color:var(--color-text-primary);border:1px solid var(--color-border-popover);border-radius:var(--radius-md);box-shadow:var(--shadow-menu);padding:10px 14px;font:450 13px/1.4 var(--font-sans)}
 
 /* board: columns without background, raised cards with a ring, no hover lift */
-.cols{gap:12px;grid-auto-columns:minmax(272px,1fr)}
+.cols{gap:12px;grid-auto-columns:minmax(272px,1fr);scrollbar-width:thin;scrollbar-color:var(--color-border-control) transparent}
+.cols::-webkit-scrollbar{height:8px}
+.cols::-webkit-scrollbar-track{background:transparent}
+.cols::-webkit-scrollbar-thumb{background:var(--color-border-control);border-radius:999px}
+.cols::-webkit-scrollbar-thumb:hover{background:var(--color-border-hover)}
 .col{background:transparent;border-radius:0;padding:0}
 .col-h{height:36px;padding:0 4px;gap:8px;font:500 13px/1 var(--font-sans)}
 .col-h .n{color:var(--color-text-tertiary);font-weight:450}
