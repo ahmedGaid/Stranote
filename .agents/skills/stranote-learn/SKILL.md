@@ -1,6 +1,6 @@
 ---
 name: stranote-learn
-description: Build the user's Oracle EBS learning and CV material inside Stranote (D:\Work). Use when the user says "make a quiz for <task>", "quiz me on GL", "test me", "add questions", "what did I learn from <task>", "make knowledge cards", "save this as a card", "write CV bullets", "update my CV", "what skills can I add to my CV", or after finishing EBS work when knowledge is worth keeping.
+description: Build the user's learning and CV material inside Stranote (D:\Work), for the active career pack (Oracle EBS for this user). Use when the user says "make a quiz for <task>", "quiz me on GL", "test me", "add questions", "what did I learn from <task>", "make knowledge cards", "save this as a card", "write CV bullets", "update my CV", "what skills can I add to my CV", or after finishing tracked work when knowledge is worth keeping.
 ---
 
 # Stranote Learn - knowledge cards, quizzes, CV
@@ -12,6 +12,21 @@ Import-Module 'D:\Work\05_Tools\Stranote\Stranote.psm1' -Force -DisableNameCheck
 ```
 Data lives in `D:\Work\04_Knowledge\Stranote\` (cards.json, questions.json, cv.json). The dashboard (Knowledge, Quiz, Skills, CV views) shows it after a page refresh.
 
+## 0. Read the active career pack (first, every time)
+
+Stranote works for any career; the field, areas, card categories and CV privacy rules come from the person's
+**active career pack**:
+
+```powershell
+$pack = Get-SnPackOrLegacy   # active pack (old installs: the EBS pack); $null = not onboarded yet
+"$($pack.id) | $($pack.name) | $($pack.field)"
+$pack.categories | Select-Object id, label        # the only valid card categories
+$pack.areas | Select-Object id, name, category    # areas (EBS calls them modules)
+$pack.ui.privateNames                             # regex of names that must never reach the CV (may be empty)
+```
+Examples in this skill are from the EBS pack (`oracle-ebs-*`). For another pack keep the method and replace the
+domain: its areas, its categories, real names from that field. Never invent domain facts; if unsure, ask the user.
+
 ## 1. Read the source material first
 
 ```powershell
@@ -20,13 +35,15 @@ Get-SnTaskFiles -Id T-0001 | ConvertTo-Json -Depth 4  # scripts saved for the ta
 Get-SnSuggestions -Id T-0001 | ConvertTo-Json      # APIs and tables found in its scripts
 (Get-SnLearn).cards | Where-Object taskId -eq 'T-0001'   # existing cards (don't duplicate)
 ```
-For "quiz me on GL" use all cards/questions/tasks of that module. Only ask about things that are true for Oracle EBS R12; if unsure, leave it out.
+For "quiz me on GL" use all cards/questions/tasks of that area (module). Only ask about things that are true in the
+pack's field (EBS pack: Oracle EBS R12); if unsure, leave it out.
 
 ## Automatic knowledge (already there)
 
 Stranote builds cards automatically on every change (`Sync-SnKnowledge`, run by `Update-SnDashboard` and on every dashboard load):
-task summary, answered business questions, bullets under "## Decisions" in the task's `_NOTES.md`, APIs called in its scripts
-(with the code snippet; 3+ procedures of one package become one card) and tables used (with select/insert/update/delete counts).
+task summary, answered business questions, bullets under "## Decisions" in the task's `_NOTES.md`, and whatever the
+pack's `extractors` find in the task's files (EBS pack: APIs called in its scripts, with the code snippet, 3+ procedures
+of one package become one card; tables used, with select/insert/update/delete counts).
 Each gets a flashcard; each API card also a "which package provides ...?" question. These have `source = 'auto'`.
 The user Keeps (`Set-SnCardKeep`) or Hides (`Remove-SnCard` on an auto card = hidden for good) them.
 So: don't duplicate what auto already covers. Your job is the *understanding* the scanner can't see: why, gotchas, order of calls,
@@ -36,7 +53,7 @@ setup steps, and good multi-choice/write-the-query questions. Tip for the user: 
 ## Arabic explanations (always)
 
 The user wants every card and quiz answer explained in **simple Egyptian Arabic, short (3-5 lines) + one example**,
-keeping every technical keyword in English exactly as it is (API, table and column names, EBS terms like
+keeping every technical keyword of the field in English exactly as it is (EBS: API, table and column names,
 responsibility, value set, concurrent program, staging, rollback). Stored in `explain-ar.json`, keyed by card or
 question id, so the automatic re-scan never erases them. A question without its own entry shows its card's.
 
@@ -52,12 +69,14 @@ Use it for "explain in more detail" requests: quote the user's own script lines 
 Write Arabic JSON with the Write tool (UTF-8), not inside a PowerShell string. When the user asks
 "اشرح كروت T-0001 بالعربي" or after new automatic cards appear, fill in every card id with no entry
 (`$ar = Get-SnArabic; (Get-SnLearn).cards | ? { -not $ar.($_.id) }`). For `Add-SnQuestions` add
-`explainAr` (and optional `exampleAr`) to each question. Be accurate; if unsure about an EBS detail, say less.
+`explainAr` (and optional `exampleAr`) to each question. Be accurate; if unsure about a domain detail, say less.
 
-## EBS screenshots
+## Screenshots of work screens (EBS forms in the examples)
 
-Each card's explanation can hold screenshots of the real EBS forms/pages (`images` in its explain-ar.json entry:
-`title`, `nav` menu path, `file` in `D:\Work\04_Knowledge\Stranote\img\`). An item without `file` is a requested screen:
+Each card's explanation can hold screenshots of the real screens of the person's work systems (EBS forms/pages here;
+`$pack.ui.screenshotsTitle` names them for the pack). Never request screens that would show private data
+(e.g. patient records in a nurse pack). They live in `images` of the card's explain-ar.json entry:
+`title`, `nav` menu path, `file` in `D:\Work\04_Knowledge\Stranote\img\`. An item without `file` is a requested screen:
 the user captures it (Win+Shift+S) and pastes it into the slot in Stranote' explanation window.
 - You cannot log into EBS (never ask for or type passwords) and Oracle Forms (Java) does not open in the built-in
   browser, so the user captures; you request the right screens:
@@ -70,13 +89,16 @@ the user captures it (Win+Shift+S) and pastes it into the slot in Stranote' expl
 
 ## Categories
 
-Every card (and its questions) has one category: **Technical** (code, APIs, tables, AOL/FNDLOAD, setup mechanics),
+Every card (and its questions) has one category, and it must be an `id` from `$pack.categories` (General pack:
+Work / People / Growth / Tools; nurse: Clinical / Medication / ...). Pass `-Category` to `Set-SnCard`, or change one
+with `Set-SnCardCategory -Id <cardId> -Category <id>`. When asked for knowledge from a task, cover every category
+that is relevant, not only the most obvious one.
+
+EBS pack categories: **Technical** (code, APIs, tables, AOL/FNDLOAD, setup mechanics),
 **Financial** (finance/accounting concepts and Oracle Financials functionality: GL, AP, AR, FA, CE ...),
 **Business** (business rules, requirements, decisions, process: why the business needs it),
-**SCM** (supply chain: PO, INV, OM, WSH, BOM, WIP ...). Automatic rule: business answers/decisions -> Business,
-APIs/tables -> Technical, otherwise by module. Pass `-Category` to `Set-SnCard`, or change one with
-`Set-SnCardCategory -Id <cardId> -Category Financial`. When asked for knowledge from a task, cover all
-relevant angles: not only the Technical card, but also what it means financially/for SCM and for the business.
+**SCM** (supply chain: PO, INV, OM, WSH, BOM, WIP ...). Automatic rule there: business answers/decisions -> Business,
+APIs/tables -> Technical, otherwise by module.
 
 ## Teach before quiz (lessons, built on the `adaptive-teacher` skill)
 
@@ -154,7 +176,7 @@ Set-SnCard -TaskId 'T-0001' -Topic 'API: FND_FLEX_VALUE_RULES_PKG.INSERT_ROW' `
   -Fact 'Creates the security rule header. Lines go in FND_FLEX_VALUE_RULE_LINES, assignment to responsibilities in FND_FLEX_VALUE_RULE_USAGES.' `
   -Code "fnd_flex_value_rules_pkg.insert_row(...);" -Tags 'GL','FND_FLEX_VALUE_RULES_PKG','Security rules'
 ```
-Tags: the module code, API/package names (they become skills), and a topic word. Each card automatically becomes a flashcard. Propose cards to the user first (a short list), save the ones they accept.
+Tags: the area id (EBS: module code), the real tool/object names (EBS: API/package names; they become skills), and a topic word. Each card automatically becomes a flashcard. Propose cards to the user first (a short list), save the ones they accept.
 
 ## 3. Quiz questions
 
@@ -168,7 +190,7 @@ Add-SnQuestions -TaskId 'T-0001' -Questions @(
 )
 ```
 Visual memory: each card has its own face (colour, glyph, icon) that is repeated on its questions. Give every question the `cardId` of the card it tests (`@{ ...; cardId='A-...' }`) so the question shows the same picture; questions linked through a lesson concept (`cardIds`/`questionIds`) get it too.
-Rules: `mcq` answer = 0-based index, 3-4 plausible options, vary the position of the right one. `tf` answer = $true/$false. `blank` answer = exact expected text; alternatives separated by `|`. `open` = write-the-query / explain questions, self-graded against the model answer. Use real EBS object names. Don't repeat existing questions (`(Get-SnLearn).questions`).
+Rules: `mcq` answer = 0-based index, 3-4 plausible options, vary the position of the right one. `tf` answer = $true/$false. `blank` answer = exact expected text; alternatives separated by `|`. `open` = write-the-query / explain questions, self-graded against the model answer. Use real names from the field (EBS: real object names). Don't repeat existing questions (`(Get-SnLearn).questions`).
 
 ## 4. CV
 
@@ -177,7 +199,12 @@ Rules: `mcq` answer = 0-based index, 3-4 plausible options, vary the position of
 ```powershell
 Add-SnCvBullet -TaskId 'T-0001' -Text 'Built a PL/SQL upload using FND_FLEX_VALUE_RULES_PKG to create GL security rules from CSV, replacing manual setup for 40+ rules across 12 responsibilities.'
 ```
-Bullet rules: action verb + what (real EBS object/API names) + business result with a number; one line; no client/company names, ticket IDs, internal XX custom object names or sensitive volumes (the CV is for other employers). If you don't know the number, ask the user for it instead of inventing one.
+Bullet rules: action verb + what (real tool/object names of the field; EBS: object/API names) + business result with a
+number; one line; no client/company names, ticket IDs, sensitive volumes, or anything matching the pack's private-name
+pattern (the CV is for other employers). Check before saving:
+`if ($pack.ui.privateNames -and $text -match $pack.ui.privateNames) { <rewrite the bullet> }`
+(EBS: internal `XX` custom objects; nurse: MRN, bed/room numbers). If you don't know the number, ask the user for it
+instead of inventing one.
 - Export happens from the CV view (Word + Markdown into `D:\Work\06_Admin\CV`).
 
 ## Reply format
