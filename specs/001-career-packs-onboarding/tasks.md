@@ -190,7 +190,7 @@ description: "Task list for 001 career packs and first-day onboarding"
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [ ] T046 [P] Update Claude skills (`ebs-task`, `ebs-dashboard-guide`, `ops-learn`) to read the active pack instead of assuming EBS
+- [X] T046 [P] Update Claude skills (`ebs-task`, `ebs-dashboard-guide`, `stranote-learn`, formerly `ops-learn`) to read the active pack instead of assuming EBS (12f5f6c)
 - [ ] T047 [P] Update `README.md` and the dashboard help for packs and onboarding
 - [X] T048 Install step: copy `src\` over `D:\Work\05_Tools\EbsTasks` after a backup; run migration; restart server
 - [ ] T049 Run the full quickstart and all Pester tests; record results in `specs/001-career-packs-onboarding/checklists/release.md`
