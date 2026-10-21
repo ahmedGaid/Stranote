@@ -27,6 +27,8 @@ take a `claimed` row, start a `blocked` row, merge (Mode C only), push, touch `D
 ## Mode A - RESUME (automatic)
 1. Read `STATE.md` (skip it if a session hook already injected it). Do NOT explore the codebase to rebuild context.
 2. **Pick a task. Never answer "nothing for me": go down this ladder until a step gives you a task.**
+   Run skill `stranote-next` first (`next.ps1 -Agent "<agent (model)>" [-Id <id>]`): it computes steps 1-5 below and
+   prints the claim command; use its answer. Apply the ladder by hand only for steps 6-7, or if the script cannot run.
    1. **Named:** the task the user named (`/stranote_resume S2`, or a request in the same message). Claimed by
       another agent -> say so in one line and go on down the ladder.
    2. **A review:** a row in `review` whose Branch is a task branch (`<agent>/<id>`) written by a different agent kind
