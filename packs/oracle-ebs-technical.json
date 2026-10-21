@@ -976,6 +976,7 @@
                "areas":  "Modules",
                "screenshotsTitle":  "صور من EBS",
                "cvTitle":  "Oracle EBS Technical Consultant",
+               "privateNamesWarning":  "contains an internal EBS custom object name",
                "sample":  { "id": "CR-1042", "module": "AP", "type": "Interface", "title": "Supplier_invoice_interface", "code": "SUPP_INV" },
                "placeholders":  {
                                     "taskId":  "CR-1042",

@@ -1880,7 +1880,8 @@ function cvWarnings(text){
   arr((META.career || {}).companies).forEach(c => { if (c.name && new RegExp('\\b' + c.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i').test(s)) w.push(`mentions ${c.name}`); });
   if (/\b[A-Z]{1,6}-\d{2,}\b/.test(s)) w.push('contains a ticket ID');
   const priv = rx(UI.privateNames, 'i');
-  if ((META.prefix && new RegExp('\\b' + META.prefix + '_?[A-Z0-9_]*', 'i').test(s)) || (priv && priv.test(s))) w.push('contains internal custom object names');
+  const privateWarning = UI.privateNamesWarning || 'contains a private name or identifier';
+  if ((META.prefix && new RegExp('\\b' + META.prefix + '_?[A-Z0-9_]*', 'i').test(s)) || (priv && priv.test(s))) w.push(privateWarning);
   if (/\[result/i.test(s)) w.push('result placeholder not filled in');
   return w;
 }

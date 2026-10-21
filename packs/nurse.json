@@ -331,6 +331,7 @@
     "areas": "Areas",
     "screenshotsTitle": "صور ومرفقات (من غير بيانات مرضى)",
     "cvTitle": "Registered nurse",
+    "privateNamesWarning": "contains a patient identifier",
     "sample": { "id": "CASE-0142", "module": "MEDS", "type": "Medication administration", "title": "Heparin_infusion_titration", "code": "HEP_INF" },
     "placeholders": {
       "taskId": "CASE-0142",
