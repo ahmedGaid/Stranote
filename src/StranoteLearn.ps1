@@ -63,10 +63,12 @@ function Set-SnCard {
     }
     if (-not $company) { $company = Get-CurrentCompany (Get-SnSettings) }
     $now = Get-Now
-    $existing = if ($Id) { @($cards | Where-Object { $_.id -eq $Id }) } else { @() }
+    $existing = @()
+    if ($Id) { $existing = @($cards | Where-Object { $_.id -eq $Id }) }
     if ($existing.Count) {
         $c = $existing[0]
-        $c.topic = $Topic.Trim(); $c.fact = "$Fact".Trim(); $c.code = "$Code"; $c.tags = (ConvertTo-StrArray $Tags); $c.module = "$Module"; $c.updated = $now
+        $c.topic = $Topic.Trim(); $c.fact = "$Fact".Trim(); $c.code = "$Code"; $c.tags = (ConvertTo-StrArray $Tags); $c.module = "$Module"
+        $c | Add-Member -NotePropertyName updated -NotePropertyValue $now -Force
         # editing an automatic card makes it yours: auto sync will no longer overwrite it
         $c | Add-Member -NotePropertyName source -NotePropertyValue 'manual' -Force
     } else {
