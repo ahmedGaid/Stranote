@@ -814,6 +814,11 @@ dialog.ob-dlg{border-radius:var(--radius-dialog)}
   .grid{grid-template-columns:1fr}
 }
 @media (max-width:760px){ .set{grid-template-columns:1fr} .set nav{flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid var(--line);border-radius:14px 14px 0 0} .set nav .sp{display:none} .types{grid-template-columns:1fr} .types .tl > button{display:inline-block;width:auto} }
+.sn-ctx{position:fixed;z-index:10000;min-width:168px;padding:4px;border:1px solid var(--color-border-popover);border-radius:var(--radius-md);background:var(--color-surface-floating);box-shadow:var(--shadow-floating)}
+.sn-ctx[hidden],.sn-tooltip[hidden]{display:none}
+.sn-ctx button{display:block;width:100%;padding:7px 10px;border:0;border-radius:var(--radius-xs);background:transparent;color:var(--color-text-primary);font:450 13px/1.4 var(--font-sans);text-align:left;cursor:pointer}
+.sn-ctx button:hover,.sn-ctx button:focus-visible{background:var(--color-highlight-menu);outline:0}
+.sn-tooltip{position:fixed;z-index:10001;max-width:min(280px,calc(100vw - 16px));padding:5px 8px;border:1px solid var(--color-border-popover);border-radius:var(--radius-xs);background:var(--color-surface-floating);box-shadow:var(--shadow-menu);color:var(--color-text-primary);font:450 12px/1.4 var(--font-sans);pointer-events:none;overflow-wrap:anywhere}
 </style>
 <script>/* theme before first paint: System unless this browser picked Light or Dark */
 try { var snT = localStorage.getItem('snTheme'); if (snT === 'light' || snT === 'dark') document.documentElement.setAttribute('data-theme', snT); } catch (e) {}</script>
@@ -3210,7 +3215,98 @@ function openKeys(){
   $('keysDlg').showModal();
 }
 
+const taskContextMenu = document.createElement('div');
+taskContextMenu.className = 'sn-ctx';
+taskContextMenu.setAttribute('role', 'menu');
+taskContextMenu.setAttribute('aria-label', 'Task actions');
+taskContextMenu.hidden = true;
+taskContextMenu.innerHTML = '<button type="button" role="menuitem" data-ctx-action="open">Open task</button><button type="button" role="menuitem" data-ctx-action="copy">Copy task ID</button>';
+document.body.appendChild(taskContextMenu);
+let contextTaskId = '';
+function closeTaskContextMenu(){ taskContextMenu.hidden = true; contextTaskId = ''; }
+function openTaskContextMenu(task, x, y){
+  contextTaskId = task.id;
+  taskContextMenu.hidden = false;
+  const r = taskContextMenu.getBoundingClientRect();
+  taskContextMenu.style.left = `${Math.max(8, Math.min(x, innerWidth - r.width - 8))}px`;
+  taskContextMenu.style.top = `${Math.max(8, Math.min(y, innerHeight - r.height - 8))}px`;
+  taskContextMenu.querySelector('button').focus();
+}
+$('board').addEventListener('contextmenu', e => {
+  const item = e.target.closest('.card[data-id],.row[data-id]');
+  if (!item) return;
+  const task = TASKS.find(t => t.id === item.dataset.id);
+  if (!task) return;
+  e.preventDefault();
+  openTaskContextMenu(task, e.clientX, e.clientY);
+});
+taskContextMenu.addEventListener('click', async e => {
+  const button = e.target.closest('[data-ctx-action]');
+  if (!button || !contextTaskId) return;
+  const id = contextTaskId;
+  closeTaskContextMenu();
+  if (button.dataset.ctxAction === 'open') show(id);
+  else if (button.dataset.ctxAction === 'copy') {
+    try {
+      if (!navigator.clipboard || !navigator.clipboard.writeText) throw new Error('Clipboard access is unavailable');
+      await navigator.clipboard.writeText(id);
+      toast(`Copied ${id}`);
+    } catch (err) { toast(`Could not copy task ID: ${err.message}`); }
+  }
+});
+document.addEventListener('pointerdown', e => { if (!taskContextMenu.hidden && !taskContextMenu.contains(e.target)) closeTaskContextMenu(); });
 document.addEventListener('keydown', e => {
+  if (taskContextMenu.hidden) return;
+  const buttons = [...taskContextMenu.querySelectorAll('[role="menuitem"]')];
+  const index = buttons.indexOf(document.activeElement);
+  if (e.key === 'Escape') { e.preventDefault(); closeTaskContextMenu(); }
+  else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    buttons[(index + (e.key === 'ArrowDown' ? 1 : -1) + buttons.length) % buttons.length].focus();
+  }
+});
+
+const snTooltip = document.createElement('div');
+snTooltip.className = 'sn-tooltip';
+snTooltip.id = 'sn-tooltip';
+snTooltip.setAttribute('role', 'tooltip');
+snTooltip.hidden = true;
+document.body.appendChild(snTooltip);
+let tooltipTarget = null, tooltipTitle = '', tooltipDescription = null;
+function hideSnTooltip(){
+  if (!tooltipTarget) return;
+  tooltipTarget.setAttribute('title', tooltipTitle);
+  if (tooltipDescription === null) tooltipTarget.removeAttribute('aria-describedby');
+  else tooltipTarget.setAttribute('aria-describedby', tooltipDescription);
+  tooltipTarget = null; tooltipTitle = ''; tooltipDescription = null; snTooltip.hidden = true;
+}
+function showSnTooltip(target){
+  const title = target.getAttribute('title');
+  if (!title || !title.trim() || target === tooltipTarget) return;
+  hideSnTooltip();
+  tooltipTarget = target; tooltipTitle = title; tooltipDescription = target.getAttribute('aria-describedby');
+  target.removeAttribute('title');
+  target.setAttribute('aria-describedby', [tooltipDescription, snTooltip.id].filter(Boolean).join(' '));
+  snTooltip.textContent = title; snTooltip.hidden = false;
+  const rect = target.getBoundingClientRect(), width = snTooltip.offsetWidth, height = snTooltip.offsetHeight;
+  const left = Math.max(8, Math.min(innerWidth - width - 8, rect.left + (rect.width - width) / 2));
+  const top = rect.bottom + height + 8 <= innerHeight - 8 ? rect.bottom + 8 : Math.max(8, rect.top - height - 8);
+  snTooltip.style.left = `${left}px`; snTooltip.style.top = `${top}px`;
+}
+document.addEventListener('pointerover', e => {
+  const target = e.target.closest && e.target.closest('[title]');
+  if (target) showSnTooltip(target);
+});
+document.addEventListener('pointerout', e => {
+  if (tooltipTarget && tooltipTarget.contains(e.target) && !tooltipTarget.contains(e.relatedTarget)) hideSnTooltip();
+});
+document.addEventListener('focusin', e => { if (e.target.matches && e.target.matches('[title]')) showSnTooltip(e.target); });
+document.addEventListener('focusout', e => {
+  if (tooltipTarget && tooltipTarget.contains(e.target) && !tooltipTarget.contains(e.relatedTarget)) hideSnTooltip();
+});
+
+document.addEventListener('keydown', e => {
+  if (!taskContextMenu.hidden) return;
   if ((e.ctrlKey || e.metaKey) && !e.altKey && !e.shiftKey && e.code === 'KeyK') { e.preventDefault(); if (palOpen()) closePal(); else if (!document.querySelector('dialog[open]')) openPal(); return; }
   if (palOpen()) return;
   const tag = (e.target.tagName || '').toLowerCase();
