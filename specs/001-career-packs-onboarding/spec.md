@@ -217,5 +217,5 @@ new pack's task types.
   through Claude sessions using the Ops skills (the person's own Claude account), never through keys in the app.
 - The person runs Ops on their own machine; their work data never goes into the product repository.
 - The interface stays English with Arabic learning text; full UI translation is a later feature.
-- The existing Claude skills (task recording, dashboard guide, ops-learn) will be generalized to read the active
+- The existing Claude skills (task recording, dashboard guide, stranote-learn) will be generalized to read the active
   pack (T046). Project progress is tracked with the `/ops_resume` + `/ops_status` pair, not inside Ops.
