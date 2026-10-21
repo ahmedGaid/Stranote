@@ -126,7 +126,8 @@ if (-not $pick) {
 # 5. Owner-decision memo
 if (-not $pick) {
     foreach ($c in $rows) {
-        if ((Get-Status $c) -like 'blocked: owner*' -and "$($c[3])" -notmatch '(?i)memo') { $pick = $c; $why = 'owner-decision memo'; break }
+        # A memo noted in Status or in Claimed by (done or being written) means the row is covered
+        if ((Get-Status $c) -like 'blocked: owner*' -and "$($c[3]) $($c[4])" -notmatch '(?i)memo') { $pick = $c; $why = 'owner-decision memo'; break }
     }
 }
 
