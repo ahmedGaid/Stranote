@@ -142,6 +142,7 @@ Breaking one of these loses another agent's work. If a rule stops you, stop and 
 | Codex | gpt-6-luna (xhigh) | multi-file coding, tests, performance work, independent review of another agent's branch |
 | Google Antigravity | Gemini (model picked in the app) | multi-file coding, UI work checked in its built-in browser (light/dark/390px), tests; a second reviewer |
 | Cline (VS Code extension) | the model set in Cline (today MiniMax-M3.1-Flash, small) | one-file fixes, docs, pack JSON text, reviews of docs/skill/pack-text branches only |
+| Kilo Code (VS Code extension) | the model set in Kilo (today Nemotron 3.5 Super VL, free, mid-size, sees images); entry `.kilocode/` | one-file fixes, docs, skill text, pack JSON text, one Pester test file, docs/skill/pack-text reviews, UI checks from screenshots (light/dark/390px) |
 | GitHub Copilot (VS Code Chat, free plan, Auto model) | small models, monthly limit | one-file fixes (CSS, wording, pack JSON labels), explaining code, one Pester test, read-only review |
 
 How to choose: owner decision, spec, more than ~3 files, engine PowerShell or `D:\Work` -> Claude Code, Codex or
