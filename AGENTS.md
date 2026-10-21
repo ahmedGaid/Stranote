@@ -1,6 +1,6 @@
 # Stranote - rules for every agent
 
-Read by every agent (Claude via `CLAUDE.md`; Codex, Antigravity, Copilot, Cline, Kilo Code, Cursor directly). Wins over tool defaults;
+Read by every agent (Claude via `CLAUDE.md`; Codex, Antigravity, Copilot, Cline, Kilo Code directly). Wins over tool defaults;
 the constitution (`.specify/memory/constitution.md`) wins over it. Public repo: no secrets, client names or personal data.
 
 ## Where things are
