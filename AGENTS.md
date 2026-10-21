@@ -13,7 +13,8 @@ the constitution (`.specify/memory/constitution.md`) wins over it. Public repo: 
 ## Commands
 `/stranote_resume` [`<id>` | `update "..."` | `merge`] · `/stranote_status` · `/stranote_next` (read-only: your next task)
 (Codex: `$stranote-resume`, `$stranote-status`, `$stranote-next`). Next task for any agent, any day, one command:
-`.agents\skills\stranote-next\next.ps1 -Agent "<agent (model)>"` (skill `stranote-next`).
+`powershell -NoProfile -ExecutionPolicy Bypass -File D:\Projects\Stranote\.agents\skills\stranote-next\next.ps1 -Agent "<agent (model)>"`
+(skill `stranote-next`).
 No command support: follow `.agents/skills/stranote-resume/SKILL.md`.
 
 ## STRICT (every agent, every session)

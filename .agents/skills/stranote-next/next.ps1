@@ -76,10 +76,10 @@ function Get-Overlap($c) {
     return $null
 }
 function Test-SmallReview([string]$branch) {
-    # Small models review only branches that leave src/ and tests/ alone
-    $files = & 'C:\Program Files\Git\cmd\git.exe' -C $Repo diff --name-only "main...$branch" 2>$null
-    if ($LASTEXITCODE -ne 0) { return $false }
-    return -not @($files | Where-Object { $_ -match '^(src|tests)/' }).Count
+    # Small models review only branches that change docs, skill text or pack text (every file must match)
+    $files = @(& 'C:\Program Files\Git\cmd\git.exe' -C $Repo diff --name-only "main...$branch" 2>$null)
+    if ($LASTEXITCODE -ne 0 -or -not $files.Count) { return $false }
+    return -not @($files | Where-Object { $_ -notmatch '(^docs/.*\.md$)|(^\.agents/skills/.*\.md$)|(^packs/.*\.json$)|(^\.(github|clinerules|kilocode)/.*\.md$)|(^[^/]+\.md$)' }).Count
 }
 
 $pick = $null; $why = ''; $notes = @()
