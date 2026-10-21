@@ -91,6 +91,22 @@ Describe 'Cards (Set-SnCard, Remove-SnCard, Set-SnCardKeep)' {
             $cards[0].source | Should Be 'manual'
         } finally { Remove-SnTestEnv $root }
     }
+    It 'updates a card by Id in place (no duplicate), makes it manual and sets updated' {
+        $root = New-SnTestEnv
+        try {
+            # a card without an "updated" property, as older cards may be
+            Set-SnTestJson 'cards.json' @([pscustomobject][ordered]@{ id = 'K-existing'; taskId = ''; company = ''; module = ''; topic = 'Old topic'; fact = 'Old fact'; code = ''; tags = @(); source = 'auto'; created = '2026-01-01' })
+            $result = Set-SnCard -Id 'K-existing' -Topic 'New topic' -Fact 'New fact'
+            $cards = @(Get-SnTestJson 'cards.json')
+            $cards.Count | Should Be 1
+            $cards[0].id | Should Be 'K-existing'
+            $cards[0].topic | Should Be 'New topic'
+            $cards[0].fact | Should Be 'New fact'
+            $cards[0].source | Should Be 'manual'
+            $cards[0].updated | Should Not BeNullOrEmpty
+            $result.id | Should Be 'K-existing'
+        } finally { Remove-SnTestEnv $root }
+    }
 }
 
 Describe 'Questions (Add-SnQuestions)' {
