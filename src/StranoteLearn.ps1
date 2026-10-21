@@ -40,6 +40,8 @@ function Get-SnCv {
         if (-not ($cv.PSObject.Properties.Name -contains $k)) { $cv | Add-Member -NotePropertyName $k -NotePropertyValue @() }
         $cv.$k = @($cv.$k | Where-Object { $_ })
     }
+    # A first-use or older cv.json has no lastExport; setting a missing property on a PSCustomObject throws
+    if (-not ($cv.PSObject.Properties.Name -contains 'lastExport')) { $cv | Add-Member -NotePropertyName lastExport -NotePropertyValue '' }
     return $cv
 }
 
