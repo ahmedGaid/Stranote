@@ -1,6 +1,6 @@
 # /stranote_resume
 
-Stranote session command, shared by every agent (Claude Code, Codex, Antigravity, Copilot, Cline).
+Stranote session command, shared by every agent (Claude Code, Codex, Copilot, Cline).
 
 1. Read `D:\Projects\Stranote\.agents\skills\stranote-resume\SKILL.md` and follow it exactly.
 2. Text the user typed after the command is its argument: nothing = RESUME (pick, claim and start your next task
