@@ -1,6 +1,6 @@
 ---
 name: stranote-next
-description: Tell any agent (Claude Code, Codex, Antigravity, Cline, Copilot) its next Stranote task in one read-only command, every day or session. Use when the user types /stranote_next, $stranote-next or asks "what's next on Stranote", "my next task", "what should I work on", "ايه التاسك الجاية", and as step 2 of /stranote_resume.
+description: Tell any agent (Claude Code, Codex, Cline, Copilot) its next Stranote task in one read-only command, every day or session. Use when the user types /stranote_next, $stranote-next or asks "what's next on Stranote", "my next task", "what should I work on", "ايه التاسك الجاية", and as step 2 of /stranote_resume.
 ---
 
 # Stranote - next task (read-only, every agent, every day)
@@ -12,7 +12,7 @@ One command gives every model the same answer, computed from `D:\Projects\Strano
 powershell -NoProfile -ExecutionPolicy Bypass -File D:\Projects\Stranote\.agents\skills\stranote-next\next.ps1 -Agent "<agent (model)>"
 ```
 - `-Agent` = your agent and model as on the board, e.g. `"Codex (gpt-6-luna)"`, `"Claude Code (Opus 5.5)"`,
-  `"Google Antigravity (Gemini)"`, `"Cline (MiniMax-M3.1-Flash)"`, `"GitHub Copilot (Auto)"`.
+  `"Cline (MiniMax-M3.1-Flash)"`, `"GitHub Copilot (Auto)"`.
 - `-Id <id>` if the user named a task. `-Small` if you run on a small model (Cline and Copilot always count as small).
 
 Print what it returns as the brief (Next, Why, Fit, Touches, Working now, Blocked on owner, Ready to merge, Last done).

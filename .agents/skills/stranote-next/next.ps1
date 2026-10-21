@@ -49,8 +49,8 @@ function Test-Overlap($a, $b) {
 # Agent kind -> branch prefix and the word that names it in the Fit column
 $kind = Get-Kind $Agent
 $map = @(
-    @('Claude', 'claude', 'Claude'), @('Codex', 'codex', 'Codex'), @('Antigravity', 'antigravity', 'Antigravity'),
-    @('Copilot', 'copilot', 'Copilot'), @('Cline', 'cline', 'Cline'), @('Kilo', 'kilo', 'Kilo'))
+    @('Claude', 'claude', 'Claude'), @('Codex', 'codex', 'Codex'), @('Copilot', 'copilot', 'Copilot'),
+    @('Cline', 'cline', 'Cline'))
 $prefix = ''; $fitWord = ''
 foreach ($m in $map) { if ($kind -match [regex]::Escape($m[0])) { $prefix = $m[1]; $fitWord = $m[2] } }
 if (-not $prefix) { $prefix = ($kind.ToLowerInvariant() -replace '[^a-z0-9]', ''); $fitWord = $kind }
@@ -79,7 +79,7 @@ function Test-SmallReview([string]$branch) {
     # Small models review only branches that change docs, skill text or pack text (every file must match)
     $files = @(& 'C:\Program Files\Git\cmd\git.exe' -C $Repo diff --name-only "main...$branch" 2>$null)
     if ($LASTEXITCODE -ne 0 -or -not $files.Count) { return $false }
-    return -not @($files | Where-Object { $_ -notmatch '(^docs/.*\.md$)|(^\.agents/skills/.*\.md$)|(^packs/.*\.json$)|(^\.(github|clinerules|kilocode)/.*\.md$)|(^[^/]+\.md$)' }).Count
+    return -not @($files | Where-Object { $_ -notmatch '(^(docs|specs)/.*\.md$)|(^\.agents/skills/.*\.md$)|(^packs/.*\.json$)|(^\.(github|clinerules)/.*\.md$)|(^[^/]+\.md$)' }).Count
 }
 
 $pick = $null; $why = ''; $notes = @()
