@@ -144,12 +144,13 @@ Breaking one of these loses another agent's work. If a rule stops you, stop and 
 | Codex | gpt-6-luna (xhigh) | multi-file coding, tests, performance work, independent review of another agent's branch |
 | Google Antigravity | **paused** (free quota used up, 2026-10-21; owner re-enables) - was Gemini Flash | none while paused: no Fit names it; its UI checks -> Claude Code or Kilo Code, its coding/second review -> Codex. Its Flash model counts as small. |
 | Cline (VS Code extension) | the model set in Cline (today MiniMax-M3.1-Flash, small) | one-file fixes, docs, pack JSON text, reviews of docs/skill/pack-text branches only |
-| Kilo Code (VS Code extension) | the model set in Kilo (today Nemotron 3.5 Super VL, free, mid-size, sees images); entry `.kilocode/` | one-file fixes, docs, skill text, pack JSON text, one Pester test file, docs/skill/pack-text reviews, UI checks from screenshots (light/dark/390px) |
+| Kilo Code (VS Code extension) | the model set in Kilo (free models, the owner switches them: Nemotron 3.5 Super VL sees images, MiniMax-M3.1-Flash is small); entry `.kilocode/` | one-file fixes, docs, skill text, pack JSON text, one Pester test file, docs/skill/pack-text reviews, UI checks from screenshots (light/dark/390px) |
 | GitHub Copilot (VS Code Chat, free plan, Auto model) | small models, monthly limit | one-file fixes (CSS, wording, pack JSON labels), explaining code, one Pester test, read-only review |
+| Cursor (free plan, Auto model) | Cursor's Auto model, limited monthly requests, always small in `next.ps1`; entry `.cursor/` | one-file fixes, docs, skill text, pack JSON text, one Pester test file for pure helpers, docs/skill/pack-text reviews; finish one row per session to spend the quota well |
 
 How to choose: owner decision, spec, more than ~3 files, engine PowerShell or `D:\Work` -> Claude Code or Codex.
 UI that must be seen in a browser -> Claude Code (Chrome / built-in browser), or Kilo Code from screenshots (light,
-dark, 390px). One file with a clear "done" -> Kilo Code, Cline or Copilot.
+dark, 390px). One file with a clear "done" -> Kilo Code, Cline, Cursor or Copilot.
 A review -> an agent other than the author. Every board row has a **Fit** column. When you finish a task, end your
 reply with the Agent fit line of the next open task:
 `**Agent fit:** Claude Code > Opus 5.5 (best) · Codex > gpt-6-luna (ok) · GitHub Copilot (no: needs planning)`

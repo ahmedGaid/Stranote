@@ -6,7 +6,7 @@
   Run:  powershell -NoProfile -ExecutionPolicy Bypass -File D:\Projects\Stranote\.agents\skills\stranote-next\next.ps1 -Agent "Codex (gpt-6-luna)"
         add -Id S2      the task the user named
         add -Small      you run on a small model (Flash / mini / free plan): only docs/skill/pack-text reviews
-                        (Cline and GitHub Copilot are always treated as small)
+                        (Cline, GitHub Copilot and Cursor are always treated as small)
 
   Ladder: named > review by another agent kind > best fit > any open row > owner-decision memo > steps 6-7 of
   stranote-resume (find new work / health check), which need judgment and are not computed here.
@@ -50,11 +50,12 @@ function Test-Overlap($a, $b) {
 $kind = Get-Kind $Agent
 $map = @(
     @('Claude', 'claude', 'Claude'), @('Codex', 'codex', 'Codex'), @('Antigravity', 'antigravity', 'Antigravity'),
-    @('Copilot', 'copilot', 'Copilot'), @('Cline', 'cline', 'Cline'), @('Kilo', 'kilo', 'Kilo'))
+    @('Copilot', 'copilot', 'Copilot'), @('Cline', 'cline', 'Cline'), @('Kilo', 'kilo', 'Kilo'),
+    @('Cursor', 'cursor', 'Cursor'))
 $prefix = ''; $fitWord = ''
 foreach ($m in $map) { if ($kind -match [regex]::Escape($m[0])) { $prefix = $m[1]; $fitWord = $m[2] } }
 if (-not $prefix) { $prefix = ($kind.ToLowerInvariant() -replace '[^a-z0-9]', ''); $fitWord = $kind }
-if ($prefix -eq 'copilot' -or $prefix -eq 'cline') { $Small = $true }
+if (@('copilot', 'cline', 'cursor') -contains $prefix) { $Small = $true }
 
 $lines = [IO.File]::ReadAllLines($Path, [Text.Encoding]::UTF8)
 $rows = @()
@@ -79,7 +80,7 @@ function Test-SmallReview([string]$branch) {
     # Small models review only branches that change docs, skill text or pack text (every file must match)
     $files = @(& 'C:\Program Files\Git\cmd\git.exe' -C $Repo diff --name-only "main...$branch" 2>$null)
     if ($LASTEXITCODE -ne 0 -or -not $files.Count) { return $false }
-    return -not @($files | Where-Object { $_ -notmatch '(^docs/.*\.md$)|(^\.agents/skills/.*\.md$)|(^packs/.*\.json$)|(^\.(github|clinerules|kilocode)/.*\.md$)|(^[^/]+\.md$)' }).Count
+    return -not @($files | Where-Object { $_ -notmatch '(^(docs|specs)/.*\.md$)|(^\.agents/skills/.*\.md$)|(^packs/.*\.json$)|(^\.(github|clinerules|kilocode|cursor)/.*\.mdc?$)|(^[^/]+\.md$)' }).Count
 }
 
 $pick = $null; $why = ''; $notes = @()
