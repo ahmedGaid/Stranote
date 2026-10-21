@@ -50,7 +50,7 @@ function Test-Overlap($a, $b) {
 $kind = Get-Kind $Agent
 $map = @(
     @('Claude', 'claude', 'Claude'), @('Codex', 'codex', 'Codex'), @('Antigravity', 'antigravity', 'Antigravity'),
-    @('Copilot', 'copilot', 'Copilot'), @('Cline', 'cline', 'Cline'))
+    @('Copilot', 'copilot', 'Copilot'), @('Cline', 'cline', 'Cline'), @('Kilo', 'kilo', 'Kilo'))
 $prefix = ''; $fitWord = ''
 foreach ($m in $map) { if ($kind -match [regex]::Escape($m[0])) { $prefix = $m[1]; $fitWord = $m[2] } }
 if (-not $prefix) { $prefix = ($kind.ToLowerInvariant() -replace '[^a-z0-9]', ''); $fitWord = $kind }
