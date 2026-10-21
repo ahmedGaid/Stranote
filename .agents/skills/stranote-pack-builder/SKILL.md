@@ -42,7 +42,8 @@ Ask in one message, max 5 questions, with suggested answers they can confirm:
 3. What they write or save while working: notes, reports, drawings, spreadsheets (becomes `ticketFolders`,
    `saveTargets` and which file types the extractor reads).
 4. Words, tools, standards or terms that come up all the time (becomes the `term` extractor list).
-5. What must never appear on a CV or in a pack (client names, ids...) (becomes `ui.privateNames`).
+5. What must never appear on a CV or in a pack (client names, ids...), and what warning should the CV show if it
+   detects one (becomes `ui.privateNames` and `ui.privateNamesWarning`).
 
 If they say "you choose", use the General pack's values for that part and say so in `x-unconfirmed`.
 
@@ -59,7 +60,7 @@ Start from `packs\general.json` (copy it, never change the shipped file) and rep
 | `taskTypes` | one per `freeTasks` item + `Other`. Each: at least one intake question (`k`,`q`,`d`), `openQuestions`, `checklist` (from step 2), `objects: []` |
 | `settings` | `phases`, `baseChecklist`, `commonQuestions`, `ticketFolders`, `saveTargets`, `notesSections`, `abbreviations` from step 2-3. Keep `workFolders` as in general. Never set `modules`, `types`, `knowledge` |
 | `extractors` | one `term` extractor: `(?i)\\b(?<key>tool1|term2|...)\\b` from request `tools` + step 4 words, `files` from step 3, `group` = a category id, `minCount` 1, `maxCards` 6 |
-| `ui` | `workspace`, `area`/`areas`, `cvTitle`, `sample` (fictional), `placeholders.taskTitle`, `privateNames` (JavaScript regex), `skills.bullet` |
+| `ui` | `workspace`, `area`/`areas`, `cvTitle`, `sample` (fictional), `placeholders.taskTitle`, `privateNames` (JavaScript regex), `privateNamesWarning` (CV warning text when the pack prefix or `privateNames` matches), `skills.bullet` |
 | `skillMap` | one `{ skill, area, group }` per area |
 | `starterLessons` | `[]` (reserved) |
 | `x-unconfirmed` | list of strings: everything you added that the person did not say |
