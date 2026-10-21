@@ -77,7 +77,9 @@ function Get-Overlap($c) {
 }
 function Test-SmallReview([string]$branch) {
     # Small models review only branches that change docs, skill text or pack text (every file must match)
-    $files = @(& 'C:\Program Files\Git\cmd\git.exe' -C $Repo diff --name-only "main...$branch" 2>$null)
+    # git's "multiple merge bases" warning goes to stderr; under Stop, PowerShell 5.1 turns it into a throw, so relax it here only
+    $ErrorActionPreference = 'Continue'
+    $files = @(& 'C:\Program Files\Git\cmd\git.exe' -C $Repo diff --name-only "main...$branch" 2>$null | Where-Object { $_ -is [string] -and $_ })
     if ($LASTEXITCODE -ne 0 -or -not $files.Count) { return $false }
     return -not @($files | Where-Object { $_ -notmatch '(^docs/.*\.md$)|(^\.agents/skills/.*\.md$)|(^packs/.*\.json$)|(^\.(github|clinerules|kilocode)/.*\.md$)|(^[^/]+\.md$)' }).Count
 }
