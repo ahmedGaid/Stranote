@@ -34,7 +34,7 @@ take a `claimed` row, start a `blocked` row, merge (Mode C only), push, touch `D
    2. **A review:** a row in `review` whose Branch is a task branch (`<agent>/<id>`) written by a different agent kind
       than you. Reviews come first because they unblock merges. Agents on a small model (Copilot, or any agent on a
       Flash / mini / small model) review only branches that change docs, skills or pack text; branches that change
-      `src/` or `tests/` need Claude, Codex or Antigravity on a strong model.
+      `src/` or `tests/` need Claude or Codex on a strong model.
    3. **Best fit:** the first `open` row (table order = priority) whose Fit names you or says `any`, and whose
       **Touches** do not overlap a `claimed` row.
    4. **Any open row:** the first `open` row you can do even if its Fit names other agents (Fit is advice: say "not
@@ -142,13 +142,14 @@ Breaking one of these loses another agent's work. If a rule stops you, stop and 
 |---|---|---|
 | Claude Code | Opus 5.5 (default); Sonnet 5.5 routine coding; Haiku 5.5 trivial edits | planning, specs, playbook, product decisions with the owner, multi-file engine work, live upgrade, Arabic teaching content, reviews |
 | Codex | gpt-6-luna (xhigh) | multi-file coding, tests, performance work, independent review of another agent's branch |
-| Google Antigravity | Gemini (model picked in the app) | multi-file coding, UI work checked in its built-in browser (light/dark/390px), tests; a second reviewer |
+| Google Antigravity | **paused** (free quota used up, 2026-10-21; owner re-enables) - was Gemini Flash | none while paused: no Fit names it; its UI checks -> Claude Code or Kilo Code, its coding/second review -> Codex. Its Flash model counts as small. |
 | Cline (VS Code extension) | the model set in Cline (today MiniMax-M3.1-Flash, small) | one-file fixes, docs, pack JSON text, reviews of docs/skill/pack-text branches only |
 | Kilo Code (VS Code extension) | the model set in Kilo (today Nemotron 3.5 Super VL, free, mid-size, sees images); entry `.kilocode/` | one-file fixes, docs, skill text, pack JSON text, one Pester test file, docs/skill/pack-text reviews, UI checks from screenshots (light/dark/390px) |
 | GitHub Copilot (VS Code Chat, free plan, Auto model) | small models, monthly limit | one-file fixes (CSS, wording, pack JSON labels), explaining code, one Pester test, read-only review |
 
-How to choose: owner decision, spec, more than ~3 files, engine PowerShell or `D:\Work` -> Claude Code, Codex or
-Antigravity. UI that must be seen in a browser -> Antigravity fits well. One file with a clear "done" -> Copilot.
+How to choose: owner decision, spec, more than ~3 files, engine PowerShell or `D:\Work` -> Claude Code or Codex.
+UI that must be seen in a browser -> Claude Code (Chrome / built-in browser), or Kilo Code from screenshots (light,
+dark, 390px). One file with a clear "done" -> Kilo Code, Cline or Copilot.
 A review -> an agent other than the author. Every board row has a **Fit** column. When you finish a task, end your
 reply with the Agent fit line of the next open task:
 `**Agent fit:** Claude Code > Opus 5.5 (best) · Codex > gpt-6-luna (ok) · GitHub Copilot (no: needs planning)`
