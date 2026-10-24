@@ -37,18 +37,18 @@
 
 ## Phase 4: Task page (board AT4) - needs AT1
 
-- [X] T020 [US3] Attach button next to "+ Save a file or script": drop / choose / paste into the attachments place with optional sub-folder; list refreshes (`src/dashboard_template.html`, files panel) (AT4)
-- [X] T021 [P] [US5] GET `/api/file?path=` for images under `01_Tickets` / `99_Archive` only (`src/StranoteServer.ps1`, R7) + Pester case for refused paths (AT4)
-- [X] T022 [US5] Files list: image previews grouped Problem / Expected / other; click opens; fix details shown as a block (AT4)
-- [X] T023 [US3] Browser check (quickstart 8, 11): light, dark, 390 px (AT4)
+- [X] T020 [US3] Attach button next to "+ Save a file or script": drop / choose / paste into the attachments place with optional sub-folder; list refreshes (`src/dashboard_template.html`, files panel) (7a4b138)
+- [X] T021 [P] [US5] GET `/api/file?path=` for images under `01_Tickets` / `99_Archive` only (`src/StranoteServer.ps1`, R7) + Pester case for refused paths (7a4b138)
+- [X] T022 [US5] Files list: image previews grouped Problem / Expected / other; click opens; fix details shown as a block (7a4b138)
+- [X] T023 [US3] Browser check (quickstart 8, 11): light, dark, 390 px (7a4b138)
 
 ## Phase 5: Skills, docs, live note (board AT5)
 
-- [ ] T024 [P] [US4] `.agents/skills/ebs-task/SKILL.md`: Report intake asks New/Fix and the fix questions; attachments go to the attachments folder
-- [ ] T025 [P] `.agents/skills/ebs-dashboard-guide/SKILL.md`: screenshots / sample outputs -> attachments folder
-- [ ] T026 [P] `README.md` user section (attachments, report fix) + `docs/pack-authoring.md` (intake fields); `stranote-dev` file map line
-- [ ] T027 Live-upgrade note for the next upgrade row (R5): check live `overrides.json` for `types`; offer the owner a merge of the Report questions with a backup first; no live change in this row
-- [ ] T028 Final: full Pester suite, quickstart 1-11, log line in `STATE.md`
+- [X] T024 [P] [US4] `.agents/skills/ebs-task/SKILL.md`: Report intake asks New/Fix and the fix questions; attachments go to the attachments folder (AT5)
+- [X] T025 [P] `.agents/skills/ebs-dashboard-guide/SKILL.md`: screenshots / sample outputs -> attachments folder (AT5)
+- [X] T026 [P] `README.md` user section (attachments, report fix) + `docs/pack-authoring.md` (intake fields); `stranote-dev` file map line (AT5)
+- [X] T027 Live-upgrade note for the next upgrade row (R5): check live `overrides.json` for `types`; offer the owner a merge of the Report questions with a backup first; no live change in this row (AT5)
+- [X] T028 Final: full Pester suite, quickstart 1-11, log line in `STATE.md` (AT5: suite 243/243; quickstart 1-9 and 11 in headless Edge; 10 via Pester -Attach, the interactive terminal prompts were not run by hand)
 
 ## Dependencies
 
