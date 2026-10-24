@@ -14,7 +14,7 @@ below is optional; a pack or an `overrides.json` written before this feature sta
 | `options` | string[] | - | required when `kind` = `choice`; 2-30 items, unique, non-empty |
 | `required` | bool | false | the task cannot be created while this visible question is blank (not for `files`) |
 | `when` | `{ "k": "<key>", "is": "<value>" }` or `{ "k": "<key>", "in": ["a","b"] }` | - | shown only when that answer matches (case-insensitive); `k` must be an earlier `choice` question of the same type |
-| `askIfBlank` | string | - | if the question is visible and left blank, this text is added as an open question |
+| `askIfBlank` | string | - | if the question is visible and left blank, this text is added as an open question (not for `files`) |
 | `sub` | string | `""` | `files` only: relative sub-folder of the attachments place (`Problem`, `Expected`) |
 
 Validation (pack loader and settings save): unknown `kind`; `choice` without `options`; `d` not in `options`; `when.k`
@@ -35,7 +35,7 @@ only if the variant defines it). `when.k` must be a `choice` question of the typ
 ## `settings.attachmentsPath`
 
 Pattern relative to the task folder, starts with `{ticket}`; tokens as save targets (`{id}`, `{module}`, `{type}`).
-Default in `src/settings.default.json`: `{ticket}\\Attachments`. Must resolve under the work root (`Assert-UnderRoot`).
+Engine default `{ticket}\Attachments`, in code (not in `src/settings.default.json`, see data-model.md). Must resolve under the work root (`Assert-UnderRoot`).
 
 ## Task record (additive)
 
