@@ -554,6 +554,12 @@ body.tint .metrics{background:color-mix(in srgb,var(--accent) 3%,transparent)}
 .fpanel{border:1px solid var(--line);border-radius:12px;padding:14px;margin:8px 0;background:var(--panel)}
 .drop{border:1.5px dashed var(--line2);border-radius:10px;padding:22px;text-align:center;color:var(--muted);cursor:pointer}
 .drop.over{border-color:var(--accent);color:var(--ink);background:var(--accent-soft)}
+.drop.sm{padding:12px;font-size:13px}
+.drop:focus{outline:none}
+.drop.on{border-color:var(--accent);border-style:solid}
+.drop u[data-pick]{cursor:pointer}
+.fl{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.fl .chip{display:inline-flex;align-items:center;gap:4px;max-width:100%;word-break:break-all}
 textarea.code{font:12.5px var(--mono);min-height:180px;white-space:pre}
 .seg{display:inline-flex;background:var(--chip);border-radius:999px;padding:3px;margin:10px 0}
 .seg button{background:none;border:0;padding:5px 14px;border-radius:999px;cursor:pointer;font-size:13px;color:var(--muted)}
@@ -879,6 +885,10 @@ try { var snT = localStorage.getItem('snTheme'); if (snT === 'light' || snT === 
       <div class="f full"><label>Description</label><textarea name="description" placeholder="What is needed and why"></textarea></div>
     </div>
     <div id="typeBlock"></div>
+    <h4>Attachments (optional)</h4>
+    <div class="drop sm on" data-drop="" tabindex="0">Drop files here, <u data-pick>choose files</u>, or click here and paste a screenshot (Ctrl+V)</div>
+    <div class="fl" data-fl=""></div>
+    <input type="file" id="ntFile" multiple hidden>
     <h4>Extra questions to confirm with the business (one per line, optional)</h4>
     <textarea name="extraQuestions" placeholder="e.g. Which data source should we use?" data-ph="extraQuestions"></textarea>
     <div class="actions"><span class="msg" id="newMsg"></span>
@@ -2486,21 +2496,94 @@ function initFiles(t){
 }
 
 /* ---------- new task ---------- */
+/* Intake questions come from the pack (spec 004): kind text | long | choice | files, shown only when their
+   `when` matches an earlier choice; the server checks the same rules (Resolve-SnIntake). */
+const MAX_FILE = 50 * 1048576;
+let NT_FILES = {}, NT_DROP = '';   // files per files-question key ('' = general attachments); paste target
+const qShown = (q, a) => (q.when ? arr(q.when.in != null ? q.when.in : q.when.is) : [])
+  .some(v => String(v).toLowerCase() === String(a[q.when.k] || '').toLowerCase());
+function intakeVisible(qs, a){
+  const shown = new Set();
+  return qs.filter(q => { if (q.when && (!shown.has(q.when.k) || !qShown(q, a))) return false; shown.add(q.k); return true; });
+}
 function renderTypeBlock(){
-  const type = $('newForm').elements.type.value;
+  const f = $('newForm'), type = f.elements.type.value;
   const qs = arr((META.typeQuestions || {})[type]);
   const needsCode = !!(META.typeHasObjects || {})[type];
+  const keep = {}; $('typeBlock').querySelectorAll('[data-k]').forEach(i => keep[i.dataset.k] = i.value);
+  const code = f.elements.shortCode ? f.elements.shortCode.value : '';
+  const a = {}; qs.forEach(q => a[q.k] = q.k in keep ? keep[q.k] : String(q.d || ''));
+  const req = q => q.required ? ' <span class="req">*</span>' : '';
+  const field = q => {
+    const k = esc(q.k), r = q.required ? 'required' : '';
+    switch (q.kind){
+      case 'choice': return `<div class="f"><label>${esc(q.q)}${req(q)}</label><select data-k="${k}" data-choice ${r}><option value="">Choose...</option>${arr(q.options).map(o => `<option ${String(o).toLowerCase() === String(a[q.k]).toLowerCase() ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select></div>`;
+      case 'long': return `<div class="f full"><label>${esc(q.q)}${req(q)}</label><textarea data-k="${k}" ${r}>${esc(a[q.k])}</textarea></div>`;
+      case 'files': return `<div class="f full"><label>${esc(q.q)}</label><div class="drop sm" data-drop="${k}" tabindex="0">Drop files, <u data-pick>choose files</u>, or click here and paste (Ctrl+V)</div><div class="fl" data-fl="${k}"></div></div>`;
+      default: return `<div class="f"><label>${esc(q.q)}${req(q)}</label><input data-k="${k}" value="${esc(a[q.k])}" ${r}></div>`;
+    }
+  };
+  const vis = intakeVisible(qs, a);
   $('typeBlock').innerHTML = (qs.length || needsCode) ? `<h4>${esc(type)} details</h4><div class="grid">
-    ${qs.map(q => `<div class="f"><label>${esc(q.q)}</label><input data-k="${esc(q.k)}" value="${esc(q.d)}"></div>`).join('')}
-    ${needsCode ? `<div class="f"><label>Short code for object names (blank = from title)</label><input name="shortCode" placeholder="e.g. SUPP_INV_IN"></div>` : ''}
+    ${vis.map(field).join('')}
+    ${needsCode ? `<div class="f"><label>Short code for object names (blank = from title)</label><input name="shortCode" placeholder="e.g. SUPP_INV_IN" value="${esc(code)}"></div>` : ''}
   </div>` : '';
+  $('typeBlock').querySelectorAll('[data-choice]').forEach(s => s.onchange = renderTypeBlock);
+  bindDrops($('typeBlock'));
+  pickDrop($('typeBlock').querySelector(`[data-drop="${NT_DROP}"]`) ? NT_DROP : '');
+  drawPicked();
 }
+function addPicked(key, files){
+  const bad = [];
+  for (const file of files){
+    if (file.size > MAX_FILE) { bad.push(`${file.name} is larger than 50 MB`); continue; }
+    (NT_FILES[key] = NT_FILES[key] || []).push(file);
+  }
+  if (bad.length) alert(bad.join('\n'));
+  drawPicked();
+}
+function drawPicked(){
+  $('newForm').querySelectorAll('[data-fl]').forEach(box => {
+    const key = box.dataset.fl;
+    box.innerHTML = arr(NT_FILES[key]).map((f, i) => `<span class="chip">${esc(f.name)} (${fmtSize(f.size)}) <button type="button" class="link" data-rm="${i}" aria-label="Remove ${esc(f.name)}">&times;</button></span>`).join('');
+    box.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { NT_FILES[key].splice(+b.dataset.rm, 1); drawPicked(); });
+  });
+}
+function pickDrop(key){
+  NT_DROP = key;
+  $('newForm').querySelectorAll('[data-drop]').forEach(d => d.classList.toggle('on', d.dataset.drop === key));
+}
+function bindDrops(root){
+  root.querySelectorAll('[data-drop]').forEach(d => {
+    const key = d.dataset.drop;
+    // click = this area receives the next paste; the "choose files" link opens the file picker
+    d.onclick = e => { pickDrop(key); if (e.target.closest('[data-pick]')) { $('ntFile').value = ''; $('ntFile').click(); } };
+    d.onfocus = () => pickDrop(key);
+    d.ondragover = e => { e.preventDefault(); d.classList.add('over'); };
+    d.ondragleave = () => d.classList.remove('over');
+    d.ondrop = e => { e.preventDefault(); d.classList.remove('over'); addPicked(key, [...e.dataTransfer.files]); };
+  });
+}
+$('ntFile').onchange = () => addPicked(NT_DROP, [...$('ntFile').files]);
+bindDrops($('newForm'));
+document.addEventListener('paste', e => {
+  if (!$('newDlg').open) return;
+  const files = [...(e.clipboardData || {}).items || []].filter(i => i.kind === 'file').map(i => i.getAsFile()).filter(Boolean);
+  if (!files.length) return;
+  e.preventDefault();
+  const p = n => String(n).padStart(2, '0'), d = new Date();
+  const stamp = `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+  addPicked(NT_DROP, files.map((f, i) => f.type.startsWith('image/') && (!f.name || /^image\.\w+$/i.test(f.name))
+    ? new File([f], `screenshot_${stamp}${i ? '_' + (i + 1) : ''}.${(f.type.split('/')[1] || 'png').replace('jpeg', 'jpg')}`, { type: f.type }) : f));
+});
+const fileB64 = f => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1] || ''); fr.onerror = () => rej(fr.error); fr.readAsDataURL(f); });
 function openNew(){
   const f = $('newForm'), el = f.elements; f.reset();
   el.priority.innerHTML = opts(META.priorities, META.defaultPriority || 'P3');
   el.module.innerHTML = '<option value="">Choose...</option>' + opts(META.modules);
   el.type.innerHTML = '<option value="">Choose...</option>' + opts(META.types);
   $('typeBlock').innerHTML = ''; $('newMsg').textContent = '';
+  NT_FILES = {}; pickDrop(''); drawPicked();
   $('newDlg').showModal(); el.id.focus();
 }
 $('newForm').elements.type.addEventListener('change', renderTypeBlock);
@@ -2510,12 +2593,24 @@ $('newForm').addEventListener('submit', async e => {
   for (const n of ['id','title','module','type','priority','due','requester','description','extraQuestions']) body[n] = f.elements[n].value.trim();
   if (f.elements.shortCode) body.shortCode = f.elements.shortCode.value.trim();
   body.details = {}; f.querySelectorAll('[data-k]').forEach(i => { if (i.value.trim()) body.details[i.dataset.k] = i.value.trim(); });
-  $('newSubmit').disabled = true; $('newMsg').className = 'msg'; $('newMsg').textContent = 'Creating...';
-  try {
-    const r = await api('/api/new', body);
-    $('newDlg').close(); await reload(); toast(`${r.Id} created`); show(r.Id);
-  } catch (err) { $('newMsg').className = 'msg err'; $('newMsg').textContent = err.message; }
-  finally { $('newSubmit').disabled = false; }
+  // only files of the general area and of file questions still shown
+  const keys = ['', ...[...$('typeBlock').querySelectorAll('[data-drop]')].map(d => d.dataset.drop)];
+  const files = keys.flatMap(k => arr(NT_FILES[k]).map(file => ({ k, file })));
+  const msg = $('newMsg');
+  $('newSubmit').disabled = true; msg.className = 'msg'; msg.textContent = 'Creating...';
+  let r;
+  try { r = await api('/api/new', body); }
+  catch (err) { msg.className = 'msg err'; msg.textContent = err.message; $('newSubmit').disabled = false; return; }
+  const failed = [];
+  for (const [i, x] of files.entries()){
+    msg.textContent = `Saving attachment ${i + 1} of ${files.length}: ${x.file.name}...`;
+    try { await api('/api/savefile', { id: r.Id, attachment: true, question: x.k, fileName: x.file.name, base64: await fileB64(x.file) }); }
+    catch (err) { failed.push(`${x.file.name}: ${err.message}`); }
+  }
+  $('newSubmit').disabled = false;
+  $('newDlg').close(); await reload(); show(r.Id);
+  toast(`${r.Id} created` + (files.length ? ` with ${files.length - failed.length} of ${files.length} attachment(s)` : ''));
+  if (failed.length) alert(`${r.Id} was created, but these files were not saved:\n\n${failed.join('\n')}\n\nAdd them again from the task page (Attach).`);
 });
 
 /* ---------- career counter ---------- */
@@ -2673,7 +2768,7 @@ function renderSettings(){
         <div>${t ? `
           <div class="grid"><div class="f"><label>Type name</label><input id="tName" value="${esc(t.name)}"></div>
           <div class="f" style="align-self:end;text-align:right"><button class="btn ghost small" id="tDel">Delete this type</button></div></div>
-          <h4>Intake questions (asked when creating the task)</h4><p class="hint">Key = short id (letters only, auto-filled if blank). Default = pre-filled answer.</p><div id="leQ"></div>
+          <h4>Intake questions (asked when creating the task)</h4><p class="hint">Key = short id (letters only, auto-filled if blank). Default = pre-filled answer.${t.questions.some(q => q.kind || q.when) || arr(t.variants).length ? ' Choice lists, conditions, file questions and variants come from the career pack; they are kept when you save (keep their keys).' : ''}</p><div id="leQ"></div>
           <h4>Questions to confirm with the business</h4><div id="leOQ"></div>
           <h4>Checklist items (added before the common checklist)</h4><div id="leCk"></div>
           <h4>Proposed object names</h4><p class="hint tok">Tokens: <code>{base}</code> = <code>{prefix}_{module}_{code}</code>, <code>{prefix}</code> <code>{prefixLower}</code> <code>{module}</code> <code>{code}</code> <code>{id}</code>. Leave empty for no objects (then no short code is asked).</p><div id="leObj"></div>
@@ -2792,9 +2887,10 @@ function cleanSettings(){
     const questions = t.questions.filter(q => String(q.q || '').trim()).map(q => {
       let k = String(q.k || '').trim() || (String(q.q).toLowerCase().match(/[a-z][a-z0-9]*/g) || ['q']).slice(0, 2).join('_');
       let k2 = k, n = 2; while (used.has(k2)) k2 = k + n++; used.add(k2);
-      return { k: k2, q: q.q.trim(), d: String(q.d || '').trim() };
+      // keep fields this editor does not show (kind, options, when, required, askIfBlank, sub: spec 004)
+      return { ...q, k: k2, q: q.q.trim(), d: String(q.d || '').trim() };
     });
-    return { name: t.name.trim(), questions, openQuestions: str(t.openQuestions), checklist: str(t.checklist), objects: str(t.objects) };
+    return { ...t, name: t.name.trim(), questions, openQuestions: str(t.openQuestions), checklist: str(t.checklist), objects: str(t.objects) };
   });
   out.career = {
     weekend: arr(S.career.weekend),
