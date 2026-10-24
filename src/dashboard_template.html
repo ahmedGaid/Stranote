@@ -569,6 +569,9 @@ table.ft td{border-top:1px solid var(--line);padding:6px;vertical-align:middle}
 table.ft td.n{font:12px var(--mono);word-break:break-all}
 table.ft td.a{white-space:nowrap;text-align:right}
 .dest{font:12px var(--mono);color:var(--muted);word-break:break-all;margin-top:8px}
+.fgrp{margin:10px 0 2px;font-weight:600;font-size:12.5px}
+img.thumb{width:44px;height:44px;object-fit:cover;border-radius:6px;border:1px solid var(--line);vertical-align:middle;margin-right:8px;cursor:zoom-in}
+#atToggle{margin-right:6px}
 
 /* settings */
 #setDlg{max-width:1060px}
@@ -1097,7 +1100,7 @@ $('board').addEventListener('click', e => { const c = e.target.closest('.card,.r
 function show(id){
   const t = TASKS.find(x => x.id === id); if (!t) return;
   const editable = LIVE && !t._archived && t.phase !== 'Done';
-  const det = arr(t.details).map(d => `<li><b>${esc(d.q)}:</b> ${esc(d.a)}</li>`).join('');
+  const det = arr(t.details).map(d => `<li style="white-space:pre-wrap"><b>${esc(d.q)}:</b> ${esc(d.a)}</li>`).join('');
   const obj = arr(t.objects).map(o => `<li><code>${esc(o)}</code></li>`).join('');
   const qs = arr(t.questions).map((q, i) => q.answered
     ? `<div class="qa"><div class="q">${i + 1}. ${esc(q.q)}</div><div class="a">&rarr; ${esc(q.answer)}</div></div>`
@@ -1166,7 +1169,9 @@ function show(id){
       ${LIVE ? '<div class="sec" id="learnSec"></div>' : ''}
 
       ${LIVE ? `<div class="sec"><h4>Files and scripts</h4>
+        <button class="btn small" id="atToggle">+ Attach</button>
         <button class="btn small" id="fsToggle">+ Save a file or script</button>
+        <div class="fpanel" id="atPanel" hidden></div>
         <div class="fpanel" id="fsPanel" hidden></div>
         <div id="filesBox" style="margin-top:10px;color:var(--muted);font-size:13px">Loading files...</div></div>` : ''}
 
@@ -1176,7 +1181,7 @@ function show(id){
     </div>`;
   if (!$('dlg').open) $('dlg').showModal(); $('dlgBody').scrollTop = 0;
 
-  if (LIVE){ $('openFolder').onclick = () => api('/api/open', { id: t.id }).catch(e => alert(e.message)); initFiles(t); initLearn(t); }
+  if (LIVE){ $('openFolder').onclick = () => api('/api/open', { id: t.id }).catch(e => alert(e.message)); initFiles(t); initAttach(t); initLearn(t); }
   if (!editable) return;
 
   $('uPhase').onchange = () => { const p = pct[$('uPhase').value]; if (p && p > +$('uPct').value) $('uPct').value = p; };
@@ -2385,12 +2390,70 @@ async function loadFiles(t){
     const row = (label, path, extra) => `<tr><td class="n">${esc(label)}</td><td>${extra}</td><td class="a">
       <button class="link" data-open="${esc(path)}">Open</button><button class="link" data-show="${esc(path)}">Show in folder</button></td></tr>`;
     const tk = arr(d.ticket), el = arr(d.elsewhere);
-    box.innerHTML = (tk.length ? `<table class="ft">${tk.map(f => row(f.rel, f.path, `${fmtSize(f.size)} &middot; ${esc(f.modified)}`)).join('')}</table>` : '<div>No files in the ticket folder yet.</div>')
+    // attachments (spec 004) first, grouped by sub-folder (e.g. Problem / Expected), images with a preview
+    const base = String(d.attachDir || '').toLowerCase(), isImg = n => /\.(png|jpe?g|gif|webp)$/i.test(n);
+    const att = base ? tk.filter(f => f.rel.toLowerCase().startsWith(base + '\\')) : [], other = tk.filter(f => !att.includes(f));
+    const groups = {}; att.forEach(f => { const rest = f.rel.slice(base.length + 1), i = rest.lastIndexOf('\\'); (groups[i < 0 ? '' : rest.slice(0, i)] = groups[i < 0 ? '' : rest.slice(0, i)] || []).push(f); });
+    const thumb = f => isImg(f.rel) ? `<img class="thumb" src="/api/file?path=${encodeURIComponent(f.path)}" alt="${esc(f.rel.split('\\').pop())}" loading="lazy" data-zoom>` : '';
+    const attHtml = Object.keys(groups).sort().map(g => `<div class="fgrp">${esc(g ? 'Attachments · ' + g : 'Attachments')}</div>
+      <table class="ft">${groups[g].map(f => row(f.rel.split('\\').pop(), f.path, `${thumb(f)}${fmtSize(f.size)} &middot; ${esc(f.modified)}`)).join('')}</table>`).join('');
+    box.innerHTML = (tk.length ? attHtml + (other.length ? `${att.length ? '<div class="fgrp">Other files</div>' : ''}<table class="ft">${other.map(f => row(f.rel, f.path, `${fmtSize(f.size)} &middot; ${esc(f.modified)}`)).join('')}</table>` : '') : '<div>No files in the ticket folder yet.</div>')
       + (el.length ? `<div style="margin:10px 0 4px;font-weight:600">Saved outside the ticket folder (repo / knowledge base)</div><table class="ft">${el.map(f => f.exists ? row(f.path, f.path, esc(f.target)) : `<tr><td class="n">${esc(f.path)}</td><td>${esc(f.target)}</td><td class="a">moved/deleted</td></tr>`).join('')}</table>` : '');
     box.querySelectorAll('[data-open]').forEach(b => b.onclick = () => openPath(b.dataset.open, false));
     box.querySelectorAll('[data-show]').forEach(b => b.onclick = () => openPath(b.dataset.show, true));
+    box.querySelectorAll('[data-zoom]').forEach(im => im.onclick = () => { $('zoomImg').src = im.src; $('zoomCap').textContent = im.alt; $('zoomDlg').showModal(); });
   } catch (e) { box.textContent = 'Could not list files: ' + e.message; }
 }
+
+/* Attach (spec 004): drop, choose or paste files straight into the task's attachments folder */
+let AT_TASK = null;
+function initAttach(t){
+  AT_TASK = t;
+  const P = $('atPanel');
+  const subs = [...new Set(arr((META.typeQuestions || {})[t.type]).filter(q => q.kind === 'files' && q.sub).map(q => q.sub))];
+  $('atToggle').onclick = () => {
+    P.hidden = !P.hidden; if (P.hidden) return;
+    P.innerHTML = `<div class="grid"><div class="f"><label>Sub-folder</label><select id="atSub"><option value="">(directly in the attachments folder)</option>${subs.map(s => `<option>${esc(s)}</option>`).join('')}<option value="__new">+ New sub-folder...</option></select></div></div>
+      <div class="drop sm on" id="atDrop" tabindex="0" style="margin-top:8px">Drop files here, <u data-pick>choose files</u>, or paste a screenshot (Ctrl+V)</div>
+      <input type="file" id="atFile" multiple hidden><div class="dest" id="atDest"></div><div class="msg" id="atMsg"></div>`;
+    const sub = $('atSub'), drop = $('atDrop');
+    const dest = () => { $('atDest').textContent = `Saves to: ${t._path}\\${String(META.attachmentsPath || '').replace(/^\{ticket\}[\\/]?/, '')}${sub.value && sub.value !== '__new' ? '\\' + sub.value : ''}`; };
+    sub.onchange = () => {
+      if (sub.value === '__new'){
+        const n = prompt('New sub-folder name (use \\ for nested):', '');
+        if (n && n.trim()){ const o = document.createElement('option'); o.value = o.textContent = n.trim(); sub.insertBefore(o, sub.lastChild); sub.value = n.trim(); } else sub.value = '';
+      }
+      dest();
+    };
+    dest();
+    drop.onclick = e => { if (e.target.closest('[data-pick]')) { $('atFile').value = ''; $('atFile').click(); } };
+    drop.ondragover = e => { e.preventDefault(); drop.classList.add('over'); };
+    drop.ondragleave = () => drop.classList.remove('over');
+    drop.ondrop = e => { e.preventDefault(); drop.classList.remove('over'); attachFiles([...e.dataTransfer.files]); };
+    $('atFile').onchange = () => attachFiles([...$('atFile').files]);
+    drop.focus();
+  };
+}
+async function attachFiles(files){
+  const t = AT_TASK, msg = $('atMsg'); if (!t || !msg || !files.length) return;
+  const sub = $('atSub').value === '__new' ? '' : $('atSub').value, bad = [];
+  let ok = 0; msg.className = 'msg';
+  for (const [i, f] of files.entries()){
+    if (f.size > MAX_FILE) { bad.push(`${f.name}: larger than 50 MB`); continue; }
+    msg.textContent = `Saving ${i + 1} of ${files.length}: ${f.name}...`;
+    try { await api('/api/savefile', { id: t.id, attachment: true, subFolder: sub, fileName: f.name, base64: await fileB64(f) }); ok++; }
+    catch (e) { bad.push(`${f.name}: ${e.message}`); }
+  }
+  msg.className = bad.length ? 'msg err' : 'msg'; msg.textContent = `Saved ${ok} of ${files.length}.` + (bad.length ? ' Not saved: ' + bad.join('; ') : '');
+  if (ok) { loadFiles(t); toast(`Attached ${ok} file(s)`); }
+}
+document.addEventListener('paste', e => {
+  if (!LIVE || !$('dlg').open || !$('atPanel') || $('atPanel').hidden) return;
+  const tag = (e.target.tagName || '').toLowerCase(); if (tag === 'input' || tag === 'textarea') return;
+  const files = [...(e.clipboardData || {}).items || []].filter(i => i.kind === 'file').map(i => i.getAsFile()).filter(Boolean);
+  if (!files.length) return;
+  e.preventDefault(); attachFiles(files.map(pastedName));
+});
 
 function initFiles(t){
   loadFiles(t);
@@ -2570,12 +2633,15 @@ document.addEventListener('paste', e => {
   if (!$('newDlg').open) return;
   const files = [...(e.clipboardData || {}).items || []].filter(i => i.kind === 'file').map(i => i.getAsFile()).filter(Boolean);
   if (!files.length) return;
-  e.preventDefault();
+  e.preventDefault(); addPicked(NT_DROP, files.map(pastedName));
+});
+function pastedName(f, i){
+  // a pasted screenshot has no real name ("image.png"): name it screenshot_<yyyyMMdd_HHmmss>.<ext>
+  if (!f.type.startsWith('image/') || (f.name && !/^image\.\w+$/i.test(f.name))) return f;
   const p = n => String(n).padStart(2, '0'), d = new Date();
   const stamp = `${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}_${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
-  addPicked(NT_DROP, files.map((f, i) => f.type.startsWith('image/') && (!f.name || /^image\.\w+$/i.test(f.name))
-    ? new File([f], `screenshot_${stamp}${i ? '_' + (i + 1) : ''}.${(f.type.split('/')[1] || 'png').replace('jpeg', 'jpg')}`, { type: f.type }) : f));
-});
+  return new File([f], `screenshot_${stamp}${i ? '_' + (i + 1) : ''}.${(f.type.split('/')[1] || 'png').replace('jpeg', 'jpg')}`, { type: f.type });
+}
 const fileB64 = f => new Promise((res, rej) => { const fr = new FileReader(); fr.onload = () => res(String(fr.result).split(',')[1] || ''); fr.onerror = () => rej(fr.error); fr.readAsDataURL(f); });
 function openNew(){
   const f = $('newForm'), el = f.elements; f.reset();

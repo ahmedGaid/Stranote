@@ -64,6 +64,16 @@ while ($listener.IsListening) {
             $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length); $ctx.Response.OutputStream.Close()
             continue
         }
+        if ($req.HttpMethod -eq 'GET' -and $path -eq '/api/file') {
+            # image previews of task attachments: only images inside 01_Tickets / 99_Archive (Get-SnTaskImage)
+            try { $img = Get-SnTaskImage -Path ([string]$req.QueryString['path']) } catch { Send $ctx 404 (@{ error = $_.Exception.Message } | ConvertTo-Json -Compress); continue }
+            $bytes = [IO.File]::ReadAllBytes($img.path)
+            $ctx.Response.StatusCode = 200; $ctx.Response.ContentType = $img.type
+            $ctx.Response.Headers.Add('Cache-Control', 'no-store')
+            $ctx.Response.ContentLength64 = $bytes.Length
+            $ctx.Response.OutputStream.Write($bytes, 0, $bytes.Length); $ctx.Response.OutputStream.Close()
+            continue
+        }
         if ($req.HttpMethod -eq 'GET') {
             switch ($path) {
                 ''           { Send $ctx 200 (Get-SnDashboardHtml -Live) 'text/html' }

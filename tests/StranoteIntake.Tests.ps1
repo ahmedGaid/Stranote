@@ -271,3 +271,29 @@ Describe 'Shipped EBS packs: Report New/Fix' {
         } finally { Remove-SnTestEnv $root }
     }
 }
+
+Describe 'Attachment previews (Get-SnTaskImage) and the files list' {
+    $root = $null
+    BeforeEach { $root = Initialize-IntakeEnv }
+    AfterEach { Remove-SnTestEnv $root }
+
+    It 'serves an image inside a task folder and tells the page where attachments are' {
+        New-SnTask -NonInteractive -Id 'P-1' -Title 'Preview' -Type 'Task' | Out-Null
+        $r = Save-SnFile -Id 'P-1' -Attachment -SubFolder 'Problem' -FileName 'shot.png' -Base64 ([Convert]::ToBase64String([byte[]](137, 80, 78, 71)))
+        $img = Get-SnTaskImage -Path $r.relative
+        $img.type | Should Be 'image/png'
+        $img.path | Should Be $r.path
+        (Get-SnTaskFiles -Id 'P-1').attachDir | Should Be '02_Files\Attachments'
+    }
+    It 'refuses other file types, folders outside task folders, escapes and absolute paths' {
+        New-SnTask -NonInteractive -Id 'P-2' -Title 'Preview' -Type 'Task' | Out-Null
+        $r = Save-SnFile -Id 'P-2' -Attachment -FileName 'notes.txt' -Text 'x'
+        { Get-SnTaskImage -Path $r.relative } | Should Throw 'Only images'
+        $k = Join-Path (Get-SnConfig).root '04_Knowledge'; New-Item -ItemType Directory -Force $k | Out-Null
+        [IO.File]::WriteAllBytes((Join-Path $k 'x.png'), [byte[]](1))
+        { Get-SnTaskImage -Path '04_Knowledge\x.png' } | Should Throw 'Only files in task folders'
+        { Get-SnTaskImage -Path '01_Tickets\..\..\outside.png' } | Should Throw
+        { Get-SnTaskImage -Path 'C:\Windows\x.png' } | Should Throw 'relative'
+        { Get-SnTaskImage -Path '01_Tickets\missing.png' } | Should Throw 'Not found'
+    }
+}
