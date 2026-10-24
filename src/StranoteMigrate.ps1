@@ -53,6 +53,8 @@ function Invoke-SnMigration {
         $eff = Get-SnEffectiveSettings
         $a = Copy-SnJson $legacy; $b = Copy-SnJson $eff
         $a.PSObject.Properties.Remove('knowledge'); $b.PSObject.Properties.Remove('knowledge')
+        # settings the old file never had (added later, e.g. attachmentsPath) are new, not a loss
+        foreach ($n in @($b.PSObject.Properties.Name)) { if (@($a.PSObject.Properties.Name) -notcontains $n) { $b.PSObject.Properties.Remove($n) } }
         $diff = Get-SnDiff $a $b
         if ($null -ne $diff) { throw "Effective settings differ after migration: $(ConvertTo-SnCanonicalJson $diff)" }
         foreach ($c in @($legacy.knowledge.categories)) { if (@($eff.knowledge.categories) -notcontains $c) { throw "Category '$c' missing after migration." } }

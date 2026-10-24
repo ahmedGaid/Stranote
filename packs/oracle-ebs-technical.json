@@ -488,31 +488,153 @@
                           "name":  "Report",
                           "questions":  [
                                             {
+                                                "k":  "mode",
+                                                "q":  "New report or fix an existing one?",
+                                                "d":  "",
+                                                "kind":  "choice",
+                                                "options":  [ "New report", "Fix an existing report" ],
+                                                "required":  true
+                                            },
+                                            {
                                                 "k":  "tech",
                                                 "q":  "Technology (BIP / Oracle Reports / SQL text output)",
-                                                "d":  "BIP"
+                                                "d":  "BIP",
+                                                "when":  { "k": "mode", "is": "New report" }
                                             },
                                             {
                                                 "k":  "format",
                                                 "q":  "Output format (Excel / PDF / RTF / CSV)",
-                                                "d":  "Excel"
+                                                "d":  "Excel",
+                                                "when":  { "k": "mode", "is": "New report" }
                                             },
                                             {
                                                 "k":  "params",
                                                 "q":  "Parameters (comma separated)",
-                                                "d":  ""
+                                                "d":  "",
+                                                "when":  { "k": "mode", "is": "New report" }
                                             },
                                             {
                                                 "k":  "frequency",
                                                 "q":  "Run frequency (ad-hoc / daily / month-end)",
-                                                "d":  "ad-hoc"
+                                                "d":  "ad-hoc",
+                                                "when":  { "k": "mode", "is": "New report" }
                                             },
                                             {
                                                 "k":  "base",
                                                 "q":  "Based on a seeded report? Name it (blank = new)",
-                                                "d":  ""
+                                                "d":  "",
+                                                "when":  { "k": "mode", "is": "New report" }
+                                            },
+                                            {
+                                                "k":  "rname",
+                                                "q":  "Report name (concurrent program name / short name)",
+                                                "d":  "",
+                                                "when":  { "k": "mode", "is": "Fix an existing report" },
+                                                "askIfBlank":  "Which report exactly (concurrent program name / short name)?"
+                                            },
+                                            {
+                                                "k":  "rtype",
+                                                "q":  "Report type in EBS",
+                                                "d":  "",
+                                                "kind":  "choice",
+                                                "options":  [ "Oracle Reports (RDF)", "BI Publisher - RDF data model", "BI Publisher - data template (XML)", "BI Publisher - PL/SQL or SQL*Plus XML", "SQL*Plus / PL/SQL text output", "FSG", "Discoverer", "Web ADI / Excel", "OAF page / export", "Other" ],
+                                                "when":  { "k": "mode", "is": "Fix an existing report" },
+                                                "askIfBlank":  "Which EBS report type is it (RDF, BI Publisher, SQL*Plus, FSG...)?"
+                                            },
+                                            {
+                                                "k":  "location",
+                                                "q":  "Where the current version is (server path e.g. $XX_TOP/reports/US, template code, Git path)",
+                                                "d":  "",
+                                                "when":  { "k": "mode", "is": "Fix an existing report" },
+                                                "askIfBlank":  "Where is the current version (server path / template code / Git)?"
+                                            },
+                                            {
+                                                "k":  "resp",
+                                                "q":  "Responsibility / request group it runs from",
+                                                "d":  "",
+                                                "when":  { "k": "mode", "is": "Fix an existing report" }
+                                            },
+                                            {
+                                                "k":  "fixParams",
+                                                "q":  "Parameters that raise the problem (exact values)",
+                                                "d":  "",
+                                                "kind":  "long",
+                                                "when":  { "k": "mode", "is": "Fix an existing report" },
+                                                "askIfBlank":  "Which parameter values raise the problem?"
+                                            },
+                                            {
+                                                "k":  "request",
+                                                "q":  "Request ID of a run that shows the problem",
+                                                "d":  "",
+                                                "when":  { "k": "mode", "is": "Fix an existing report" },
+                                                "askIfBlank":  "Request ID of a run that shows the problem?"
+                                            },
+                                            {
+                                                "k":  "instance",
+                                                "q":  "Instance where it was seen (PROD / UAT / DEV)",
+                                                "d":  "PROD",
+                                                "when":  { "k": "mode", "is": "Fix an existing report" }
+                                            },
+                                            {
+                                                "k":  "wrong",
+                                                "q":  "What is wrong now (current result)",
+                                                "d":  "",
+                                                "kind":  "long",
+                                                "required":  true,
+                                                "when":  { "k": "mode", "is": "Fix an existing report" }
+                                            },
+                                            {
+                                                "k":  "expected",
+                                                "q":  "The correction needed (expected result)",
+                                                "d":  "",
+                                                "kind":  "long",
+                                                "when":  { "k": "mode", "is": "Fix an existing report" },
+                                                "askIfBlank":  "What exactly should the corrected output show?"
+                                            },
+                                            {
+                                                "k":  "since",
+                                                "q":  "Since when / what changed recently (patch, setup, data)",
+                                                "d":  "",
+                                                "when":  { "k": "mode", "is": "Fix an existing report" }
+                                            },
+                                            {
+                                                "k":  "problemFiles",
+                                                "q":  "Screenshots / output / log that show the problem",
+                                                "d":  "",
+                                                "kind":  "files",
+                                                "sub":  "Problem",
+                                                "when":  { "k": "mode", "is": "Fix an existing report" }
+                                            },
+                                            {
+                                                "k":  "expectedFiles",
+                                                "q":  "Files that show the expected result (mockup, corrected Excel, email)",
+                                                "d":  "",
+                                                "kind":  "files",
+                                                "sub":  "Expected",
+                                                "when":  { "k": "mode", "is": "Fix an existing report" }
                                             }
                                         ],
+                          "variants":  [
+                                           {
+                                               "when":  { "k": "mode", "is": "Fix an existing report" },
+                                               "openQuestions":  [
+                                                                     "Can the business share a sample of the correct output?",
+                                                                     "Is it wrong for every OU / ledger or only some?",
+                                                                     "Who tests the fix in UAT?"
+                                                                 ],
+                                               "checklist":  [
+                                                                 "Reproduced in a test instance with the same parameters",
+                                                                 "Root cause found (data, query, template or setup)",
+                                                                 "Backup of the current version taken (RDF / template / FNDLOAD ldt)",
+                                                                 "Fix tested with the same parameters",
+                                                                 "Old vs new output compared and shared",
+                                                                 "Deployed and checked in PROD with the business"
+                                                             ],
+                                               "objects":  [
+
+                                                           ]
+                                           }
+                                       ],
                           "openQuestions":  [
                                                 "Exact columns / mockup agreed?",
                                                 "Which responsibility / request group runs it?",
@@ -1093,6 +1215,7 @@
                                            "04_Test",
                                            "05_Deploy"
                                        ],
+                     "attachmentsPath":  "{ticket}\\01_Requirements\\Attachments",
                      "notesSections":  [
                                            "Decisions",
                                            "Free notes"

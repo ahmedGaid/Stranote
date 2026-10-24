@@ -417,6 +417,7 @@
       "Working papers saved in 03_Working_papers"
     ],
     "ticketFolders": ["01_Source_documents", "02_Calculations", "03_Working_papers", "04_Review"],
+    "attachmentsPath": "{ticket}\\01_Source_documents\\Attachments",
     "notesSections": ["Decisions", "Journal entries", "Free notes"],
     "saveTargets": [
       { "name": "Source document (invoice, contract, statement)", "path": "{ticket}\\01_Source_documents", "prefix": false },

@@ -418,6 +418,7 @@
       "Notes saved in 01_Notes"
     ],
     "ticketFolders": ["01_Notes", "02_Files", "03_Protocols"],
+    "attachmentsPath": "{ticket}\\01_Notes\\Attachments",
     "notesSections": ["What I learned", "Protocols and doses", "Free notes"],
     "saveTargets": [
       { "name": "Notes or reflection", "path": "{ticket}\\01_Notes", "prefix": false },

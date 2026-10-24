@@ -22,10 +22,10 @@
 
 ## Phase 2: Pack data (board AT2) - needs T001-T005
 
-- [ ] T011 [P] [US1] `packs/oracle-ebs-technical.json` Report: `mode` choice, today's questions under New, fix questions (spec US1 list, report-type options), 2 file questions (`Problem`, `Expected`), Fix variant (open questions, checklist, objects); `attachmentsPath` `{ticket}\\01_Requirements\\Attachments`
-- [ ] T012 [P] [US1] `packs/oracle-ebs-functional-financials.json` Report: same branch, worded for a functional consultant; same `attachmentsPath`
-- [ ] T013 [P] [US2] `attachmentsPath` in `packs/accountant.json`, `packs/general.json`, `packs/nurse.json`, `packs/software-developer.json` (inside their first ticket folder)
-- [ ] T014 [US1] Extend `tests/StranoteIntake.Tests.ps1`: every shipped pack loads; both EBS Report types produce the fix checklist for Fix and the old one for New; full suite green
+- [X] T011 [P] [US1] `packs/oracle-ebs-technical.json` Report: `mode` choice, today's questions under New, fix questions (spec US1 list, report-type options), 2 file questions (`Problem`, `Expected`), Fix variant (open questions, checklist, objects); `attachmentsPath` `{ticket}\\01_Requirements\\Attachments` (AT2)
+- [X] T012 [P] [US1] `packs/oracle-ebs-functional-financials.json` Report: same branch, worded for a functional consultant; same `attachmentsPath` (AT2)
+- [X] T013 [P] [US2] `attachmentsPath` in `packs/accountant.json`, `packs/general.json`, `packs/nurse.json`, `packs/software-developer.json` (inside their first ticket folder) (AT2)
+- [X] T014 [US1] Extend `tests/StranoteIntake.Tests.ps1`: every shipped pack loads; both EBS Report types produce the fix checklist for Fix and the old one for New; full suite green (AT2)
 
 ## Phase 3: New task dialog + Settings editor (board AT3) - needs AT1, AT2
 
