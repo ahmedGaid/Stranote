@@ -37,8 +37,8 @@ TL1 notes: the page already indexes save places per task (`taskLayout(t)` in the
 
 ## Phase 4: Settings type editor (board TL4) - needs TL1
 
-- [ ] T017 [US4] Layout part per type: folders list + live preview, save places with versioned switch, attachments folder, two switches; empty folders = use general (field removed); unknown fields kept (`src/dashboard_template.html`)
-- [ ] T018 [US4] Pester round-trip: save settings with layouts 5 times, read back identical; browser check light / dark / 390 px
+- [X] T017 [US4] Layout part per type: folders list + live preview, save places with versioned switch, attachments folder, two switches; empty folders = use general (field removed); unknown fields kept (`src/dashboard_template.html`) (976f790)
+- [X] T018 [US4] Pester round-trip: save settings with layouts 5 times, read back identical; browser check light / dark / 390 px (976f790)
 
 ## Phase 5: Skills, docs, live upgrade note (board TL5) - needs TL2
 

@@ -137,6 +137,16 @@ Describe 'Tasks with and without a type layout' {
         @($s.types | Where-Object { $_.name -eq 'Data pull' })[0].folders = @('..\up')
         { Save-SnSettings -Settings $s } | Should Throw "folder '..\up' is not a valid relative folder name."
     }
+    It 'saving settings five times keeps every type and a versioned general place unchanged' {
+        $s = Get-SnSettings
+        @($s.saveTargets)[1] | Add-Member -NotePropertyName versioned -NotePropertyValue $true -Force
+        Save-SnSettings -Settings $s | Out-Null
+        $before = ConvertTo-SnCanonicalJson @((Get-SnSettings).types)
+        foreach ($i in 1..5) { Save-SnSettings -Settings (Get-SnSettings) | Out-Null }
+        ConvertTo-SnCanonicalJson @((Get-SnSettings).types) | Should Be $before
+        @((Get-SnSettings).saveTargets)[1].versioned | Should Be $true
+        @(@((Get-SnSettings).types | Where-Object { $_.name -eq 'Task' })[0].PSObject.Properties.Name) -contains 'folders' | Should Be $false
+    }
     It 'creating folders for active tickets uses each task type layout' {
         $r = New-SnTask -NonInteractive -Id 'D-4' -Title 'x' -Type 'Data pull' -Details @{ need = 'x' }
         Save-SnSettings -Settings (Get-SnSettings) -ApplyToActiveTickets | Out-Null

@@ -605,7 +605,7 @@ tr.older table.ft td{color:var(--muted)}
 .le-row .badge.new{color:var(--ok);font-weight:600}
 .le-head{display:flex;gap:6px;font-size:11.5px;color:var(--muted);margin-bottom:4px;padding-right:102px}
 .le-head span{flex:1}
-.types{display:grid;grid-template-columns:180px 1fr;gap:18px}
+.types{display:grid;grid-template-columns:180px minmax(0,1fr);gap:18px}
 .types .tl > button{display:block;width:100%;text-align:left;background:none;border:1px solid transparent;padding:6px 10px;border-radius:6px;cursor:pointer}
 .types .tl > button.on{border-color:var(--line);background:var(--chip);font-weight:600}
 .preview{font:12px var(--mono);background:var(--chip);border-radius:8px;padding:10px 12px;white-space:pre;overflow:auto;color:var(--ink2)}
@@ -831,7 +831,7 @@ dialog.ob-dlg{border-radius:var(--radius-dialog)}
   .pg{padding:20px 18px 40px}.props{grid-template-columns:110px minmax(0,1fr)}
   .grid{grid-template-columns:1fr}
 }
-@media (max-width:760px){ .set{grid-template-columns:1fr} .set nav{flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid var(--line);border-radius:14px 14px 0 0} .set nav .sp{display:none} .types{grid-template-columns:1fr} .types .tl > button{display:inline-block;width:auto} }
+@media (max-width:760px){ .set{grid-template-columns:1fr} .set nav{flex-direction:row;flex-wrap:wrap;border-right:0;border-bottom:1px solid var(--line);border-radius:14px 14px 0 0} .set nav .sp{display:none} .types{grid-template-columns:minmax(0,1fr)} .types .tl > button{display:inline-block;width:auto} }
 .sn-ctx{position:fixed;z-index:10000;min-width:168px;padding:4px;border:1px solid var(--color-border-popover);border-radius:var(--radius-md);background:var(--color-surface-floating);box-shadow:var(--shadow-floating)}
 .sn-ctx[hidden],.sn-tooltip[hidden]{display:none}
 .sn-ctx button{display:block;width:100%;padding:7px 10px;border:0;border-radius:var(--radius-xs);background:transparent;color:var(--color-text-primary);font:450 13px/1.4 var(--font-sans);text-align:left;cursor:pointer}
@@ -2967,10 +2967,17 @@ function renderSettings(){
           <h4>Questions to confirm with the business</h4><div id="leOQ"></div>
           <h4>Checklist items (added before the common checklist)</h4><div id="leCk"></div>
           <h4>Proposed object names</h4><p class="hint tok">Tokens: <code>{base}</code> = <code>{prefix}_{module}_{code}</code>, <code>{prefix}</code> <code>{prefixLower}</code> <code>{module}</code> <code>{code}</code> <code>{id}</code>. Leave empty for no objects (then no short code is asked).</p><div id="leObj"></div>
-          <h4>Preview</h4><div class="preview" id="objPrev"></div>` : '<p class="hint">No types. Add one.</p>'}</div>
+          <h4>Preview</h4><div class="preview" id="objPrev"></div>
+          <h4>Layout of a new task of this type</h4><p class="hint">Leave a part empty to use the general one (Folders and Common items). Only new tasks use the layout; existing tasks keep their folders and checklist.</p>
+          <label style="display:flex;gap:8px;align-items:center"><input type="checkbox" id="tyBase" ${t.useBaseChecklist !== false ? 'checked' : ''}> Also add the common checklist</label>
+          <label style="display:flex;gap:8px;align-items:center;margin-top:4px"><input type="checkbox" id="tyCommon" ${t.useCommonQuestions !== false ? 'checked' : ''}> Also add the common questions for the business</label>
+          <h4>Sub-folders (empty = the general ticket sub-folders)</h4><div id="leTyF"></div>
+          <div class="grid" style="margin-top:8px"><div class="f full"><label for="tyAtt">Attachments folder (blank = the general one)</label><input id="tyAtt" value="${esc(t.attachmentsPath || '')}" placeholder="{ticket}\\01_From_Requester"></div></div>
+          <h4>Save places (empty = the general save destinations)</h4><p class="hint tok">Paths start with <code>{ticket}</code>. "Versions" = the first file is saved as <code>name_v1</code>, so every version shows in its name. General destinations outside the task folder (repo, knowledge base) are added after these.</p><div id="leTyST"></div>
+          <h4>Preview of a new task folder</h4><div class="preview" id="tyPrev"></div>` : '<p class="hint">No types. Add one.</p>'}</div>
       </div>`;
     B.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { typeIdx = +b.dataset.t; renderSettings(); });
-    $('tAdd').onclick = () => { S.types.push({ name: 'New type', questions: [], openQuestions: [], checklist: [], objects: [] }); typeIdx = S.types.length - 1; renderSettings(); $('tName').select(); };
+    $('tAdd').onclick = () => { S.types.push({ name: 'New type', questions: [], openQuestions: [], checklist: [], objects: [], folders: [], saveTargets: [], __had: {} }); typeIdx = S.types.length - 1; renderSettings(); $('tName').select(); };
     $('tUp').onclick = () => { if (typeIdx > 0){ [S.types[typeIdx - 1], S.types[typeIdx]] = [S.types[typeIdx], S.types[typeIdx - 1]]; typeIdx--; renderSettings(); } };
     $('tDown').onclick = () => { if (typeIdx < S.types.length - 1){ [S.types[typeIdx + 1], S.types[typeIdx]] = [S.types[typeIdx], S.types[typeIdx + 1]]; typeIdx++; renderSettings(); } };
     if (!t) return;
@@ -2982,6 +2989,19 @@ function renderSettings(){
     const prev = () => { const tok = objTokens(); $('objPrev').textContent = t.objects.filter(Boolean).map(p => expand(p, tok)).join('\n') || '(no objects)'; };
     listEditor($('leObj'), t.objects, { ph: '{base}_PKG (package)', addLabel: 'Add object pattern', onChange: prev });
     prev();
+    // layout (spec 005): empty parts fall back to the general settings
+    const tyPrev = () => {
+      const fs = t.folders.filter(f => String(f).trim()), ap = String(t.attachmentsPath || '').trim() || S.attachmentsPath || '{ticket}\\Attachments';
+      $('tyPrev').textContent = `01_Tickets\\${expand(S.ticketFolderName, sample)}\\\n` + (fs.length ? fs : S.ticketFolders.filter(Boolean)).map(f => '  ' + f + '\\').join('\n')
+        + '\n  _NOTES.md\n  task.json\nAttachments go to: ' + ap.replace(/^\{ticket\}[\\/]?/, '') + '\\'
+        + (fs.length ? '' : '\n(general sub-folders)') + (t.useBaseChecklist === false ? '\nChecklist: this type only' : '\nChecklist: this type + common');
+    };
+    $('tyBase').onchange = e => { t.useBaseChecklist = e.target.checked; tyPrev(); };
+    $('tyCommon').onchange = e => { t.useCommonQuestions = e.target.checked; };
+    $('tyAtt').oninput = e => { t.attachmentsPath = e.target.value; tyPrev(); };
+    listEditor($('leTyF'), t.folders, { ph: 'e.g. 02_Scripts', addLabel: 'Add sub-folder', onChange: tyPrev });
+    listEditor($('leTyST'), t.saveTargets, { cols: [{ k: 'name', label: 'Name shown', w: 3, ph: 'e.g. Query script' }, { k: 'path', label: 'Folder', w: 3, ph: '{ticket}\\02_Scripts' }, { k: 'prefix', label: 'Number', w: 1, type: 'check', text: 'ID_NN_' }, { k: 'versioned', label: 'Versions', w: 1, type: 'check', text: '_v1' }], addLabel: 'Add save place' });
+    tyPrev();
   }
   else if (setTab === 'common'){
     B.innerHTML = `<h3>Common items</h3><p class="hint">Added to every new task, whatever the type.</p>
@@ -3007,7 +3027,7 @@ function renderSettings(){
     listEditor($('leWF'), S.workFolders, { ph: 'e.g. 07_Training', addLabel: 'Add folder', locked: f => ['01_Tickets', '99_Archive'].includes(f) && SX.settings.workFolders.includes(f),
       badge: f => { const isNew = f && !exists(f); return `<span class="badge ${isNew ? 'new' : ''}">${f ? (isNew ? 'new' : 'exists') : ''}</span>`; } });
     listEditor($('leTF'), S.ticketFolders, { ph: 'e.g. 06_Handover', addLabel: 'Add sub-folder', onChange: prev });
-    listEditor($('leST'), S.saveTargets, { cols: [{ k: 'name', label: 'Name shown', w: 3, ph: 'e.g. Postman collection' }, { k: 'path', label: 'Folder', w: 3, ph: '{ticket}\\03_Dev\\Postman' }, { k: 'prefix', label: 'Number', w: 1, type: 'check', text: 'ID_NN_' }], addLabel: 'Add destination' });
+    listEditor($('leST'), S.saveTargets, { cols: [{ k: 'name', label: 'Name shown', w: 3, ph: 'e.g. Postman collection' }, { k: 'path', label: 'Folder', w: 3, ph: '{ticket}\\03_Dev\\Postman' }, { k: 'prefix', label: 'Number', w: 1, type: 'check', text: 'ID_NN_' }, { k: 'versioned', label: 'Versions', w: 1, type: 'check', text: '_v1' }], addLabel: 'Add destination' });
     $('applyTF').onchange = e => SX.apply = e.target.checked;
     $('openRoot').onclick = () => api('/api/openroot', {}).catch(e => alert(e.message));
     prev();
@@ -3071,6 +3091,8 @@ function renderSettings(){
 
 function cleanSettings(){
   const str = a => a.map(x => String(x == null ? '' : x).trim()).filter(Boolean);
+  // a save place; versioned only when set (spec 005), so places without it look as before
+  const target = x => ({ name: x.name.trim(), path: String(x.path || '').trim().replace(/\//g, '\\'), prefix: !!x.prefix, ...(x.versioned ? { versioned: true } : {}) });
   const out = JSON.parse(JSON.stringify(S));
   delete out.__root; delete out.__abbr;
   out.prefix = out.prefix.trim();
@@ -3085,14 +3107,23 @@ function cleanSettings(){
       // keep fields this editor does not show (kind, options, when, required, askIfBlank, sub: spec 004)
       return { ...q, k: k2, q: q.q.trim(), d: String(q.d || '').trim() };
     });
-    return { ...t, name: t.name.trim(), questions, openQuestions: str(t.openQuestions), checklist: str(t.checklist), objects: str(t.objects) };
+    const o = { ...t, name: t.name.trim(), questions, openQuestions: str(t.openQuestions), checklist: str(t.checklist), objects: str(t.objects) };
+    // layout (spec 005): an empty part is left out (= the general one); a field the type did not have stays out
+    // while it holds the default, so an unchanged type still matches its career pack
+    const had = t.__had || {}; delete o.__had;
+    o.folders = str(arr(t.folders)).map(f => f.replace(/\//g, '\\')); if (!o.folders.length) delete o.folders;
+    o.saveTargets = arr(t.saveTargets).filter(x => String(x.name || '').trim()).map(target);
+    if (!o.saveTargets.length) delete o.saveTargets;
+    o.attachmentsPath = String(t.attachmentsPath || '').trim().replace(/\//g, '\\'); if (!o.attachmentsPath) delete o.attachmentsPath;
+    for (const k of ['useBaseChecklist', 'useCommonQuestions']) { if (t[k] === false) o[k] = false; else if (had[k]) o[k] = true; else delete o[k]; }
+    return o;
   });
   out.career = {
     weekend: arr(S.career.weekend),
     companies: arr(S.career.companies).filter(c => String(c.name || '').trim()).map(c => ({ name: c.name.trim(), role: String(c.role || '').trim(), start: c.start || '', end: c.end || '' }))
   };
   out.appearance = { accent: /^#[0-9a-f]{6}$/i.test(S.appearance.accent) ? S.appearance.accent.toUpperCase() : '#4F46E5', tint: !!S.appearance.tint, learnAccent: /^#[0-9a-f]{6}$/i.test(S.appearance.learnAccent) ? S.appearance.learnAccent.toUpperCase() : '#4F46E5' };
-  out.saveTargets = out.saveTargets.filter(x => String(x.name || '').trim()).map(x => ({ name: x.name.trim(), path: String(x.path || '').trim().replace(/\//g, '\\'), prefix: !!x.prefix }));
+  out.saveTargets = out.saveTargets.filter(x => String(x.name || '').trim()).map(target);
   out.abbreviations = {}; S.__abbr.forEach(r => { if (String(r.w || '').trim()) out.abbreviations[r.w.trim().toUpperCase()] = String(r.a || '').trim().toUpperCase(); });
   return out;
 }
@@ -3103,7 +3134,10 @@ async function openSettings(){
   ['modules','priorities','commonQuestions','baseChecklist','ticketFolders','notesSections','workFolders','stopWords','phases','types','saveTargets'].forEach(k => S[k] = arr(S[k]));
   S.career = S.career || {}; S.career.weekend = arr(S.career.weekend); S.career.companies = arr(S.career.companies);
   S.appearance = Object.assign({ accent: '#4F46E5', tint: false, learnAccent: '#2563EB' }, S.appearance || {});
-  S.types.forEach(t => ['questions','openQuestions','checklist','objects'].forEach(k => t[k] = arr(t[k])));
+  S.types.forEach(t => {
+    t.__had = { useBaseChecklist: 'useBaseChecklist' in t, useCommonQuestions: 'useCommonQuestions' in t };
+    ['questions','openQuestions','checklist','objects','folders','saveTargets'].forEach(k => t[k] = arr(t[k]));
+  });
   S.__root = d.root;
   S.__abbr = Object.entries(S.abbreviations || {}).map(([w, a]) => ({ w, a }));
   SX = { settings: JSON.parse(JSON.stringify(S)), existing: arr(d.existingWorkFolders), apply: true, hasBackup: d.hasBackup };
