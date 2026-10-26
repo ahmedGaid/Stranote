@@ -45,6 +45,7 @@ function Test-Overlap($a, $b) {
         if ($x -eq $y -or $x.StartsWith($y + '/') -or $y.StartsWith($x + '/')) { return "$x ~ $y" } } }
     return $null
 }
+function Test-Holder([string]$cell, [string]$k) { return "$cell".Trim().StartsWith($k, [StringComparison]::OrdinalIgnoreCase) }
 
 # Agent kind -> branch prefix and the word that names it in the Fit column
 $kind = Get-Kind $Agent
@@ -106,7 +107,8 @@ if (-not $pick) {
         if ((Get-Status $c) -ne 'review') { continue }
         $br = ("$($c[5])" -split '[ (]')[0].Trim()
         if ($br -notmatch '^[a-z0-9-]+/') { continue }
-        if ($br.StartsWith("$prefix/")) { continue }
+        # the author (Claimed by: who wrote done) is this agent kind: its own work, same test as board.ps1
+        if (Test-Holder $c[4] $kind) { continue }
         if ($Small -and -not (Test-SmallReview $br)) { $notes += "Review $($c[0]) ($br) changes src/ or tests/: needs a strong model."; continue }
         $pick = $c; $why = "review of $br"; break
     }
