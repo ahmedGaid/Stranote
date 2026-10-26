@@ -29,18 +29,18 @@
 
 ## Phase 3: New task dialog + Settings editor (board AT3) - needs AT1, AT2
 
-- [X] T015 [US1] `renderTypeBlock` draws `kind` (text, long, choice, files), applies `when` live, marks `required` (`src/dashboard_template.html`, new task) (AT3)
-- [X] T016 [US2] Attachments area for every type: drop, choose, paste image (R6), remove before Create, 50 MB check; file questions as their own areas (AT3)
-- [X] T017 [US2] Submit: `/api/new`, then one `/api/savefile` per file with `attachment` + `question`; progress; failures listed by name with "add it from the task page" (AT3)
-- [X] T018 [US1] Settings > Task types editor copies unknown question / type fields through on save (FR-012); simple editing of `kind` / `options` is out of scope (pack JSON) (AT3)
-- [X] T019 [US1] Browser check (quickstart 1-7, 9, 11): light, dark, 390 px, no console errors (AT3)
+- [X] T015 [US1] `renderTypeBlock` draws `kind` (text, long, choice, files), applies `when` live, marks `required` (`src/dashboard_template.html`, new task) (741b8c2)
+- [X] T016 [US2] Attachments area for every type: drop, choose, paste image (R6), remove before Create, 50 MB check; file questions as their own areas (741b8c2)
+- [X] T017 [US2] Submit: `/api/new`, then one `/api/savefile` per file with `attachment` + `question`; progress; failures listed by name with "add it from the task page" (741b8c2)
+- [X] T018 [US1] Settings > Task types editor copies unknown question / type fields through on save (FR-012); simple editing of `kind` / `options` is out of scope (pack JSON) (741b8c2)
+- [X] T019 [US1] Browser check (quickstart 1-7, 9, 11): light, dark, 390 px, no console errors (741b8c2)
 
 ## Phase 4: Task page (board AT4) - needs AT1
 
-- [ ] T020 [US3] Attach button next to "+ Save a file or script": drop / choose / paste into the attachments place with optional sub-folder; list refreshes (`src/dashboard_template.html`, files panel)
-- [ ] T021 [P] [US5] GET `/api/file?path=` for images under `01_Tickets` / `99_Archive` only (`src/StranoteServer.ps1`, R7) + Pester case for refused paths
-- [ ] T022 [US5] Files list: image previews grouped Problem / Expected / other; click opens; fix details shown as a block
-- [ ] T023 [US3] Browser check (quickstart 8, 11): light, dark, 390 px
+- [X] T020 [US3] Attach button next to "+ Save a file or script": drop / choose / paste into the attachments place with optional sub-folder; list refreshes (`src/dashboard_template.html`, files panel) (AT4)
+- [X] T021 [P] [US5] GET `/api/file?path=` for images under `01_Tickets` / `99_Archive` only (`src/StranoteServer.ps1`, R7) + Pester case for refused paths (AT4)
+- [X] T022 [US5] Files list: image previews grouped Problem / Expected / other; click opens; fix details shown as a block (AT4)
+- [X] T023 [US3] Browser check (quickstart 8, 11): light, dark, 390 px (AT4)
 
 ## Phase 5: Skills, docs, live note (board AT5)
 

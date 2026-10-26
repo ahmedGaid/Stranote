@@ -928,7 +928,26 @@ function Get-SnTaskFiles {
     $root = (Get-SnConfig).root
     $elsewhere = @(@($t.files) | Where-Object { $_ -and $_.path } | Where-Object { -not (Join-Path $root $_.path).StartsWith($t._path, [StringComparison]::OrdinalIgnoreCase) } |
         ForEach-Object { [pscustomobject]@{ path = $_.path; target = $_.target; at = $_.at; exists = (Test-Path (Join-Path $root $_.path)) } })
-    return [pscustomobject]@{ ticket = $inTicket; elsewhere = $elsewhere }
+    # attachDir: the attachments place relative to the task folder, so the page can group attachments (spec 004)
+    $attachDir = (Resolve-SnAttachDir $t '').Substring($t._path.Length).TrimStart('\')
+    return [pscustomobject]@{ ticket = $inTicket; elsewhere = $elsewhere; attachDir = $attachDir }
+}
+
+function Get-SnTaskImage {
+    <# An image inside a task folder (01_Tickets / 99_Archive), for previews on the task page.
+       Returns { path, type }; throws for anything else (other folders, other file types, missing files). #>
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Path)
+    if ([IO.Path]::IsPathRooted($Path)) { throw 'Path must be relative to the work folder.' }
+    $root = [IO.Path]::GetFullPath((Get-SnConfig).root).TrimEnd('\')
+    $full = Assert-UnderRoot (Join-Path $root $Path)
+    $rel = $full.Substring($root.Length).TrimStart('\')
+    if ($rel -notmatch '^(01_Tickets|99_Archive)\\') { throw 'Only files in task folders can be previewed.' }
+    $types = @{ '.png' = 'image/png'; '.jpg' = 'image/jpeg'; '.jpeg' = 'image/jpeg'; '.gif' = 'image/gif'; '.webp' = 'image/webp' }
+    $ext = [IO.Path]::GetExtension($full).ToLower()
+    if (-not $types.ContainsKey($ext)) { throw 'Only images can be previewed.' }
+    if (-not (Test-Path -LiteralPath $full -PathType Leaf)) { throw "Not found: $rel" }
+    return [pscustomobject]@{ path = $full; type = $types[$ext] }
 }
 
 function Open-SnPath {
@@ -1037,5 +1056,5 @@ function Start-SnMenu {
 
 $script:SnExports = @(
     'Test-SnPack', 'Get-SnPack', 'Get-SnPackList', 'Get-SnProfile', 'Save-SnProfile', 'Get-SnActivePack', 'Get-SnPackOrLegacy', 'New-SnPackRequest', 'Get-SnPackRequest', 'Approve-SnPackDraft', 'Deny-SnPackDraft', 'Submit-SnPackDraft', 'Get-SnEffectiveSettings', 'Get-SnBaseSettings', 'Get-SnOverrides', 'Get-SnDiff', 'Merge-SnObject', 'ConvertTo-SnCanonicalJson', 'Get-SnConfigPath', 'Get-SnLearnDirFor', 'Get-SnLearnDir', 'Invoke-SnMigration', 'Get-SnSnapshot', 'Compare-SnSnapshot', 'Get-SnExtractors', 'Copy-SnJson', 'Get-SnOnboarding', 'Save-SnOnboarding', 'Restart-SnOnboarding', 'Complete-SnOnboarding', 'New-SnFirstWeekPlan', 'Get-SnPlan', 'Set-SnPlanItem',
-    'Set-SnCard', 'Remove-SnCard', 'Set-SnCardKeep', 'Sync-SnKnowledge', 'Get-SnArabic', 'Set-SnArabic', 'Set-SnShotRequests', 'Add-SnShot', 'Remove-SnShot', 'Set-SnCardCategory', 'Test-SnQuestionReady', 'Set-SnConceptStatus', 'Set-SnLesson', 'Remove-SnLesson', 'Save-SnLessonProgress', 'Add-SnFollowup', 'Set-SnFollowupAnswer', 'Get-SnTeach', 'Get-SnPendingFollowups', 'Get-SnDailyReview', 'Save-SnReviewDay', 'Get-SnReviewStreak', 'Add-SnQuestions', 'Remove-SnQuestion', 'Submit-SnAnswer', 'Get-SnCv', 'Save-SnCv', 'Add-SnCvBullet', 'Export-SnCv', 'Get-SnLearn', 'Get-SnSuggestions', 'New-SnTask', 'Update-SnTask', 'Get-SnTask', 'Show-SnTask', 'Close-SnTask', 'Update-SnDashboard', 'Get-SnDashboardHtml', 'Start-SnMenu', 'Get-SnTaskList', 'Find-SnTask', 'Get-SnMeta', 'Get-SnConfig', 'Get-SnSettings', 'Save-SnSettings', 'Reset-SnSettings', 'Restore-SnSettingsBackup', 'Get-SnTargetFolders', 'Save-SnFile', 'Get-SnTaskFiles', 'Open-SnPath'
+    'Set-SnCard', 'Remove-SnCard', 'Set-SnCardKeep', 'Sync-SnKnowledge', 'Get-SnArabic', 'Set-SnArabic', 'Set-SnShotRequests', 'Add-SnShot', 'Remove-SnShot', 'Set-SnCardCategory', 'Test-SnQuestionReady', 'Set-SnConceptStatus', 'Set-SnLesson', 'Remove-SnLesson', 'Save-SnLessonProgress', 'Add-SnFollowup', 'Set-SnFollowupAnswer', 'Get-SnTeach', 'Get-SnPendingFollowups', 'Get-SnDailyReview', 'Save-SnReviewDay', 'Get-SnReviewStreak', 'Add-SnQuestions', 'Remove-SnQuestion', 'Submit-SnAnswer', 'Get-SnCv', 'Save-SnCv', 'Add-SnCvBullet', 'Export-SnCv', 'Get-SnLearn', 'Get-SnSuggestions', 'New-SnTask', 'Update-SnTask', 'Get-SnTask', 'Show-SnTask', 'Close-SnTask', 'Update-SnDashboard', 'Get-SnDashboardHtml', 'Start-SnMenu', 'Get-SnTaskList', 'Find-SnTask', 'Get-SnMeta', 'Get-SnConfig', 'Get-SnSettings', 'Save-SnSettings', 'Reset-SnSettings', 'Restore-SnSettingsBackup', 'Get-SnTargetFolders', 'Save-SnFile', 'Get-SnTaskFiles', 'Get-SnTaskImage', 'Open-SnPath'
 )
