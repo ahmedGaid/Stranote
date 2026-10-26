@@ -81,6 +81,7 @@ function Test-SnPack {
         if (-not "$($tt[$i].name)".Trim()) { & $err "taskTypes[$i].name: required" }
         foreach ($c in @($tt[$i].checklist | Where-Object { $null -ne $_ })) { if (-not "$c".Trim()) { & $err "taskTypes[$i].checklist: empty item" } }
         foreach ($e in @(Get-SnIntakeErrors $tt[$i])) { & $err "taskTypes[$i]: $e" }
+        foreach ($e in @(Get-SnLayoutErrors $tt[$i])) { & $err "taskTypes[$i]: $e" }
     }
     if ($Pack.settings -and "$($Pack.settings.attachmentsPath)") {
         $ap = "$($Pack.settings.attachmentsPath)"

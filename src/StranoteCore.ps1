@@ -96,6 +96,8 @@ function Assert-SnSettings($s) {
         if (@($keys | Select-Object -Unique).Count -ne $keys.Count) { throw "Type '$($t.name)': question keys must be unique." }
         $ie = @(Get-SnIntakeErrors $t)
         if ($ie.Count) { throw "$($ie[0])." }
+        $le = @(Get-SnLayoutErrors $t)
+        if ($le.Count) { throw "$("$($le[0])".TrimEnd('.'))." }
     }
     if ("$($s.attachmentsPath)") {
         if ("$($s.attachmentsPath)" -notmatch '^\{ticket\}') { throw 'Attachments folder must start with {ticket} (inside the task folder).' }
@@ -124,6 +126,7 @@ function Assert-SnSettings($s) {
         if (-not "$($t.name)".Trim()) { throw 'A save destination has no name.' }
         $rel = ("$($t.path)" -replace '^\{ticket\}[\\/]?', '') -replace '\{(id|module|type)\}', 'x'
         if ($rel) { Test-RelPath $rel "Save destination '$($t.name)'" }
+        if ($null -ne $t.versioned -and $t.versioned -isnot [bool]) { throw "Save destination '$($t.name)': versioned must be true or false." }
     }
     foreach ($r in $script:RequiredWorkFolders) { if (@($s.workFolders) -notcontains $r) { throw "Work folders must keep '$r' (the tool stores tickets there)." } }
 }
@@ -149,7 +152,7 @@ function Save-SnSettings {
     if ($ApplyToActiveTickets) {
         foreach ($t in Get-SnTaskList) {
             $added = $false
-            foreach ($sub in $Settings.ticketFolders) {
+            foreach ($sub in @((Get-SnTypeLayout $Settings (Get-TypeDef $Settings $t.type)).folders)) {
                 $full = Join-Path $t._path $sub
                 if (-not (Test-Path $full)) { New-Item -ItemType Directory -Force -Path $full | Out-Null; $added = $true }
             }
@@ -318,6 +321,92 @@ function Get-SnTypeList($TypeDef, $Variant, [string]$Name) {
     # a variant's list replaces the type's own when the variant defines it
     if ($Variant -and $null -ne $Variant.$Name) { return @($Variant.$Name) }
     return @($TypeDef.$Name)
+}
+
+# ---------------------------------------------------------------------------
+# Type layout: a task type's own sub-folders, save places, attachments folder and general lists; file versions
+# Spec: specs/005-task-type-layouts-versions (contracts/type-layout.md)
+# ---------------------------------------------------------------------------
+
+function Get-SnTicketPathErrors([string]$Path, [string]$At) {
+    # a pattern inside the task folder: starts with {ticket}, the rest a safe relative folder (tokens allowed)
+    if ($Path -notmatch '^\{ticket\}') { return @("${At} must start with {ticket} (inside the task folder)") }
+    $rel = ($Path -replace '^\{ticket\}[\\/]?', '') -replace '\{(id|module|type)\}', 'x'
+    if ($rel) { try { Test-RelPath $rel $At } catch { return @($_.Exception.Message) } }
+    return @()
+}
+
+function Get-SnLayoutErrors($Type) {
+    <# Errors in a task type's layout fields (folders, saveTargets, attachmentsPath, useBaseChecklist,
+       useCommonQuestions); empty = valid. Types without them are always valid. Used by Test-SnPack and Assert-SnSettings. #>
+    $errs = @()
+    $at = "Type '$($Type.name)'"
+    $fs = @(@($Type.folders) | Where-Object { $null -ne $_ } | ForEach-Object { "$_".Trim() })
+    if ($fs.Count -gt 20) { $errs += "${at}: at most 20 folders" }
+    foreach ($f in $fs) { try { Test-RelPath $f "$at folder" } catch { $errs += $_.Exception.Message } }
+    if (@($fs | ForEach-Object { $_.ToLower() } | Select-Object -Unique).Count -ne $fs.Count) { $errs += "${at}: folders must be unique" }
+    $st = @(@($Type.saveTargets) | Where-Object { $_ })
+    for ($i = 0; $i -lt $st.Count; $i++) {
+        $n = "$($st[$i].name)".Trim()
+        if (-not $n) { $errs += "${at}: save place $($i + 1) has no name"; continue }
+        $errs += @(Get-SnTicketPathErrors "$($st[$i].path)" "$at save place '$n'")
+        if ($null -ne $st[$i].versioned -and $st[$i].versioned -isnot [bool]) { $errs += "$at save place '$n': versioned must be true or false" }
+    }
+    if ("$($Type.attachmentsPath)") { $errs += @(Get-SnTicketPathErrors "$($Type.attachmentsPath)" "$at attachments folder") }
+    foreach ($f in 'useBaseChecklist', 'useCommonQuestions') {
+        if ($null -ne $Type.$f -and $Type.$f -isnot [bool]) { $errs += "${at}: $f must be true or false" }
+    }
+    return $errs   # callers wrap the result in @()
+}
+
+function Get-SnTypeLayout($s, $TypeDef) {
+    <# The layout of a task type; each field falls back to the general setting:
+       folders      the type's folders, else settings.ticketFolders (an empty list = the general ones)
+       saveTargets  the type's places + the general places outside the task folder, else all general places
+       attachmentsPath  the type's, else settings.attachmentsPath, else {ticket}\Attachments
+       useBaseChecklist / useCommonQuestions  false only when the type says so #>
+    $folders = @(@($TypeDef.folders) | Where-Object { "$_".Trim() })
+    if (-not $folders.Count) { $folders = @(@($s.ticketFolders) | Where-Object { "$_".Trim() }) }
+    $own = @(@($TypeDef.saveTargets) | Where-Object { $_ -and "$($_.name)".Trim() })
+    if ($own.Count) { $targets = @($own) + @(@($s.saveTargets) | Where-Object { $_ -and "$($_.path)" -notmatch '^\{ticket\}' }) }
+    else { $targets = @(@($s.saveTargets) | Where-Object { $_ }) }
+    $ap = "$($TypeDef.attachmentsPath)"
+    if (-not $ap) { $ap = "$($s.attachmentsPath)" }
+    if (-not $ap) { $ap = '{ticket}\Attachments' }
+    return [pscustomobject]@{
+        folders = $folders; saveTargets = $targets; attachmentsPath = $ap
+        useBaseChecklist = ($TypeDef.useBaseChecklist -ne $false); useCommonQuestions = ($TypeDef.useCommonQuestions -ne $false)
+    }
+}
+
+function Get-SnTaskTargets($Task, $s) {
+    # the save places of a task (its type's layout); the page and the API index into this list
+    if (-not $s) { $s = Get-SnSettings }
+    return @((Get-SnTypeLayout $s (Get-TypeDef $s $Task.type)).saveTargets)
+}
+
+function Get-SnFileFamily([string]$Name) {
+    # family and version of a file name: 'x_v3.sql' -> x, 3; 'x.sql' -> x, 1
+    $ext = [IO.Path]::GetExtension($Name); $stem = [IO.Path]::GetFileNameWithoutExtension($Name)
+    if ($stem -match '^(.+?)_[vV](\d{1,3})$' -and [int]$Matches[2] -ge 1) { return [pscustomobject]@{ family = $Matches[1]; version = [int]$Matches[2]; ext = $ext } }
+    return [pscustomobject]@{ family = $stem; version = 1; ext = $ext }
+}
+
+function Get-SnDirFamilies([string]$Dir) {
+    # the file families of one folder (not its sub-folders), newest first: { family, latest, version, versions, at, ext }
+    $fam = @{}
+    if (Test-Path -LiteralPath $Dir -PathType Container) {
+        foreach ($f in Get-ChildItem -LiteralPath $Dir -File | Where-Object { @('task.json', '_NOTES.md') -notcontains $_.Name -and $_.Name -notlike '.*' }) {
+            $x = Get-SnFileFamily $f.Name
+            $key = $x.family.ToLower()
+            if (-not $fam.ContainsKey($key)) { $fam[$key] = @{ family = $x.family; version = 0; versions = 0; file = $null } }
+            $e = $fam[$key]; $e.versions++
+            if ($x.version -gt $e.version) { $e.version = $x.version; $e.family = $x.family; $e.file = $f }
+        }
+    }
+    return @($fam.Values | Sort-Object { $_.file.LastWriteTime } -Descending | ForEach-Object {
+        [pscustomobject]@{ family = $_.family; latest = $_.file.Name; version = $_.version; versions = $_.versions
+            at = $_.file.LastWriteTime.ToString('yyyy-MM-dd HH:mm'); ext = $_.file.Extension } })
 }
 
 # ---------------------------------------------------------------------------
@@ -542,12 +631,16 @@ function New-SnTask {
     }
     $ShortCode = (Get-SafeName $ShortCode 20).ToUpper()
 
+    # the type's layout (spec 005) decides the sub-folders and whether the general questions / checklist are added
+    $layout = Get-SnTypeLayout $s $typeDef
+    $common = @(); if ($layout.useCommonQuestions) { $common = @($s.commonQuestions) }
+    $base = @(); if ($layout.useBaseChecklist) { $base = @($s.baseChecklist) }
     $questions = @()
-    foreach ($q in (@(Get-SnTypeList $typeDef $intake.variant 'openQuestions') + @($s.commonQuestions) + @($intake.askBusiness) + @($ExtraQuestions) | Where-Object { "$_".Trim() })) {
+    foreach ($q in (@(Get-SnTypeList $typeDef $intake.variant 'openQuestions') + $common + @($intake.askBusiness) + @($ExtraQuestions) | Where-Object { "$_".Trim() })) {
         $questions += [pscustomobject]@{ q = $q; answered = $false; answer = '' }
     }
     $checklist = @()
-    foreach ($c in (@(Get-SnTypeList $typeDef $intake.variant 'checklist') + @($s.baseChecklist) | Where-Object { "$_".Trim() })) { $checklist += [pscustomobject]@{ item = $c; done = $false } }
+    foreach ($c in (@(Get-SnTypeList $typeDef $intake.variant 'checklist') + $base | Where-Object { "$_".Trim() })) { $checklist += [pscustomobject]@{ item = $c; done = $false } }
 
     $tok = @{ prefix = $s.prefix; prefixLower = $s.prefix.ToLower(); module = $Module; code = $ShortCode; base = "$($s.prefix)_$($Module)_$ShortCode"; id = $Id; type = $Type }
     $objects = @($objPatterns | ForEach-Object { Expand-Pattern $_ $tok })
@@ -571,7 +664,7 @@ function New-SnTask {
     $folderName = (Expand-Pattern $s.ticketFolderName $ftok) -replace '[\\/:*?"<>|]', '_'
     $folder = Join-Path (Join-Path $cfg.root '01_Tickets') $folderName
     New-Item -ItemType Directory -Force -Path $folder | Out-Null
-    foreach ($sub in @($s.ticketFolders)) { New-Item -ItemType Directory -Force -Path (Join-Path $folder $sub) | Out-Null }
+    foreach ($sub in @($layout.folders)) { New-Item -ItemType Directory -Force -Path (Join-Path $folder $sub) | Out-Null }
     $task | Add-Member -NotePropertyName '_path' -NotePropertyValue $folder -Force
     Save-SnTask $task
 
@@ -795,8 +888,7 @@ function Assert-UnderRoot([string]$Path) {
 }
 
 function Resolve-SnTarget($Task, [int]$Target, [string]$SubFolder) {
-    $s = Get-SnSettings
-    $targets = @($s.saveTargets)
+    $targets = @(Get-SnTaskTargets $Task)
     if ($Target -lt 0 -or $Target -ge $targets.Count) { throw 'Unknown save destination.' }
     $tg = $targets[$Target]
     $p = [string]$tg.path
@@ -809,13 +901,42 @@ function Resolve-SnTarget($Task, [int]$Target, [string]$SubFolder) {
 }
 
 function Resolve-SnAttachDir($Task, [string]$Sub) {
-    # attachments place inside the task folder (settings.attachmentsPath, default {ticket}\Attachments) + optional sub-folder
-    $p = "$((Get-SnSettings).attachmentsPath)"
-    if (-not $p) { $p = '{ticket}\Attachments' }
+    # attachments place inside the task folder (the type's, else settings.attachmentsPath, default {ticket}\Attachments)
+    # + optional sub-folder
+    $s = Get-SnSettings
+    $p = (Get-SnTypeLayout $s (Get-TypeDef $s $Task.type)).attachmentsPath
     $p = Expand-Pattern ($p -replace '^\{ticket\}[\\/]?', '') @{ id = (Get-SafeName $Task.id 20 -KeepHyphen); module = $Task.module; type = (Get-SafeName $Task.type 20) }
     $dir = if ($p) { Join-Path $Task._path $p } else { $Task._path }
     if ($Sub) { Test-RelPath $Sub 'Sub-folder'; $dir = Join-Path $dir $Sub }
     return (Assert-UnderRoot $dir)
+}
+
+function Resolve-SnSaveDir($Task, [int]$Target, [string]$SubFolder, [bool]$Attachment, [string]$Question) {
+    # the folder a file of this task is saved in: a save place (+ sub-folder) or the attachments place (+ the files
+    # question's sub-folder + sub-folder). Returns { Dir, TargetName, Versioned }
+    if ($Attachment) {
+        $sub = ''
+        if ($Question) {
+            $fq = @(@((Get-TypeDef (Get-SnSettings) $Task.type).questions) | Where-Object { $_ -and "$($_.k)" -eq $Question -and (Get-SnQuestionKind $_) -eq 'files' })
+            if (-not $fq.Count) { throw "'$Question' is not a file question of type '$($Task.type)'." }
+            $sub = "$($fq[0].sub)"
+        }
+        if ($SubFolder) { if ($sub) { $sub = Join-Path $sub $SubFolder } else { $sub = $SubFolder } }
+        return [pscustomobject]@{ Dir = (Resolve-SnAttachDir $Task $sub); TargetName = 'Attachments'; Versioned = $false }
+    }
+    $r = Resolve-SnTarget $Task $Target $SubFolder
+    return [pscustomobject]@{ Dir = $r.Dir; TargetName = $r.Target.name; Versioned = ($r.Target.versioned -eq $true) }
+}
+
+function Get-SnFileFamilies {
+    <# The file families in the folder a save would go to (same parameters as Save-SnFile), newest first, so the page
+       can ask "new file or new version of ...?" before saving. Read-only. #>
+    [CmdletBinding()]
+    param([Parameter(Mandatory)][string]$Id, [int]$Target = 0, [string]$SubFolder, [switch]$Attachment, [string]$Question)
+    $t = Find-SnTask $Id -IncludeArchive
+    $d = Resolve-SnSaveDir $t $Target $SubFolder $Attachment $Question
+    $rel = $d.Dir.Substring([IO.Path]::GetFullPath((Get-SnConfig).root).TrimEnd('\').Length).TrimStart('\')
+    return [pscustomobject]@{ dir = $rel; versioned = $d.Versioned; families = @(Get-SnDirFamilies $d.Dir) }
 }
 
 function Get-SnTargetFolders {
@@ -840,26 +961,19 @@ function Save-SnFile {
         [switch]$AddPrefix, [switch]$AddHeader, [string]$Purpose,
         # -Attachment: save in the task's attachments place (settings.attachmentsPath) instead of save target -Target;
         # -Question: the files question it answers (its sub-folder is used); -SourcePath: copy this file (left untouched)
-        [switch]$Attachment, [string]$Question, [string]$SourcePath, [switch]$NoRefresh
+        [switch]$Attachment, [string]$Question, [string]$SourcePath, [switch]$NoRefresh,
+        # versions (spec 005): -VersionOf <family> = the next version of that file; -AsNew = a new file, refused if the
+        # name is taken; neither = the old rule (a free name _v2, _v3 ...). -Note = what changed (logged).
+        [string]$VersionOf, [switch]$AsNew, [string]$Note
     )
     $t = Find-SnTask $Id -IncludeArchive
-    if ($Attachment) {
-        $sub = ''
-        if ($Question) {
-            $fq = @(@((Get-TypeDef (Get-SnSettings) $t.type).questions) | Where-Object { $_ -and "$($_.k)" -eq $Question -and (Get-SnQuestionKind $_) -eq 'files' })
-            if (-not $fq.Count) { throw "'$Question' is not a file question of type '$($t.type)'." }
-            $sub = "$($fq[0].sub)"
-        }
-        if ($SubFolder) { if ($sub) { $sub = Join-Path $sub $SubFolder } else { $sub = $SubFolder } }
-        $dir = Resolve-SnAttachDir $t $sub
-        $targetName = 'Attachments'
-    } else {
-        $r = Resolve-SnTarget $t $Target $SubFolder
-        $dir = $r.Dir
-        $targetName = $r.Target.name
-    }
+    if ($VersionOf -and $AsNew) { throw 'Choose a new version or a new file, not both.' }
+    $d = Resolve-SnSaveDir $t $Target $SubFolder $Attachment $Question
+    $dir = $d.Dir; $targetName = $d.TargetName
     $name = ([IO.Path]::GetFileName($FileName.Trim()) -replace '[\\/:*?"<>|]', '_').Trim()
     if (-not $name) { throw 'File name is required.' }
+    $Note = ("$Note" -replace '\s+', ' ').Trim()
+    if ($Note.Length -gt 200) { $Note = $Note.Substring(0, 200) }
     # size is checked before anything is written
     $bytes = $null
     if ($PSBoundParameters.ContainsKey('Text')) { }
@@ -870,17 +984,38 @@ function Save-SnFile {
         $bytes = [Convert]::FromBase64String($Base64)
         if ($bytes.Length -gt $script:MaxFileBytes) { throw "$name is larger than 50 MB." }
     } else { throw 'Nothing to save (no content).' }
+    $follows = ''
+    if ($VersionOf) {
+        # the family keeps its name whatever the new file is called; the extension comes from the new file
+        $fk = ([IO.Path]::GetFileName($VersionOf.Trim()) -replace '[\\/:*?"<>|]', '_').Trim()
+        $fam = @(Get-SnDirFamilies $dir | Where-Object { $_.family -ieq $fk })
+        if (-not $fam.Count) { throw "There is no file '$fk' in this folder to add a version to." }
+        $name = '{0}_v{1}{2}' -f $fam[0].family, ($fam[0].version + 1), [IO.Path]::GetExtension($name)
+        $follows = Join-Path $dir $fam[0].latest
+    }
     New-Item -ItemType Directory -Force -Path $dir | Out-Null
 
-    if ($AddPrefix -and -not $name.StartsWith("$($t.id)_", [StringComparison]::OrdinalIgnoreCase)) {
+    if (-not $VersionOf -and $AddPrefix -and -not $name.StartsWith("$($t.id)_", [StringComparison]::OrdinalIgnoreCase)) {
         $rx = '^' + [regex]::Escape($t.id) + '_(\d+)_'
         $max = 0
         foreach ($f in Get-ChildItem -Path $dir -File) { if ($f.Name -match $rx) { $max = [Math]::Max($max, [int]$Matches[1]) } }
         $name = '{0}_{1:D2}_{2}' -f $t.id, ($max + 1), $name
     }
+    # a versioned place shows the version from the first file on: x.sql -> x_v1.sql
+    if (-not $VersionOf -and $d.Versioned -and [IO.Path]::GetFileNameWithoutExtension($name) -notmatch '_[vV]\d{1,3}$') {
+        $name = '{0}_v1{1}' -f [IO.Path]::GetFileNameWithoutExtension($name), [IO.Path]::GetExtension($name)
+    }
     $path = Join-Path $dir $name
-    $stem = [IO.Path]::GetFileNameWithoutExtension($name); $ext = [IO.Path]::GetExtension($name); $v = 2
-    while (Test-Path -LiteralPath $path) { $path = Join-Path $dir ('{0}_v{1}{2}' -f $stem, $v, $ext); $v++ }
+    if ($AsNew -and (Test-Path -LiteralPath $path)) { throw "A file named '$name' is already here: save it as a new version or change the name." }
+    $stem = [IO.Path]::GetFileNameWithoutExtension($name); $ext = [IO.Path]::GetExtension($name)
+    if ($VersionOf -or $d.Versioned) {
+        # never overwrite: the next free version number of the same family
+        $fx = Get-SnFileFamily $name; $v = $fx.version
+        while (Test-Path -LiteralPath $path) { $v++; $path = Join-Path $dir ('{0}_v{1}{2}' -f $fx.family, $v, $ext) }
+    } else {
+        $v = 2
+        while (Test-Path -LiteralPath $path) { $path = Join-Path $dir ('{0}_v{1}{2}' -f $stem, $v, $ext); $v++ }
+    }
 
     if ($PSBoundParameters.ContainsKey('Text')) {
         $body = $Text -replace "`r?`n", "`r`n"
@@ -908,13 +1043,21 @@ function Save-SnFile {
     if (-not ($t.PSObject.Properties.Name -contains 'files')) { $t | Add-Member -NotePropertyName 'files' -NotePropertyValue @() }
     $rec = [ordered]@{ at = $now; path = $rel; target = $targetName }
     if ($Attachment) { $rec.question = $Question; $rec.original = [IO.Path]::GetFileName($FileName.Trim()) }
+    $ff = Get-SnFileFamily ([IO.Path]::GetFileName($path))
+    $rec.family = $ff.family; $rec.version = $ff.version
+    $rootLen = [IO.Path]::GetFullPath((Get-SnConfig).root).TrimEnd('\').Length
+    if ($follows) { $rec.follows = $follows.Substring($rootLen).TrimStart('\') }
+    if ($Note) { $rec.note = $Note }
     $t.files = @($t.files) + [pscustomobject]$rec
     $t.updated = $now
     $t.history = @($t.history) + [pscustomobject]@{ at = $now; phase = $t.phase; percent = $t.percent; note = "Saved file: $rel" }
     Save-SnTask $t
-    Add-NotesLog $t "$now | FILE | $rel  ($targetName)"
+    $extra = ''
+    if ($follows) { $extra += " | version $($ff.version) of $($ff.family)" }
+    if ($Note) { $extra += " | $Note" }
+    Add-NotesLog $t "$now | FILE | $rel  ($targetName)$extra"
     if (-not $NoRefresh) { Update-SnDashboard | Out-Null }
-    return [pscustomobject]@{ path = $path; relative = $rel }
+    return [pscustomobject]@{ path = $path; relative = $rel; family = $ff.family; version = $ff.version }
 }
 
 function Get-SnTaskFiles {
@@ -962,7 +1105,7 @@ function Open-SnPath {
 
 function Get-SnMeta {
     $s = Get-SnSettings
-    $tq = @{}; $tobj = @{}
+    $tq = @{}; $tobj = @{}; $tl = @{}
     foreach ($t in $s.types) {
         $tq[$t.name] = @($t.questions | Where-Object { $_ } | ForEach-Object {
             $o = [ordered]@{ k = $_.k; q = $_.q; d = [string]$_.d }
@@ -970,6 +1113,11 @@ function Get-SnMeta {
             foreach ($f in 'kind', 'options', 'required', 'when', 'askIfBlank', 'sub') { if ($null -ne $_.$f) { $o[$f] = $_.$f } }
             [pscustomobject]$o })
         $tobj[$t.name] = (@($t.objects | Where-Object { $_ }).Count -gt 0)
+        # the type's layout, resolved (spec 005): the page indexes save places per task from this list
+        $l = Get-SnTypeLayout $s $t
+        $tl[$t.name] = [pscustomobject]@{ folders = @($l.folders); attachmentsPath = $l.attachmentsPath
+            useBaseChecklist = $l.useBaseChecklist; useCommonQuestions = $l.useCommonQuestions
+            saveTargets = @($l.saveTargets | ForEach-Object { ConvertTo-SnMetaTarget $_ }) }
     }
     return [pscustomobject]@{
         modules = @($s.modules); types = @($s.types | ForEach-Object { $_.name }); priorities = @($s.priorities)
@@ -977,10 +1125,18 @@ function Get-SnMeta {
         typeQuestions = $tq; typeHasObjects = $tobj; prefix = $s.prefix; root = (Get-SnConfig).root
         career = $s.career
         appearance = $s.appearance
-        saveTargets = @($s.saveTargets | ForEach-Object { [pscustomobject]@{ name = $_.name; path = $_.path; prefix = [bool]$_.prefix } })
+        saveTargets = @($s.saveTargets | ForEach-Object { ConvertTo-SnMetaTarget $_ })
         attachmentsPath = $(if ("$($s.attachmentsPath)") { "$($s.attachmentsPath)" } else { '{ticket}\Attachments' })
+        typeLayouts = $tl
         pack = (Get-SnMetaPack)
     }
+}
+
+function ConvertTo-SnMetaTarget($T) {
+    # a save place for the page; versioned only when set, so plain places look as before
+    $o = [ordered]@{ name = $T.name; path = $T.path; prefix = [bool]$T.prefix }
+    if ($T.versioned -eq $true) { $o.versioned = $true }
+    return [pscustomobject]$o
 }
 
 function Get-SnMetaPack {
@@ -1056,5 +1212,5 @@ function Start-SnMenu {
 
 $script:SnExports = @(
     'Test-SnPack', 'Get-SnPack', 'Get-SnPackList', 'Get-SnProfile', 'Save-SnProfile', 'Get-SnActivePack', 'Get-SnPackOrLegacy', 'New-SnPackRequest', 'Get-SnPackRequest', 'Approve-SnPackDraft', 'Deny-SnPackDraft', 'Submit-SnPackDraft', 'Get-SnEffectiveSettings', 'Get-SnBaseSettings', 'Get-SnOverrides', 'Get-SnDiff', 'Merge-SnObject', 'ConvertTo-SnCanonicalJson', 'Get-SnConfigPath', 'Get-SnLearnDirFor', 'Get-SnLearnDir', 'Invoke-SnMigration', 'Get-SnSnapshot', 'Compare-SnSnapshot', 'Get-SnExtractors', 'Copy-SnJson', 'Get-SnOnboarding', 'Save-SnOnboarding', 'Restart-SnOnboarding', 'Complete-SnOnboarding', 'New-SnFirstWeekPlan', 'Get-SnPlan', 'Set-SnPlanItem',
-    'Set-SnCard', 'Remove-SnCard', 'Set-SnCardKeep', 'Sync-SnKnowledge', 'Get-SnArabic', 'Set-SnArabic', 'Set-SnShotRequests', 'Add-SnShot', 'Remove-SnShot', 'Set-SnCardCategory', 'Test-SnQuestionReady', 'Set-SnConceptStatus', 'Set-SnLesson', 'Remove-SnLesson', 'Save-SnLessonProgress', 'Add-SnFollowup', 'Set-SnFollowupAnswer', 'Get-SnTeach', 'Get-SnPendingFollowups', 'Get-SnDailyReview', 'Save-SnReviewDay', 'Get-SnReviewStreak', 'Add-SnQuestions', 'Remove-SnQuestion', 'Submit-SnAnswer', 'Get-SnCv', 'Save-SnCv', 'Add-SnCvBullet', 'Export-SnCv', 'Get-SnLearn', 'Get-SnSuggestions', 'New-SnTask', 'Update-SnTask', 'Get-SnTask', 'Show-SnTask', 'Close-SnTask', 'Update-SnDashboard', 'Get-SnDashboardHtml', 'Start-SnMenu', 'Get-SnTaskList', 'Find-SnTask', 'Get-SnMeta', 'Get-SnConfig', 'Get-SnSettings', 'Save-SnSettings', 'Reset-SnSettings', 'Restore-SnSettingsBackup', 'Get-SnTargetFolders', 'Save-SnFile', 'Get-SnTaskFiles', 'Get-SnTaskImage', 'Open-SnPath'
+    'Set-SnCard', 'Remove-SnCard', 'Set-SnCardKeep', 'Sync-SnKnowledge', 'Get-SnArabic', 'Set-SnArabic', 'Set-SnShotRequests', 'Add-SnShot', 'Remove-SnShot', 'Set-SnCardCategory', 'Test-SnQuestionReady', 'Set-SnConceptStatus', 'Set-SnLesson', 'Remove-SnLesson', 'Save-SnLessonProgress', 'Add-SnFollowup', 'Set-SnFollowupAnswer', 'Get-SnTeach', 'Get-SnPendingFollowups', 'Get-SnDailyReview', 'Save-SnReviewDay', 'Get-SnReviewStreak', 'Add-SnQuestions', 'Remove-SnQuestion', 'Submit-SnAnswer', 'Get-SnCv', 'Save-SnCv', 'Add-SnCvBullet', 'Export-SnCv', 'Get-SnLearn', 'Get-SnSuggestions', 'New-SnTask', 'Update-SnTask', 'Get-SnTask', 'Show-SnTask', 'Close-SnTask', 'Update-SnDashboard', 'Get-SnDashboardHtml', 'Start-SnMenu', 'Get-SnTaskList', 'Find-SnTask', 'Get-SnMeta', 'Get-SnConfig', 'Get-SnSettings', 'Save-SnSettings', 'Reset-SnSettings', 'Restore-SnSettingsBackup', 'Get-SnTargetFolders', 'Save-SnFile', 'Get-SnFileFamilies', 'Get-SnTaskFiles', 'Get-SnTaskImage', 'Open-SnPath'
 )

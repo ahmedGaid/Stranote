@@ -2417,7 +2417,7 @@ function initAttach(t){
       <div class="drop sm on" id="atDrop" tabindex="0" style="margin-top:8px">Drop files here, <u data-pick>choose files</u>, or paste a screenshot (Ctrl+V)</div>
       <input type="file" id="atFile" multiple hidden><div class="dest" id="atDest"></div><div class="msg" id="atMsg"></div>`;
     const sub = $('atSub'), drop = $('atDrop');
-    const dest = () => { $('atDest').textContent = `Saves to: ${t._path}\\${String(META.attachmentsPath || '').replace(/^\{ticket\}[\\/]?/, '')}${sub.value && sub.value !== '__new' ? '\\' + sub.value : ''}`; };
+    const dest = () => { $('atDest').textContent = `Saves to: ${t._path}\\${String(taskLayout(t).attachmentsPath || META.attachmentsPath || '').replace(/^\{ticket\}[\\/]?/, '')}${sub.value && sub.value !== '__new' ? '\\' + sub.value : ''}`; };
     sub.onchange = () => {
       if (sub.value === '__new'){
         const n = prompt('New sub-folder name (use \\ for nested):', '');
@@ -2455,9 +2455,12 @@ document.addEventListener('paste', e => {
   e.preventDefault(); attachFiles(files.map(pastedName));
 });
 
+// a task's layout from its type (spec 005): save places are indexed per task, the same list the server uses
+function taskLayout(t){ return (META.typeLayouts || {})[t.type] || {}; }
+
 function initFiles(t){
   loadFiles(t);
-  const P = $('fsPanel'), targets = arr(META.saveTargets);
+  const P = $('fsPanel'), targets = arr(taskLayout(t).saveTargets || META.saveTargets);
   let mode = 'upload', picked = [];
   $('fsToggle').onclick = () => { P.hidden = !P.hidden; if (!P.hidden && !P.innerHTML) build(); };
 
