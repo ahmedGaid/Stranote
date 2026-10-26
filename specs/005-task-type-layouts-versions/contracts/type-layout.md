@@ -13,6 +13,12 @@ feature stays valid and behaves as today.
 | `attachmentsPath` | string | - (use `settings.attachmentsPath`) | the type's attachments (requester) folder; starts with `{ticket}`; under the work root |
 | `useBaseChecklist` | bool | `true` | `false` = `settings.baseChecklist` is not added to this type's tasks |
 | `useCommonQuestions` | bool | `true` | `false` = `settings.commonQuestions` are not added to this type's tasks |
+| `phases` | `{ name, percent?, column }[]` | - (use `settings.phases`) | the type's own phases; must include `Done`; `column` = a name in `settings.phases` (the board column); `Done` -> `Done`, `On Hold` -> `On Hold`; unique names; percent 0-100 or empty |
+
+Phase rules: new tasks of the type start in its first phase; the update dialog / terminal offer the type's phases (plus
+the task's current phase if it is no longer listed); the board places a card in `column` of its phase (unknown phase:
+today's extra column) and shows the task's phase name when it differs from the column; `Get-SnMeta` sends per type
+`phases` and `phaseColumn` / `phasePct` maps. `Done` and `On Hold` keep their special meaning everywhere.
 
 Save places shown for a task of a type with `saveTargets`: the type's `saveTargets`, then the general
 `settings.saveTargets` whose `path` does NOT start with `{ticket}`. Without `saveTargets`: all general ones (today).
@@ -64,6 +70,14 @@ newest first.
 ```json
 { "name": "Data request",
   "useBaseChecklist": false, "useCommonQuestions": false,
+  "phases": [
+    { "name": "Requested", "percent": 10, "column": "Requirements" },
+    { "name": "Query written", "percent": 40, "column": "Development" },
+    { "name": "Data sent", "percent": 70, "column": "UAT" },
+    { "name": "Confirmed", "percent": 90, "column": "UAT" },
+    { "name": "On Hold", "column": "On Hold" },
+    { "name": "Done", "percent": 100, "column": "Done" }
+  ],
   "folders": ["01_From_Requester", "02_Scripts", "03_Data"],
   "attachmentsPath": "{ticket}\\01_From_Requester",
   "saveTargets": [

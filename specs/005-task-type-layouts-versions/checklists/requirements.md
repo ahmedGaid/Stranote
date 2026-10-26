@@ -33,7 +33,6 @@
 
 - The spec names existing product pieces (`_NOTES.md`, `overrides.json`, the Settings type editor, `_v<n>` names)
   because they are what the owner sees and what must not be lost; how they change is in plan.md / research.md.
-- Three choices were decided by default and are offered to the owner on hand-over (no markers left):
-  Q1 versions in the same folder with `_v<n>` (B: latest plain + `_versions\`); Q2 Data request in the EBS technical
-  pack only; Q3 phases stay general (no per-type phases).
+- Owner answered the three hand-over questions on 2026-10-26: Q1 "any one" (versions `_v<n>` in the same folder),
+  Q2 "any one" (Data request in the EBS technical pack only), Q3 "b" (per-type phases, User Story 7, board row TL6).
 - Depends on spec 004 being merged (AT0-AT5).

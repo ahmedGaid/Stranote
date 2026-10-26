@@ -1,6 +1,6 @@
 # Implementation Plan: Task-type layouts, Data request type and file versions
 
-**Branch**: `claude/TL0` (docs, stacked on `claude/AT5`); build rows TL1-TL5 | **Date**: 2026-10-26 | **Spec**: [spec.md](spec.md)
+**Branch**: `claude/TL0` (docs, stacked on `claude/AT5`); build rows TL1-TL6 | **Date**: 2026-10-26 | **Spec**: [spec.md](spec.md)
 
 **Input**: Feature specification from `/specs/005-task-type-layouts-versions/spec.md`
 
@@ -100,11 +100,14 @@ helper from spec 004.
    takes `versionOf` / `asNew`; terminal and agents pass parameters; old callers keep today's free-name rule.
 5. **Lossless Settings** (R5): the type editor gets the layout fields and still copies unknown fields through.
 6. **Live data** (R6): the live upgrade checks `overrides.json` `types` and adds Data request only on the owner's word.
+7. **Per-type phases** (R8, owner Q3-B): `taskTypes[].phases` with a board `column`; one board, cards placed by column
+   and labelled with their own phase; `Done` / `On Hold` keep their meaning.
 
 ## Delivery slices (board)
 
 TL1 engine (layout fields + validation, resolver, `New-SnTask`, per-task targets, families, versions in `Save-SnFile`,
 server, meta, tests) -> TL2 pack data (Data request in EBS technical, pack tests) -> TL3 page: version dialog (save
 panel + Attach), paste-text attachments, New task dialog uses the type's attachments folder, files grouped by family ->
-TL4 Settings type editor Layout part -> TL5 skills, docs, live-upgrade note. TL2 can start when TL1's contract is
-merged; TL3 and TL4 touch different parts of the template and can run in parallel after TL1.
+TL4 Settings type editor Layout part -> TL5 skills, docs, live-upgrade note -> TL6 per-type phases (engine, Data
+request phases, board/update dialog, Settings phases list, tests). TL2 can start when TL1's contract is merged; TL3 and
+TL4 touch different parts of the template and can run in parallel after TL1; TL6 after TL4 (same type editor).

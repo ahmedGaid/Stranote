@@ -14,5 +14,7 @@
 6. Create a Report and an Interface task -> folders, checklist and open questions as before (compare with main).
 7. Settings > Task types -> Support -> Layout: folders `01_Evidence`, `02_Fix`, general checklist off -> Save 5 times ->
    reload: fields kept; new Support task uses them; an old Support task unchanged.
-8. Light, dark and 390 px for the version dialog, the attachments area and the Layout part.
-9. `Invoke-Pester <worktree>\tests` -> all green.
+8. Data request -> Update: only Requested / Query written / Data sent / Confirmed / On Hold offered; set Data sent ->
+   card in the UAT column labelled "Data sent", 70%. A Report still offers the general phases.
+9. Light, dark and 390 px for the version dialog, the attachments area and the Layout part.
+10. `Invoke-Pester <worktree>\tests` -> all green.

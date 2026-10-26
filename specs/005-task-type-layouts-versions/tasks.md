@@ -43,3 +43,11 @@ when done. Each phase maps to a board row.
 - [ ] T019 [P] [US5] `.agents/skills/ebs-task/SKILL.md`: Data request intake; `.agents/skills/ebs-dashboard-guide/SKILL.md`: where query / sheet / requester files go, save as next version with a note
 - [ ] T020 [P] README.md + `docs/pack-authoring.md`: type layout fields and versions; `stranote-dev` file-map line
 - [ ] T021 Live-upgrade note: check live `overrides.json` `types`; add Data request only on the owner's word, backup first
+
+## Phase 6: Per-type phases (board TL6) - needs TL1, TL4 (owner choice Q3-B)
+
+- [ ] T022 [US7] Validate `taskTypes[].phases` (pack loader + `Assert-SnSettings`): `Done` present, unique names, `column` in general phases, percent 0-100 (`src/StranotePacks.ps1`, `src/StranoteCore.ps1`)
+- [ ] T023 [US7] Engine: `Get-PhaseNames` / `Get-PhasePct` take the task type; `New-SnTask` first phase, `Update-SnTask` choices + auto percent (keep the current phase if no longer listed); `Get-SnMeta` sends per-type phases, columns, percents
+- [ ] T024 [US7] Page: update dialog offers the type's phases; board and list place cards by column and show the type phase label (`src/dashboard_template.html`)
+- [ ] T025 [US7] Data request phases in `packs/oracle-ebs-technical.json` (FR-017); Settings type editor phases list (name, %, column), empty = general
+- [ ] T026 [US7] Tests in `tests/StranoteLayout.Tests.ps1`: validation, first phase, update choices, removed phase kept, types without phases unchanged; browser check light / dark / 390 px

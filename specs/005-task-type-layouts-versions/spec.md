@@ -1,6 +1,6 @@
 # Feature Specification: Task-type layouts, Data request type and file versions
 
-**Feature Branch**: `claude/TL0` (spec, stacked on spec 004 `claude/AT5`); build rows TL1-TL5
+**Feature Branch**: `claude/TL0` (spec, stacked on spec 004 `claude/AT5`); build rows TL1-TL6
 
 **Created**: 2026-10-26
 
@@ -198,6 +198,37 @@ first with its note and time; older versions fold under "older versions (n)". Op
 
 **Independent Test**: a family with three versions shows one row (v3) with "older versions (2)".
 
+---
+
+### User Story 7 - A Data request moves through its own short phases (Priority: P2)
+
+A Data request does not go through Design, UAT or Deployment. Its phases are its own:
+
+`Requested -> Query written -> Data sent -> Confirmed -> Done` (plus `On Hold`)
+
+The task page, the update dialog and the terminal offer only the task type's phases. Each type phase belongs to one
+column of the general board (Requested -> Requirements, Query written -> Development, Data sent and Confirmed -> UAT,
+On Hold -> On Hold, Done -> Done), so the board keeps one set of columns for all tasks; the card shows the task's own
+phase name ("Data sent") inside that column. Each phase can set the progress percent, as general phases do today.
+
+**Why this priority**: owner choice (2026-10-26, option B): the general phases do not describe a data request, and
+skipping four meaningless phases on every request is noise.
+
+**Independent Test**: create a Data request; the update dialog offers only its 5 phases + On Hold; set "Data sent";
+the card shows in the UAT column with the label "Data sent" and 70%; a Report task still offers the general phases.
+
+**Acceptance Scenarios**:
+
+1. **Given** a Data request, **When** the person opens the update dialog, **Then** the phase list is the type's list,
+   not the general one.
+2. **Given** a type phase with a board column, **When** the board shows, **Then** the card is in that column and shows
+   its own phase name.
+3. **Given** a type without its own phases, **When** it is updated, **Then** the general phases show, as today.
+4. **Given** a type's phases are changed in Settings and an old task is in a phase that no longer exists, **When** it is
+   shown, **Then** it keeps its phase (shown as today's "extra" column) and the update dialog still offers it, so
+   nothing is lost.
+5. **Given** a task is closed, **When** it is archived, **Then** its phase is `Done`, as for every task today.
+
 ### Edge Cases
 
 - Tasks created before this feature: keep their folders and checklist; the version question and family grouping work on
@@ -246,11 +277,21 @@ first with its note and time; older versions fold under "older versions (n)". Op
 - **FR-013**: The task page SHOULD group files by place and family, latest version first, older versions folded.
 - **FR-014**: Engine and page MUST contain no EBS words for this feature; type names, folders and wording come from the
   pack (Principle I). All writes go through the local server with the existing write header; nothing leaves the PC.
+- **FR-015**: A task type MUST be able to define its own phases (name, optional percent, the general board column it
+  shows in); the list MUST include `Done` and MAY include `On Hold` (same meaning as the general ones). Without it, the
+  general phases apply.
+- **FR-016**: The update dialog, the task page and the terminal MUST offer the task type's phases; the board MUST keep
+  the general columns, place each card in its phase's column and show the task's own phase name on the card.
+- **FR-017**: The Data request type MUST use the phases of User Story 7 (Requested 10%, Query written 40%, Data sent
+  70%, Confirmed 90%, On Hold, Done).
+- **FR-018**: Changing a type's phases MUST NOT change the phase of existing tasks; a task whose phase is no longer in
+  the list keeps it and can still be updated.
 
 ### Key Entities
 
 - **Type layout** (pack data, per task type): sub-folders, save places, attachments folder, use-general-checklist,
-  use-general-questions. Absent = today's general settings.
+  use-general-questions, phases. Absent = today's general settings.
+- **Type phase**: name, percent, board column (a general phase name).
 - **Save place** (general or per type): name, folder pattern, prefix flag (today), versioned flag (new).
 - **File family**: files in one place sharing a name without the `_v<n>` ending and extension; has versions 1..n.
 - **Saved file record** (on the task, additive): today's time, path, place; new family, version, follows, note.
@@ -268,17 +309,16 @@ first with its note and time; older versions fold under "older versions (n)". Op
   open questions), checked by tests.
 - **SC-005**: Saving Settings 5 times keeps every layout field of every type.
 - **SC-006**: Existing files named `x.sql`, `x_v2.sql` are listed as one family with 2 versions.
+- **SC-007**: A Data request goes from created to Done in 4 phase changes or fewer, and never shows Design, UAT or
+  Deployment as a choice.
 
 ## Assumptions
 
-- Version naming (Q1, default A): all versions stay in the same folder with `_v<n>` in the name (visible in Explorer
-  and in the emailed file name). Alternative B: the latest keeps the plain name and older ones move to a `_versions`
-  sub-folder (renames files: more risk, harder to say which one was sent).
-- Data request is added to the **EBS technical** pack only (Q2, default); the functional pack and other packs can add
-  it later by pack data only. Other EBS types keep today's layout; the owner can give Support / Analysis lighter
-  layouts in Settings.
-- Phases stay the pack's general phases for every type (Q3, default); a Data request simply moves faster
-  (Requirements -> Development -> Done). Per-type phases are a later spec if needed.
+- Owner answers (2026-10-26): **Q1** "any one" -> versions stay in the same folder with `_v<n>` in the name (visible in
+  Explorer and in the emailed file name; no renames). **Q2** "any one" -> Data request is added to the **EBS
+  technical** pack only; the functional pack and other packs can add it later by pack data only. **Q3** "b" -> types
+  can have their own phases; Data request gets its own (User Story 7). Other EBS types keep today's layout and
+  phases; the owner can give Support / Analysis lighter layouts or phases in Settings.
 - The version question is asked by the dashboard; terminal and agents state the choice with a parameter (no prompt
   when a parameter is given). The best guess uses file type and name similarity only; no content comparison.
 - Builds on spec 004 (attachments, intake fields, type editor pass-through); TL1 starts after AT0-AT5 are merged and
@@ -289,6 +329,6 @@ first with its note and time; older versions fold under "older versions (n)". Op
 
 ## Out of scope
 
-- Running SQL from the app or connecting to any database; per-type phases; moving or renaming files of existing tasks;
+- Running SQL from the app or connecting to any database; a separate board (own columns) per task type; moving or renaming files of existing tasks;
   deleting versions from the dashboard; comparing the content of two versions (diff); sending data sheets by email;
   masking data automatically.

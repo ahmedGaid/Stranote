@@ -46,6 +46,16 @@ Same as spec 004 R5: if the live `overrides.json` holds its own `types`, the new
 not show. The live-upgrade row checks this, shows the owner, and only on their word appends the pack's Data request
 type to `overrides.json` (backup first). No other live data changes.
 
+## R8 - Per-type phases (owner choice Q3-B, 2026-10-26)
+**Decision**: optional `taskTypes[].phases` with a `column` per phase that names a general phase; the board keeps the
+general columns and places cards by `column`, showing the task's own phase name. `Done` and `On Hold` must keep those
+exact names because the engine and page treat them specially (close sets `Done`; ring colours, overdue, counts).
+**Why**: one board stays readable when Report and Data request tasks are mixed; the task record needs no new field
+(`phase` simply holds the type phase name), so history and `_NOTES.md` work unchanged.
+**Rejected**: a separate board per type (many boards, filters break); mapping by percent only (two phases with the
+same column would not be told apart). Code points: `Get-PhaseNames`/`Get-PhasePct` callers (`New-SnTask` first
+phase, `Update-SnTask` choices/percent), `Get-SnMeta`, page `PHASES` uses (board columns, list groups, update select).
+
 ## R7 - Overlap with Phase A (board P4) and spec 004
 `New-SnTask` and `Save-SnFile` are touched by spec 004 and by Phase A. **Decision**: build TL1 on main after AT0-AT5 are
 merged, with small separate changes; P4 takes them in when forward-ported (same as spec 004 Q3).

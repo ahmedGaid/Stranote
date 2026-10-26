@@ -5,6 +5,8 @@ All changes are additive (Principle IV). No migration; old tasks, packs and file
 | Where | Field | Change |
 |---|---|---|
 | `packs/<id>.json` `taskTypes[]` | `folders`, `saveTargets`, `attachmentsPath`, `useBaseChecklist`, `useCommonQuestions` | new, optional ([contract](contracts/type-layout.md)) |
+| `packs/<id>.json` `taskTypes[]` | `phases[]` (`name`, `percent`, `column`) | new, optional; `column` = a general phase name |
+| `task.json` `phase`, `history[].phase` | - | may hold a type phase name (e.g. `Data sent`); no new field |
 | `settings.saveTargets[]`, `taskTypes[].saveTargets[]` | `versioned` | new, optional, default false |
 | `overrides.json` `types` | same fields | kept by the Settings editor; empty folders list = field removed (fallback) |
 | `task.json` `files[]` | `family`, `version`, `follows`, `note` | new, optional |
