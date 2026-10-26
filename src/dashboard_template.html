@@ -574,6 +574,7 @@ img.thumb{width:44px;height:44px;object-fit:cover;border-radius:6px;border:1px s
 #atToggle{margin-right:6px}
 /* versions (spec 005): latest version first, older ones folded */
 .chip.ver{margin-right:6px;font:600 11px/18px var(--mono)}
+.chip.ph{font-weight:600;color:var(--ink2)}
 table.ft tr.older td{border-top:0;padding:0 6px 6px}
 tr.older summary{cursor:pointer;color:var(--muted);font-size:12px}
 tr.older table.ft td{color:var(--muted)}
@@ -1068,23 +1069,30 @@ function render(){
   }
   if (!list.length){ B.innerHTML = '<div class="empty">No tasks match your filters.</div>'; return; }
 
+  // a task of a type with its own phases sits in its phase's column (spec 005), e.g. "Data sent" under UAT
   if (VIEW === 'board'){
-    const extra = [...new Set(list.map(t => t.phase))].filter(p => p && !PHASES.includes(p));
+    const extra = [...new Set(list.map(phaseCol))].filter(p => p && !PHASES.includes(p));
     const phases = PHASES.filter(p => p !== 'Done' || list.some(t => t.phase === 'Done')).concat(extra);
     B.innerHTML = `<div class="cols">${phases.map(p => {
-      const cards = list.filter(t => t.phase === p).sort(byPrio);
+      const cards = list.filter(t => phaseCol(t) === p).sort(byPrio);
       return `<div class="col"><div class="col-h">${ring({ phase: p, percent: (META.phasePct || {})[p] || 0 })}${esc(p)}<span class="n">${cards.length}</span></div>${cards.map(card).join('')}</div>`;
     }).join('')}</div>`;
   } else {
     const groups = archived ? [['Archived', list.slice().sort((a, b) => String(b.closed || '').localeCompare(String(a.closed || '')))]]
-      : PHASES.concat([...new Set(list.map(t => t.phase))].filter(p => !PHASES.includes(p))).map(p => [p, list.filter(t => t.phase === p).sort(byPrio)]).filter(g => g[1].length);
+      : PHASES.concat([...new Set(list.map(phaseCol))].filter(p => !PHASES.includes(p))).map(p => [p, list.filter(t => phaseCol(t) === p).sort(byPrio)]).filter(g => g[1].length);
     B.innerHTML = groups.map(([p, rows]) => `<div class="grp"><div class="grp-h">${archived ? '' : ring({ phase: p, percent: (META.phasePct || {})[p] || 0 })}${esc(p)}<span class="n">${rows.length}</span></div>${rows.map(rowHtml).join('')}</div>`).join('');
   }
 }
 
+// the board column of a task: its type's mapping for its phase (spec 005), else the phase itself
+function phaseCol(t){ return (taskLayout(t).phaseColumn || {})[t.phase] || t.phase; }
+// the phases a task can move to: its type's (spec 005), plus its current phase if the list no longer has it
+function taskPhases(t){ const l = arr(taskLayout(t).phases || PHASES); return t.phase && !l.includes(t.phase) ? l.concat(t.phase) : l; }
+// the task's own phase name when it differs from the column it shows in
+const ownPhase = t => phaseCol(t) !== t.phase ? `<span class="chip ph">${esc(t.phase)}</span>` : '';
 function card(t){
   const oq = openQ(t);
-  const chips = [`<span class="chip">${esc(t.module)}</span>`, `<span class="chip">${esc(t.type)}</span>`];
+  const chips = [ownPhase(t), `<span class="chip">${esc(t.module)}</span>`, `<span class="chip">${esc(t.type)}</span>`].filter(Boolean);
   if (t.due) chips.push(`<span class="chip ${overdue(t) ? 'bad' : ''}">${ICO.cal}${fmtDue(t.due)}</span>`);
   if (oq) chips.push(`<span class="chip warn">${ICO.q}${oq}</span>`);
   return `<div class="card" data-id="${esc(t.id)}">
@@ -1100,7 +1108,7 @@ function rowHtml(t){
     ${prioIcon(t.priority)}
     <span class="id">${esc(t.id)}</span>
     <span class="ti">${esc(t.title)}${t.blocker ? `<span class="bl">&#9679; blocked</span>` : ''}</span>
-    <span class="chips"><span class="chip">${esc(t.module)}</span><span class="chip">${esc(t.type)}</span>${oq ? `<span class="chip warn">${ICO.q}${oq}</span>` : ''}</span>
+    <span class="chips">${ownPhase(t)}<span class="chip">${esc(t.module)}</span><span class="chip">${esc(t.type)}</span>${oq ? `<span class="chip warn">${ICO.q}${oq}</span>` : ''}</span>
     <span class="pc">${ring(t)}<span class="bar"><i style="width:${+t.percent || 0}%"></i></span></span>
     <span class="due ${overdue(t) ? 'bad' : ''}">${t._archived ? esc(String(t.closed || '').slice(0, 10)) : fmtDue(t.due)}</span>
   </div>`;
@@ -1119,7 +1127,7 @@ function show(id){
   const ck = arr(t.checklist); const done = ck.filter(c => c.done).length;
   const cl = ck.map((c, i) => `<label class="${c.done ? 'done' : ''}"><input type="checkbox" data-c="${i + 1}" ${c.done ? 'checked' : ''} ${editable ? '' : 'disabled'}><span>${esc(c.item)}</span></label>`).join('');
   const hist = arr(t.history).slice().reverse().map(h => `<tr><td>${esc(h.at)}</td><td>${esc(h.phase)}</td><td>${esc(h.percent)}%</td><td>${esc(h.note)}</td></tr>`).join('');
-  const pct = META.phasePct || {};
+  const pct = taskLayout(t).phasePct || META.phasePct || {};
 
   const P = (icon, label, val, cls = '') => `<dt>${icon}${label}</dt><dd class="${cls}">${val}</dd>`;
   const PI = {
@@ -1161,7 +1169,7 @@ function show(id){
       ${editable ? `
       <div class="sec"><h4>Update progress</h4>
       <div class="upd"><div class="grid">
-        <div class="f"><label>Phase</label><select id="uPhase">${opts(PHASES.filter(p => p !== 'Done'), t.phase)}</select></div>
+        <div class="f"><label>Phase</label><select id="uPhase">${opts(taskPhases(t).filter(p => p !== 'Done'), t.phase)}</select></div>
         <div class="f"><label>Percent complete</label><input id="uPct" type="number" min="0" max="100" value="${+t.percent || 0}"></div>
         <div class="f full"><label>What did you do?</label><textarea id="uNote" placeholder="Tested the API with 5 rows in DEV"></textarea></div>
         <div class="f full"><label>Blocker ${t.blocker ? '(empty it to clear)' : ''}</label><input id="uBlk" value="${esc(t.blocker)}" placeholder="Waiting for DBA to grant access"></div>
@@ -2974,10 +2982,11 @@ function renderSettings(){
           <h4>Sub-folders (empty = the general ticket sub-folders)</h4><div id="leTyF"></div>
           <div class="grid" style="margin-top:8px"><div class="f full"><label for="tyAtt">Attachments folder (blank = the general one)</label><input id="tyAtt" value="${esc(t.attachmentsPath || '')}" placeholder="{ticket}\\01_From_Requester"></div></div>
           <h4>Save places (empty = the general save destinations)</h4><p class="hint tok">Paths start with <code>{ticket}</code>. "Versions" = the first file is saved as <code>name_v1</code>, so every version shows in its name. General destinations outside the task folder (repo, knowledge base) are added after these.</p><div id="leTyST"></div>
-          <h4>Preview of a new task folder</h4><div class="preview" id="tyPrev"></div>` : '<p class="hint">No types. Add one.</p>'}</div>
+          <h4>Preview of a new task folder</h4><div class="preview" id="tyPrev"></div>
+          <h4>Phases (empty = the general phases)</h4><p class="hint">The steps a task of this type moves through. Each one shows in a board column (one of the general phases: ${esc(S.phases.map(p => p.name).filter(Boolean).join(', '))}). "Done" is required and uses the Done column; "On Hold" uses On Hold. Existing tasks keep their phase.</p><div id="leTyPh"></div>` : '<p class="hint">No types. Add one.</p>'}</div>
       </div>`;
     B.querySelectorAll('[data-t]').forEach(b => b.onclick = () => { typeIdx = +b.dataset.t; renderSettings(); });
-    $('tAdd').onclick = () => { S.types.push({ name: 'New type', questions: [], openQuestions: [], checklist: [], objects: [], folders: [], saveTargets: [], __had: {} }); typeIdx = S.types.length - 1; renderSettings(); $('tName').select(); };
+    $('tAdd').onclick = () => { S.types.push({ name: 'New type', questions: [], openQuestions: [], checklist: [], objects: [], folders: [], saveTargets: [], phases: [], __had: {} }); typeIdx = S.types.length - 1; renderSettings(); $('tName').select(); };
     $('tUp').onclick = () => { if (typeIdx > 0){ [S.types[typeIdx - 1], S.types[typeIdx]] = [S.types[typeIdx], S.types[typeIdx - 1]]; typeIdx--; renderSettings(); } };
     $('tDown').onclick = () => { if (typeIdx < S.types.length - 1){ [S.types[typeIdx + 1], S.types[typeIdx]] = [S.types[typeIdx], S.types[typeIdx + 1]]; typeIdx++; renderSettings(); } };
     if (!t) return;
@@ -3002,6 +3011,7 @@ function renderSettings(){
     listEditor($('leTyF'), t.folders, { ph: 'e.g. 02_Scripts', addLabel: 'Add sub-folder', onChange: tyPrev });
     listEditor($('leTyST'), t.saveTargets, { cols: [{ k: 'name', label: 'Name shown', w: 3, ph: 'e.g. Query script' }, { k: 'path', label: 'Folder', w: 3, ph: '{ticket}\\02_Scripts' }, { k: 'prefix', label: 'Number', w: 1, type: 'check', text: 'ID_NN_' }, { k: 'versioned', label: 'Versions', w: 1, type: 'check', text: '_v1' }], addLabel: 'Add save place' });
     tyPrev();
+    listEditor($('leTyPh'), t.phases, { cols: [{ k: 'name', label: 'Phase', w: 3, ph: 'e.g. Data sent' }, { k: 'percent', label: 'Auto %', w: 1, type: 'number' }, { k: 'column', label: 'Board column', w: 2, ph: 'e.g. UAT' }], addLabel: 'Add phase' });
   }
   else if (setTab === 'common'){
     B.innerHTML = `<h3>Common items</h3><p class="hint">Added to every new task, whatever the type.</p>
@@ -3115,6 +3125,8 @@ function cleanSettings(){
     o.saveTargets = arr(t.saveTargets).filter(x => String(x.name || '').trim()).map(target);
     if (!o.saveTargets.length) delete o.saveTargets;
     o.attachmentsPath = String(t.attachmentsPath || '').trim().replace(/\//g, '\\'); if (!o.attachmentsPath) delete o.attachmentsPath;
+    o.phases = arr(t.phases).filter(p => String(p.name || '').trim()).map(p => ({ name: p.name.trim(), percent: p.percent === '' || p.percent == null ? null : +p.percent, column: String(p.column || '').trim() }));
+    if (!o.phases.length) delete o.phases;
     for (const k of ['useBaseChecklist', 'useCommonQuestions']) { if (t[k] === false) o[k] = false; else if (had[k]) o[k] = true; else delete o[k]; }
     return o;
   });
@@ -3136,7 +3148,7 @@ async function openSettings(){
   S.appearance = Object.assign({ accent: '#4F46E5', tint: false, learnAccent: '#2563EB' }, S.appearance || {});
   S.types.forEach(t => {
     t.__had = { useBaseChecklist: 'useBaseChecklist' in t, useCommonQuestions: 'useCommonQuestions' in t };
-    ['questions','openQuestions','checklist','objects','folders','saveTargets'].forEach(k => t[k] = arr(t[k]));
+    ['questions','openQuestions','checklist','objects','folders','saveTargets','phases'].forEach(k => t[k] = arr(t[k]));
   });
   S.__root = d.root;
   S.__abbr = Object.entries(S.abbreviations || {}).map(([w, a]) => ({ w, a }));

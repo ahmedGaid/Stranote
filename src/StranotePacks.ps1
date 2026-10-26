@@ -77,8 +77,12 @@ function Test-SnPack {
     if (-not $tt.Count) { & $err 'taskTypes: at least one task type' }
     $tn = @($tt | ForEach-Object { "$($_.name)" })
     if (@($tn | Select-Object -Unique).Count -ne $tn.Count) { & $err 'taskTypes: duplicate name' }
+    # the general phases the type phases map to (board columns): the pack's, else the engine defaults
+    $genPh = @(@($Pack.settings.phases) | Where-Object { $_ } | ForEach-Object { "$($_.name)" })
+    if (-not $genPh.Count) { $genPh = @(Get-SnEngineDefaults).phases | ForEach-Object { "$($_.name)" } }
     for ($i = 0; $i -lt $tt.Count; $i++) {
         if (-not "$($tt[$i].name)".Trim()) { & $err "taskTypes[$i].name: required" }
+        foreach ($e in @(Get-SnTypePhaseErrors $tt[$i] $genPh)) { & $err "taskTypes[$i]: $e" }
         foreach ($c in @($tt[$i].checklist | Where-Object { $null -ne $_ })) { if (-not "$c".Trim()) { & $err "taskTypes[$i].checklist: empty item" } }
         foreach ($e in @(Get-SnIntakeErrors $tt[$i])) { & $err "taskTypes[$i]: $e" }
         foreach ($e in @(Get-SnLayoutErrors $tt[$i])) { & $err "taskTypes[$i]: $e" }
