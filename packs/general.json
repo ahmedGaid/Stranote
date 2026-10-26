@@ -261,6 +261,7 @@
       "Notes saved in 01_Notes"
     ],
     "ticketFolders": ["01_Notes", "02_Files"],
+    "attachmentsPath": "{ticket}\\01_Notes\\Attachments",
     "notesSections": ["What I learned", "Steps and decisions", "Free notes"],
     "saveTargets": [
       { "name": "Notes", "path": "{ticket}\\01_Notes", "prefix": false },

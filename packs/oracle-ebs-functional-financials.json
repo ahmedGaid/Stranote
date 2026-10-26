@@ -239,9 +239,39 @@
     {
       "name": "Report",
       "questions": [
-        { "k": "tech", "q": "Report type (standard / FSG / custom request)", "d": "standard" },
-        { "k": "purpose", "q": "What the business wants to see", "d": "" },
-        { "k": "params", "q": "Parameters (ledger, period, OU...)", "d": "" }
+        { "k": "mode", "q": "New report or fix an existing one?", "d": "", "kind": "choice", "options": ["New report", "Fix an existing report"], "required": true },
+        { "k": "tech", "q": "Report type (standard / FSG / custom request)", "d": "standard", "when": { "k": "mode", "is": "New report" } },
+        { "k": "purpose", "q": "What the business wants to see", "d": "", "when": { "k": "mode", "is": "New report" } },
+        { "k": "params", "q": "Parameters (ledger, period, OU...)", "d": "", "when": { "k": "mode", "is": "New report" } },
+        { "k": "rname", "q": "Report name (as users see it in the request form)", "d": "", "when": { "k": "mode", "is": "Fix an existing report" }, "askIfBlank": "Which report exactly (name in the request form)?" },
+        { "k": "rtype", "q": "Report type in EBS", "d": "", "kind": "choice",
+          "options": ["Standard report", "Custom report (Oracle Reports / BI Publisher)", "FSG", "Discoverer", "Web ADI / Excel", "OAF page / export", "Other"],
+          "when": { "k": "mode", "is": "Fix an existing report" } },
+        { "k": "resp", "q": "Responsibility it runs from", "d": "", "when": { "k": "mode", "is": "Fix an existing report" } },
+        { "k": "fixParams", "q": "Parameters that raise the problem (ledger, period, OU... exact values)", "d": "", "kind": "long", "when": { "k": "mode", "is": "Fix an existing report" }, "askIfBlank": "Which parameter values raise the problem?" },
+        { "k": "request", "q": "Request ID of a run that shows the problem", "d": "", "when": { "k": "mode", "is": "Fix an existing report" }, "askIfBlank": "Request ID of a run that shows the problem?" },
+        { "k": "instance", "q": "Instance where it was seen (PROD / UAT)", "d": "PROD", "when": { "k": "mode", "is": "Fix an existing report" } },
+        { "k": "wrong", "q": "What is wrong now (current result)", "d": "", "kind": "long", "required": true, "when": { "k": "mode", "is": "Fix an existing report" } },
+        { "k": "expected", "q": "The correction needed (expected result)", "d": "", "kind": "long", "when": { "k": "mode", "is": "Fix an existing report" }, "askIfBlank": "What exactly should the corrected output show?" },
+        { "k": "problemFiles", "q": "Screenshots / output that show the problem", "d": "", "kind": "files", "sub": "Problem", "when": { "k": "mode", "is": "Fix an existing report" } },
+        { "k": "expectedFiles", "q": "Files that show the expected result (corrected Excel, email)", "d": "", "kind": "files", "sub": "Expected", "when": { "k": "mode", "is": "Fix an existing report" } }
+      ],
+      "variants": [
+        {
+          "when": { "k": "mode", "is": "Fix an existing report" },
+          "openQuestions": [
+            "Is it a setup or data issue, or a report bug?",
+            "Who signs off the corrected output?"
+          ],
+          "checklist": [
+            "Reproduced with the same parameters",
+            "Setup and source data checked before raising it to technical",
+            "Expected output agreed with the business",
+            "Corrected output reconciled (e.g. against GL balances)",
+            "Business tested the fix in UAT"
+          ],
+          "objects": []
+        }
       ],
       "openQuestions": [
         "Does a standard report already cover it?",
@@ -428,6 +458,7 @@
       "Applied in PROD and checked with a sample transaction"
     ],
     "ticketFolders": ["01_Requirements", "02_Design", "03_Setup", "04_Test", "05_Deploy"],
+    "attachmentsPath": "{ticket}\\01_Requirements\\Attachments",
     "notesSections": ["Decisions", "Setup values", "Free notes"],
     "saveTargets": [
       { "name": "Setup document (BR100, setup screenshots)", "path": "{ticket}\\03_Setup", "prefix": true },

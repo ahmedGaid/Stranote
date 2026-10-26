@@ -28,9 +28,11 @@ Describe 'Migration of an existing EBS install' {
         It 'keeps only your own changes as overrides' {
             ($r.overrides | Sort-Object) -join ',' | Should Be 'appearance,career,types'
         }
-        It 'gives exactly the same effective settings as before (except pack-owned knowledge)' {
+        It 'gives exactly the same effective settings as before (except pack-owned knowledge and settings added later)' {
             $a = Copy-SnJson $legacy; $b = Copy-SnJson (Get-SnSettings)
             $a.PSObject.Properties.Remove('knowledge'); $b.PSObject.Properties.Remove('knowledge')
+            $b.attachmentsPath | Should Be '{ticket}\01_Requirements\Attachments'   # new since the old file: comes from the pack
+            foreach ($n in @($b.PSObject.Properties.Name)) { if (@($a.PSObject.Properties.Name) -notcontains $n) { $b.PSObject.Properties.Remove($n) } }
             ConvertTo-SnCanonicalJson $b | Should Be (ConvertTo-SnCanonicalJson $a)
             (Get-SnSettings).knowledge.categories -join ',' | Should Be 'Technical,Financial,Business,SCM'
         }

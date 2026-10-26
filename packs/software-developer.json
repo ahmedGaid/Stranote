@@ -431,6 +431,7 @@
       "Notes saved in 01_Notes"
     ],
     "ticketFolders": ["01_Notes", "02_Code", "03_Tests", "04_Docs"],
+    "attachmentsPath": "{ticket}\\01_Notes\\Attachments",
     "notesSections": ["Decisions", "Commands and snippets", "Free notes"],
     "saveTargets": [
       { "name": "Notes or analysis", "path": "{ticket}\\01_Notes", "prefix": false },

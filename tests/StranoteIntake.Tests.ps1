@@ -239,3 +239,35 @@ Describe 'Attachments' {
         { Save-SnFile -Id 'T-8' -Attachment -Question 'goal' -FileName 'a.txt' -Text 'a' } | Should Throw "'goal' is not a file question"
     }
 }
+
+Describe 'Shipped EBS packs: Report New/Fix' {
+    foreach ($packId in 'oracle-ebs-technical', 'oracle-ebs-functional-financials') {
+        $root = New-SnTestEnv
+        try {
+            Save-SnProfile -SnProfile ([pscustomobject]@{ schemaVersion = 1; roles = @([pscustomobject]@{ id = 'r1'; packId = $packId }) }) | Out-Null
+            $pk = [IO.File]::ReadAllText((Join-Path $packs "$packId.json")) | ConvertFrom-Json
+            $rep = @($pk.taskTypes | Where-Object { $_.name -eq 'Report' })[0]
+            $fixList = @(@($rep.variants)[0].checklist)
+
+            It "${packId}: a new report keeps the pack's Report checklist and open questions" {
+                New-SnTask -NonInteractive -Id 'N-1' -Title 'New report' -Type 'Report' -Details @{ mode = 'New report' } | Out-Null
+                $t = Find-SnTask 'N-1'
+                $items = @($t.checklist | ForEach-Object { $_.item })
+                ($items[0..(@($rep.checklist).Count - 1)] -join '|') | Should Be (@($rep.checklist) -join '|')
+                @($t.questions | ForEach-Object { $_.q }) -contains @($rep.openQuestions)[0] | Should Be $true
+            }
+            It "${packId}: a fix gets the fix checklist, open questions for the gaps and attachments in 01_Requirements" {
+                $src = Join-Path $root 'shot.png'; [IO.File]::WriteAllBytes($src, [byte[]](1, 2))
+                $r = New-SnTask -NonInteractive -Id 'F-1' -Title 'Totals wrong' -Type 'Report' -Details @{ mode = 'Fix an existing report'; wrong = 'Totals double'; rtype = 'other' } -Attach @("problemFiles=$src")
+                $t = Find-SnTask 'F-1'
+                $items = @($t.checklist | ForEach-Object { $_.item })
+                ($items[0..($fixList.Count - 1)] -join '|') | Should Be ($fixList -join '|')
+                $q = @($t.questions | ForEach-Object { $_.q })
+                $q -contains 'Which parameter values raise the problem?' | Should Be $true
+                $q -contains @($rep.openQuestions)[0] | Should Be $false
+                @($t.objects).Count | Should Be 0
+                Test-Path (Join-Path $r.Folder '01_Requirements\Attachments\Problem\shot.png') | Should Be $true
+            }
+        } finally { Remove-SnTestEnv $root }
+    }
+}
