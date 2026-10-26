@@ -25,8 +25,8 @@ TL1 notes: the page already indexes save places per task (`taskLayout(t)` in the
 
 ## Phase 2: Pack data (board TL2) - needs T001-T007
 
-- [ ] T011 [US1] `packs/oracle-ebs-technical.json`: Data request type per the contract example (questions, layout, places, checklist, open questions, Recurring variant)
-- [ ] T012 [US1] Extend `tests/StranoteLayout.Tests.ps1`: every shipped pack loads; Data request creates 3 folders, 6 checklist items, no base items; Report/Interface unchanged; full suite green
+- [X] T011 [US1] `packs/oracle-ebs-technical.json`: Data request type per the contract example (questions, layout, places, checklist, open questions, Recurring variant) (8cb2e97)
+- [X] T012 [US1] Extend `tests/StranoteLayout.Tests.ps1`: every shipped pack loads; Data request creates 3 folders, 6 checklist items, no base items; Report/Interface unchanged; full suite green (8cb2e97)
 
 ## Phase 3: Page - versions and attachments (board TL3) - needs TL1, TL2
 
