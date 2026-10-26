@@ -22,18 +22,18 @@
 
 ## Phase 2: Pack data (board AT2) - needs T001-T005
 
-- [X] T011 [P] [US1] `packs/oracle-ebs-technical.json` Report: `mode` choice, today's questions under New, fix questions (spec US1 list, report-type options), 2 file questions (`Problem`, `Expected`), Fix variant (open questions, checklist, objects); `attachmentsPath` `{ticket}\\01_Requirements\\Attachments` (AT2)
-- [X] T012 [P] [US1] `packs/oracle-ebs-functional-financials.json` Report: same branch, worded for a functional consultant; same `attachmentsPath` (AT2)
-- [X] T013 [P] [US2] `attachmentsPath` in `packs/accountant.json`, `packs/general.json`, `packs/nurse.json`, `packs/software-developer.json` (inside their first ticket folder) (AT2)
-- [X] T014 [US1] Extend `tests/StranoteIntake.Tests.ps1`: every shipped pack loads; both EBS Report types produce the fix checklist for Fix and the old one for New; full suite green (AT2)
+- [X] T011 [P] [US1] `packs/oracle-ebs-technical.json` Report: `mode` choice, today's questions under New, fix questions (spec US1 list, report-type options), 2 file questions (`Problem`, `Expected`), Fix variant (open questions, checklist, objects); `attachmentsPath` `{ticket}\\01_Requirements\\Attachments` (11fb3bd)
+- [X] T012 [P] [US1] `packs/oracle-ebs-functional-financials.json` Report: same branch, worded for a functional consultant; same `attachmentsPath` (11fb3bd)
+- [X] T013 [P] [US2] `attachmentsPath` in `packs/accountant.json`, `packs/general.json`, `packs/nurse.json`, `packs/software-developer.json` (inside their first ticket folder) (11fb3bd)
+- [X] T014 [US1] Extend `tests/StranoteIntake.Tests.ps1`: every shipped pack loads; both EBS Report types produce the fix checklist for Fix and the old one for New; full suite green (11fb3bd)
 
 ## Phase 3: New task dialog + Settings editor (board AT3) - needs AT1, AT2
 
-- [ ] T015 [US1] `renderTypeBlock` draws `kind` (text, long, choice, files), applies `when` live, marks `required` (`src/dashboard_template.html`, new task)
-- [ ] T016 [US2] Attachments area for every type: drop, choose, paste image (R6), remove before Create, 50 MB check; file questions as their own areas
-- [ ] T017 [US2] Submit: `/api/new`, then one `/api/savefile` per file with `attachment` + `question`; progress; failures listed by name with "add it from the task page"
-- [ ] T018 [US1] Settings > Task types editor copies unknown question / type fields through on save (FR-012); simple editing of `kind` / `options` is out of scope (pack JSON)
-- [ ] T019 [US1] Browser check (quickstart 1-7, 9, 11): light, dark, 390 px, no console errors
+- [X] T015 [US1] `renderTypeBlock` draws `kind` (text, long, choice, files), applies `when` live, marks `required` (`src/dashboard_template.html`, new task) (AT3)
+- [X] T016 [US2] Attachments area for every type: drop, choose, paste image (R6), remove before Create, 50 MB check; file questions as their own areas (AT3)
+- [X] T017 [US2] Submit: `/api/new`, then one `/api/savefile` per file with `attachment` + `question`; progress; failures listed by name with "add it from the task page" (AT3)
+- [X] T018 [US1] Settings > Task types editor copies unknown question / type fields through on save (FR-012); simple editing of `kind` / `options` is out of scope (pack JSON) (AT3)
+- [X] T019 [US1] Browser check (quickstart 1-7, 9, 11): light, dark, 390 px, no console errors (AT3)
 
 ## Phase 4: Task page (board AT4) - needs AT1
 
