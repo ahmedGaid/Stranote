@@ -58,7 +58,10 @@ type's checklist. If the module can't be loaded, still give the guide (EBS user:
 
 Rules for this table:
 - Use destination names exactly as in `saveTargets`. Mention **numbered** for destinations with `prefix=true` - the user types the plain name, the dashboard adds `<ID>_NN_`.
-- EBS pack: production objects (packages, tables, views, ldt, rdf, BIP templates, ctl, shell, wft) go to the **repo** with the right sub-folder; scratch/test calls go to **Task script**; install, rollback and data-fix scripts go to **Deployment script** in run order; screenshots/outputs go to **Test evidence**.
+- EBS pack: production objects (packages, tables, views, ldt, rdf, BIP templates, ctl, shell, wft) go to the **repo** with the right sub-folder; scratch/test calls go to **Task script**; install, rollback and data-fix scripts go to **Deployment script** in run order; screenshots/outputs of *your tests* go to **Test evidence**.
+- Input from the business (their screenshots, emails, sample or wrong outputs, mockups of the expected result) is an
+  **attachment**, not a save destination: task page > **+ Attach** (sub-folder `Problem` / `Expected` for a Report fix),
+  saved in `<ticket>\01_Requirements\Attachments`. Write "Attach" in the destination column for these rows.
 - Something reusable (a clean API call example)? Add a row for **Reusable snippet** too.
 - EBS pack: if an object you wrote depends on setup that you did not write (concurrent program, value set, request group, lookup, profile, grants/synonyms), still list it as a row marked *"to create - extract with FNDLOAD"* so the user doesn't forget it. Give the FNDLOAD command in the code section of your answer, not in the table.
 

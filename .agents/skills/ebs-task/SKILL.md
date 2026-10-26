@@ -32,11 +32,19 @@ $meta = Get-SnMeta           # modules (= the pack's areas), types, priorities, 
 1. Extract what you can from the user's message / pasted ticket or email.
 2. The user edits all lists in the dashboard Settings, so never assume them. First run
    `Get-SnMeta | ConvertTo-Json -Depth 6` to get the current modules, types, priorities (and default), phases,
-   and each type's intake questions (`typeQuestions.<Type>` = list of `k` key / `q` question / `d` default).
+   and each type's intake questions (`typeQuestions.<Type>` = list of `k` key / `q` question / `d` default, and
+   optionally `kind` choice|long|files, `options`, `required`, `when` {k, is|in}, `askIfBlank`, `sub`).
    Then ask for what's missing. Use AskUserQuestion for choices (area/module, Type, Priority) in one call, then ask the
    free-text gaps (title, ticket ID - blank = auto, due date, requester, description, and the chosen type's questions)
    in one short chat message. Pass answers to `-Details` keyed by `k`.
    Don't interrogate: if the user doesn't know something, leave it blank; it becomes an open question.
+   **Branching types** (e.g. EBS Report): ask the `choice` questions first (AskUserQuestion with their `options`;
+   EBS Report: "New report or fix an existing one?"), then ask only the questions whose `when` matches the answer.
+   For a Report **fix**, ask: report name / short name, its EBS report type (`rtype` options), where the current
+   version is, responsibility, the parameter values that raise the problem, a request ID that shows it, the instance,
+   what is wrong now, the correction needed, since when - and ask for screenshots / output files of the problem and
+   of the expected result. `required` questions must be answered; blank `askIfBlank` questions become open questions.
+   Hidden answers are dropped by the engine, so never send fix answers for a new report.
 3. Add task-specific questions you, as an experienced practitioner of the pack's field (`$pack.field`), would want
    confirmed via `-ExtraQuestions` (EBS: MOAC/OU security, API vs interface table, seeded object to copy). Never invent
    domain facts for a career you are unsure of; ask the user instead.
@@ -48,6 +56,15 @@ $meta = Get-SnMeta           # modules (= the pack's areas), types, priorities, 
      -ExtraQuestions @('Invoice import via AP_INVOICES_INTERFACE or AP API?')
    ```
    Use single quotes; double any apostrophe inside values. Due accepts `yyyy-MM-dd` or `+N` days.
+   Report fix with attachments (files are copied, originals untouched; `key=path` puts a file under that files
+   question's sub-folder, a plain path goes to the attachments folder itself):
+   ```powershell
+   New-SnTask -NonInteractive -Title 'Supplier aging totals wrong' -Module AP -Type Report `
+     -Details @{ mode='Fix an existing report'; rname='XX Supplier Aging (XXAPAGING)'; rtype='BI Publisher - data template (XML)';
+                 fixParams='OU=Cairo; As of 30-SEP-2026'; wrong='Totals are doubled for invoices with 2 holds' } `
+     -Attach @('problemFiles=C:\Users\me\Downloads\aging_output.xlsx', 'C:\Users\me\Downloads\email.msg')
+   ```
+   Check `AttachFailed` in the result and tell the user which files were not saved.
 5. Report back briefly: folder created, proposed object names, the open questions to take to the business, and suggest the first step.
 
 ## Progress update
@@ -80,6 +97,15 @@ index. Other packs have their own list (General: Notes, File or attachment, How-
 Save-SnFile -Id 'CR-1042' -Target 0 -FileName 'create_invoice_api.sql' -Text $script -AddPrefix -AddHeader -Purpose '...'
 ```
 Use `-Base64` for binary content. List a task's files with `Get-SnTaskFiles -Id X`.
+
+**Attachments** (screenshots, emails, sample outputs, mockups - input to the work, not deliverables) go to the task's
+attachments folder (`(Get-SnSettings).attachmentsPath`; EBS: `<ticket>\01_Requirements\Attachments`):
+```powershell
+Save-SnFile -Id 'CR-1042' -Attachment -SourcePath 'C:\Users\me\Downloads\wrong_totals.png' -FileName 'wrong_totals.png' -Question problemFiles
+Save-SnFile -Id 'CR-1042' -Attachment -SubFolder 'Expected' -FileName 'expected.xlsx' -Base64 $b64
+```
+`-Question <files question key>` uses that question's sub-folder (EBS Report fix: `Problem`, `Expected`). Never
+overwrites (`_v2`), 50 MB per file. In the dashboard: task page > **+ Attach** (drop, choose or paste Ctrl+V).
 
 ## Other commands
 

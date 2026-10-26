@@ -99,10 +99,33 @@ These are the kinds of work a person logs. Each type brings its intake questions
 
 Names must be unique, and checklist items cannot be empty. Add an `Other` type.
 
+**Branching intake (optional).** A question can be a list (`"kind": "choice"` with `options`), a multi-line answer
+(`"kind": "long"`), or a drop area for files (`"kind": "files"`, with an optional `sub` folder inside the attachments
+folder). `"required": true` blocks creation while it is blank. `"when": { "k": "<choice key>", "is": "<option>" }` (or
+`"in": [...]`) shows a question only for that answer; the choice must come earlier in the list, and conditions can be at
+most 2 levels deep. `"askIfBlank": "..."` turns a blank answer into an open question. `variants` replace the type's
+`openQuestions`, `checklist` and `objects` when their `when` matches. Questions without these fields work as before.
+
+```json
+{ "name": "Patient case",
+  "questions": [
+    { "k": "mode", "q": "New case or follow-up?", "kind": "choice", "options": ["New case", "Follow-up"], "required": true },
+    { "k": "change", "q": "What changed since the last shift", "kind": "long", "when": { "k": "mode", "is": "Follow-up" },
+      "askIfBlank": "What changed since the last shift?" },
+    { "k": "photos", "q": "Wound photos (no faces)", "kind": "files", "sub": "Photos", "when": { "k": "mode", "is": "Follow-up" } }
+  ],
+  "variants": [ { "when": { "k": "mode", "is": "Follow-up" }, "checklist": ["Compared with the last assessment"] } ],
+  "openQuestions": ["What would make me escalate this patient?"],
+  "checklist": ["Assessment done and charted", "Handover written"],
+  "objects": [] }
+```
+Full contract: `specs/004-task-attachments-report-intake/contracts/intake-fields.md`.
+
 ### `settings`
 
 Any engine setting the pack wants to set: `phases`, `commonQuestions`, `baseChecklist`, `ticketFolders`,
-`notesSections`, `saveTargets`, `workFolders`, `abbreviations`, `stopWords`, `prefix`... Look up names and defaults in
+`notesSections`, `saveTargets`, `attachmentsPath` (where attachments go inside the task folder, starts with
+`{ticket}`; default `{ticket}\Attachments`), `workFolders`, `abbreviations`, `stopWords`, `prefix`... Look up names and defaults in
 `src\settings.default.json`. Do not set `modules`, `types` or `knowledge` here, because they are built from `areas`,
 `taskTypes` and `categories`.
 
@@ -111,6 +134,7 @@ Any engine setting the pack wants to set: `phases`, `commonQuestions`, `baseChec
   "phases": [ { "name": "Not started", "percent": 0 }, { "name": "In progress", "percent": 50 }, { "name": "Done", "percent": 100 } ],
   "ticketFolders": ["01_Notes", "02_Files", "03_Protocols"],
   "saveTargets": [ { "name": "Protocol or guideline", "path": "{ticket}\\03_Protocols", "prefix": false } ],
+  "attachmentsPath": "{ticket}\\01_Notes\\Attachments",
   "abbreviations": { "MEDICATION": "MED", "HANDOVER": "HO" }
 }
 ```
