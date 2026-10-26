@@ -30,10 +30,10 @@ TL1 notes: the page already indexes save places per task (`taskLayout(t)` in the
 
 ## Phase 3: Page - versions and attachments (board TL3) - needs TL1, TL2
 
-- [ ] T013 [US2] Version dialog before save (save panel upload + pasted script, Attach): families list, guess, note, apply-to-all, name clash -> version/rename; Cancel writes nothing (`src/dashboard_template.html`)
-- [ ] T014 [US3] Attachments area accepts pasted text (name box, `.sql` guess) in the New task dialog and on the task page; New task dialog uses the type's attachments folder and says where files go
-- [ ] T015 [US6] Task files list grouped by place and family; latest first with note; "older versions (n)" folded
-- [ ] T016 Browser check light / dark / 390 px of the three areas; no console errors
+- [X] T013 [US2] Version dialog before save (save panel upload + pasted script, Attach): families list, guess, note, apply-to-all, name clash -> version/rename; Cancel writes nothing (`src/dashboard_template.html`) (94fa587)
+- [X] T014 [US3] Attachments area accepts pasted text (name box, `.sql` guess) in the New task dialog and on the task page; New task dialog uses the type's attachments folder and says where files go (94fa587)
+- [X] T015 [US6] Task files list grouped by place and family; latest first with note; "older versions (n)" folded (94fa587)
+- [X] T016 Browser check light / dark / 390 px of the three areas; no console errors (94fa587)
 
 ## Phase 4: Settings type editor (board TL4) - needs TL1
 
