@@ -1,0 +1,224 @@
+# Pester 3.x tests for spec 005: task-type layouts (folders, save places, attachments folder, general lists on/off)
+# and file versions (Save-SnFile -VersionOf / -AsNew / -Note, Get-SnFileFamilies).
+# Run:  Invoke-Pester D:\Projects\Stranote\tests
+# Every test runs on a throw-away work root with a test pack (copy of packs/general.json + a 'Data pull' type with
+# its own layout); the guard refuses to run if the config root is not under %TEMP%.
+
+$here = Split-Path -Parent $MyInvocation.MyCommand.Path
+Import-Module (Join-Path $here '..\src\Stranote.psm1') -Force -DisableNameChecking
+. (Join-Path $here 'StranoteTestHelpers.ps1')
+$packs = Join-Path $here '..\packs'
+
+function New-LayoutType {
+    [pscustomobject]@{
+        name = 'Data pull'
+        useBaseChecklist = $false; useCommonQuestions = $false
+        folders = @('01_From_Requester', '02_Scripts', '03_Data')
+        attachmentsPath = '{ticket}\01_From_Requester'
+        saveTargets = @(
+            [pscustomobject]@{ name = 'Query script'; path = '{ticket}\02_Scripts'; prefix = $false; versioned = $true }
+            [pscustomobject]@{ name = 'Data sheet'; path = '{ticket}\03_Data'; prefix = $false; versioned = $true }
+            [pscustomobject]@{ name = 'From requester'; path = '{ticket}\01_From_Requester'; prefix = $false }
+        )
+        questions = @(
+            [pscustomobject]@{ k = 'need'; q = 'What data is needed'; kind = 'long'; required = $true }
+            [pscustomobject]@{ k = 'filters'; q = 'Filters'; kind = 'long'; askIfBlank = 'Which filters?' }
+            [pscustomobject]@{ k = 'reqFiles'; q = 'Their files'; kind = 'files' }
+        )
+        openQuestions = @('Is the source allowed?')
+        checklist = @('Need confirmed', 'Data sent')
+        objects = @()
+    }
+}
+
+function Initialize-LayoutEnv {
+    $root = New-SnTestEnv
+    $cfgRoot = [IO.Path]::GetFullPath((Get-SnConfig).root)
+    if (-not $cfgRoot.StartsWith([IO.Path]::GetFullPath($env:TEMP), [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Test env is not isolated: config root is '$cfgRoot'. Refusing to write."
+    }
+    $pk = [IO.File]::ReadAllText((Join-Path $packs 'general.json')) | ConvertFrom-Json
+    $pk.id = 'test-layout'
+    $pk.taskTypes = @(@($pk.taskTypes) + (New-LayoutType))
+    $pdir = Join-Path $env:STRANOTE_LEARN_DIR 'packs'; New-Item -ItemType Directory -Force $pdir | Out-Null
+    [IO.File]::WriteAllText((Join-Path $pdir 'test-layout.json'), ($pk | ConvertTo-Json -Depth 20), (New-Object Text.UTF8Encoding $false))
+    Save-SnProfile -SnProfile ([pscustomobject]@{ schemaVersion = 1; roles = @([pscustomobject]@{ id = 'r1'; packId = 'test-layout' }) }) | Out-Null
+    return $root
+}
+
+function Get-LayoutErrors($Type) { & (Get-Module Stranote) { param($t) Get-SnLayoutErrors $t } $Type }
+function Get-Family([string]$Name) { & (Get-Module Stranote) { param($n) Get-SnFileFamily $n } $Name }
+function Get-Layout($TypeName) { & (Get-Module Stranote) { param($n) $s = Get-SnSettings; Get-SnTypeLayout $s (Get-TypeDef $s $n) } $TypeName }
+function Get-Targets($Task) { & (Get-Module Stranote) { param($t) @(Get-SnTaskTargets $t) } $Task }
+function New-B64([string]$Text) { [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($Text)) }
+
+Describe 'Type layout validation' {
+    It 'accepts the layout type and types without layout fields' {
+        @(Get-LayoutErrors (New-LayoutType)).Count | Should Be 0
+        @(Get-LayoutErrors ([pscustomobject]@{ name = 'Task'; checklist = @('x') })).Count | Should Be 0
+    }
+    It 'refuses unsafe or duplicate folders, places outside the task folder and non-bool switches' {
+        $t = New-LayoutType
+        $t.folders = @('01_A', '..\x', '01_a')
+        $t.saveTargets = @([pscustomobject]@{ name = 'Out'; path = '04_Knowledge\x' }, [pscustomobject]@{ name = 'V'; path = '{ticket}\x'; versioned = 'yes' }, [pscustomobject]@{ name = ''; path = '{ticket}\y' })
+        $t.attachmentsPath = 'C:\x'
+        $t.useBaseChecklist = 'no'
+        $e = @(Get-LayoutErrors $t) -join ' | '
+        $e | Should Match "folder '\.\.\\x' is not a valid relative folder name"
+        $e | Should Match 'folders must be unique'
+        $e | Should Match "save place 'Out' must start with \{ticket\}"
+        $e | Should Match "save place 'V': versioned must be true or false"
+        $e | Should Match 'save place 3 has no name'
+        $e | Should Match 'attachments folder must start with \{ticket\}'
+        $e | Should Match 'useBaseChecklist must be true or false'
+    }
+    It 'Test-SnPack reports layout errors with the task type path' {
+        $pk = [IO.File]::ReadAllText((Join-Path $packs 'general.json')) | ConvertFrom-Json
+        $bad = New-LayoutType; $bad.folders = @('C:\x')
+        $pk.taskTypes = @(@($pk.taskTypes) + $bad)
+        $r = Test-SnPack -Pack $pk
+        $r.ok | Should Be $false
+        (@($r.errors) -join ' | ') | Should Match "taskTypes\[6\]: Type 'Data pull' folder 'C:\\x'"
+    }
+    It 'every shipped pack still loads' {
+        foreach ($f in Get-ChildItem $packs -Filter '*.json') { $r = Test-SnPack -Path $f.FullName; ((@($r.errors) -join '; ') + "|$($f.Name)") | Should Be "|$($f.Name)" }
+    }
+}
+
+Describe 'Tasks with and without a type layout' {
+    $root = $null
+    BeforeEach { $root = Initialize-LayoutEnv }
+    AfterEach { Remove-SnTestEnv $root }
+
+    It 'a layout type gets only its folders, its checklist and its questions' {
+        $r = New-SnTask -NonInteractive -Id 'D-1' -Title 'Invoices on hold' -Type 'Data pull' -Details @{ need = 'All held invoices' }
+        @(Get-ChildItem $r.Folder -Directory | ForEach-Object { $_.Name } | Sort-Object) -join ',' | Should Be '01_From_Requester,02_Scripts,03_Data'
+        $t = Find-SnTask 'D-1'
+        @($t.checklist | ForEach-Object { $_.item }) -join '|' | Should Be 'Need confirmed|Data sent'
+        @($t.questions | ForEach-Object { $_.q }) -join '|' | Should Be 'Is the source allowed?|Which filters?'
+    }
+    It 'a type without a layout gives the same folders, checklist and questions as before' {
+        $r = New-SnTask -NonInteractive -Id 'T-1' -Title 'Plain' -Type 'Task'
+        $pk = [IO.File]::ReadAllText((Join-Path $packs 'general.json')) | ConvertFrom-Json
+        $type = @($pk.taskTypes | Where-Object { $_.name -eq 'Task' })[0]
+        @(Get-ChildItem $r.Folder -Directory | ForEach-Object { $_.Name } | Sort-Object) -join ',' | Should Be ((@($pk.settings.ticketFolders) | Sort-Object) -join ',')
+        $t = Find-SnTask 'T-1'
+        @($t.checklist | ForEach-Object { $_.item }) -join '|' | Should Be ((@($type.checklist) + @($pk.settings.baseChecklist) | Where-Object { "$_".Trim() }) -join '|')
+        @($t.questions | ForEach-Object { $_.q }) -join '|' | Should Be ((@($type.openQuestions) + @($pk.settings.commonQuestions) | Where-Object { "$_".Trim() }) -join '|')
+    }
+    It 'resolves save places per task: the type places + general places outside the task folder' {
+        New-SnTask -NonInteractive -Id 'D-2' -Title 'x' -Type 'Data pull' -Details @{ need = 'x' } | Out-Null
+        New-SnTask -NonInteractive -Id 'T-2' -Title 'x' -Type 'Task' | Out-Null
+        @(Get-Targets (Find-SnTask 'D-2') | ForEach-Object { $_.name }) -join '|' | Should Be 'Query script|Data sheet|From requester|How-to (Knowledge base)|Template (Knowledge base)|Certificate or admin file'
+        $pk = [IO.File]::ReadAllText((Join-Path $packs 'general.json')) | ConvertFrom-Json
+        @(Get-Targets (Find-SnTask 'T-2') | ForEach-Object { $_.name }) -join '|' | Should Be (@($pk.settings.saveTargets | ForEach-Object { $_.name }) -join '|')
+        (Save-SnFile -Id 'D-2' -Target 3 -FileName 'howto.md' -Text 'x').relative | Should Be '04_Knowledge\HowTo\howto.md'
+        (Save-SnFile -Id 'D-2' -Target 2 -FileName 'their.sql' -Text 'x').relative | Should Match 'D-2.*\\01_From_Requester\\their\.sql$'
+        { Save-SnFile -Id 'D-2' -Target 6 -FileName 'x.txt' -Text 'x' } | Should Throw 'Unknown save destination'
+    }
+    It 'attachments of a layout type go to its own folder; others keep the general place' {
+        $src = Join-Path $root 'shot.png'; [IO.File]::WriteAllBytes($src, [byte[]](1, 2))
+        $r = New-SnTask -NonInteractive -Id 'D-3' -Title 'x' -Type 'Data pull' -Details @{ need = 'x' } -Attach @("reqFiles=$src")
+        $r.Attached | Should Be 1
+        Test-Path (Join-Path $r.Folder '01_From_Requester\shot.png') | Should Be $true
+        (Get-SnTaskFiles -Id 'D-3').attachDir | Should Be '01_From_Requester'
+        New-SnTask -NonInteractive -Id 'T-3' -Title 'x' -Type 'Task' | Out-Null
+        (Get-SnTaskFiles -Id 'T-3').attachDir | Should Be '01_Notes\Attachments'
+    }
+    It 'Settings save keeps every layout field and refuses a broken one' {
+        Save-SnSettings -Settings (Get-SnSettings) | Out-Null
+        Save-SnSettings -Settings (Get-SnSettings) | Out-Null
+        $l = Get-Layout 'Data pull'
+        @($l.folders) -join ',' | Should Be '01_From_Requester,02_Scripts,03_Data'
+        $l.attachmentsPath | Should Be '{ticket}\01_From_Requester'
+        $l.useBaseChecklist | Should Be $false
+        @($l.saveTargets | Where-Object { $_.versioned -eq $true }).Count | Should Be 2
+        $s = Get-SnSettings
+        @($s.types | Where-Object { $_.name -eq 'Data pull' })[0].folders = @('..\up')
+        { Save-SnSettings -Settings $s } | Should Throw "folder '..\up' is not a valid relative folder name."
+    }
+    It 'creating folders for active tickets uses each task type layout' {
+        $r = New-SnTask -NonInteractive -Id 'D-4' -Title 'x' -Type 'Data pull' -Details @{ need = 'x' }
+        Save-SnSettings -Settings (Get-SnSettings) -ApplyToActiveTickets | Out-Null
+        Test-Path (Join-Path $r.Folder '01_Notes') | Should Be $false
+    }
+    It 'sends resolved layouts to the page and keeps plain save places as before' {
+        $m = Get-SnMeta
+        @($m.typeLayouts['Data pull'].saveTargets)[0].versioned | Should Be $true
+        @($m.typeLayouts['Data pull'].folders).Count | Should Be 3
+        $m.typeLayouts['Task'].useBaseChecklist | Should Be $true
+        @($m.saveTargets[0].PSObject.Properties.Name) -join ',' | Should Be 'name,path,prefix'
+    }
+}
+
+Describe 'File families and versions' {
+    $root = $null
+    BeforeEach { $root = Initialize-LayoutEnv }
+    AfterEach { Remove-SnTestEnv $root }
+
+    It 'reads family and version from file names' {
+        $f = Get-Family 'query.sql'; "$($f.family)|$($f.version)|$($f.ext)" | Should Be 'query|1|.sql'
+        $f = Get-Family 'query_v2.sql'; "$($f.family)|$($f.version)" | Should Be 'query|2'
+        $f = Get-Family 'report_v7.XLSX'; "$($f.family)|$($f.version)|$($f.ext)" | Should Be 'report|7|.XLSX'
+        $f = Get-Family 'a_v2_V3.txt'; "$($f.family)|$($f.version)" | Should Be 'a_v2|3'
+        $f = Get-Family '_v2.txt'; "$($f.family)|$($f.version)" | Should Be '_v2|1'
+        $f = Get-Family 'v_v0.txt'; "$($f.family)|$($f.version)" | Should Be 'v_v0|1'
+    }
+    It 'a versioned place names the first file _v1 and a new version _v2 under the family name' {
+        New-SnTask -NonInteractive -Id 'V-1' -Title 'x' -Type 'Data pull' -Details @{ need = 'x' } | Out-Null
+        $a = Save-SnFile -Id 'V-1' -Target 1 -FileName 'AP_holds.xlsx' -Base64 (New-B64 'one')
+        [IO.Path]::GetFileName($a.path) | Should Be 'AP_holds_v1.xlsx'
+        $b = Save-SnFile -Id 'V-1' -Target 1 -FileName 'Book1.xlsx' -Base64 (New-B64 'two') -VersionOf 'AP_holds' -Note "added`r`nsupplier site"
+        [IO.Path]::GetFileName($b.path) | Should Be 'AP_holds_v2.xlsx'
+        "$($b.family)|$($b.version)" | Should Be 'AP_holds|2'
+        [IO.File]::ReadAllText($a.path) | Should Be 'one'
+        $t = Find-SnTask 'V-1'
+        $rec = @($t.files)[-1]
+        "$($rec.family)|$($rec.version)|$($rec.note)|$($rec.original)" | Should Be 'AP_holds|2|added supplier site|'
+        $rec.follows | Should Be $a.relative
+        [IO.File]::ReadAllText((Join-Path $t._path '_NOTES.md')) | Should Match 'AP_holds_v2\.xlsx  \(Data sheet\) \| version 2 of AP_holds \| added supplier site'
+    }
+    It 'a new version takes the extension of the new file and never overwrites' {
+        New-SnTask -NonInteractive -Id 'V-2' -Title 'x' -Type 'Data pull' -Details @{ need = 'x' } | Out-Null
+        Save-SnFile -Id 'V-2' -Target 0 -FileName 'q.sql' -Text 'select 1' | Out-Null
+        $dir = Join-Path (Find-SnTask 'V-2')._path '02_Scripts'
+        [IO.File]::WriteAllText((Join-Path $dir 'q_v3.txt'), 'planted')
+        $r = Save-SnFile -Id 'V-2' -Target 0 -FileName 'new.txt' -Text 'select 2' -VersionOf 'Q'
+        [IO.Path]::GetFileName($r.path) | Should Be 'q_v4.txt'
+        [IO.File]::ReadAllText((Join-Path $dir 'q_v3.txt')) | Should Be 'planted'
+    }
+    It '-AsNew refuses a taken name; no flag keeps the old free-name rule' {
+        New-SnTask -NonInteractive -Id 'V-3' -Title 'x' -Type 'Task' | Out-Null
+        Save-SnFile -Id 'V-3' -Target 1 -FileName 'a.txt' -Text '1' | Out-Null
+        { Save-SnFile -Id 'V-3' -Target 1 -FileName 'a.txt' -Text '2' -AsNew } | Should Throw "A file named 'a.txt' is already here"
+        [IO.Path]::GetFileName((Save-SnFile -Id 'V-3' -Target 1 -FileName 'a.txt' -Text '2').path) | Should Be 'a_v2.txt'
+        [IO.Path]::GetFileName((Save-SnFile -Id 'V-3' -Target 1 -FileName 'b.txt' -Text '1' -AsNew).path) | Should Be 'b.txt'
+        { Save-SnFile -Id 'V-3' -Target 1 -FileName 'c.txt' -Text '1' -VersionOf 'nothing' } | Should Throw "There is no file 'nothing'"
+        { Save-SnFile -Id 'V-3' -Target 1 -FileName 'c.txt' -Text '1' -VersionOf 'a' -AsNew } | Should Throw 'not both'
+    }
+    It 'lists families newest first, old plain + _v2 names as one family, Arabic names kept' {
+        New-SnTask -NonInteractive -Id 'V-4' -Title 'x' -Type 'Task' | Out-Null
+        $dir = Join-Path (Find-SnTask 'V-4')._path '02_Files'
+        $ar = -join ([char[]](0x062A, 0x0642, 0x0631, 0x064A, 0x0631))
+        [IO.File]::WriteAllText((Join-Path $dir 'query.sql'), '1'); (Get-Item (Join-Path $dir 'query.sql')).LastWriteTime = (Get-Date).AddHours(-3)
+        [IO.File]::WriteAllText((Join-Path $dir 'query_v2.sql'), '2'); (Get-Item (Join-Path $dir 'query_v2.sql')).LastWriteTime = (Get-Date).AddHours(-2)
+        [IO.File]::WriteAllText((Join-Path $dir "$ar.txt"), '3')
+        $r = Get-SnFileFamilies -Id 'V-4' -Target 1
+        $r.dir | Should Match 'V-4.*\\02_Files$'
+        $r.versioned | Should Be $false
+        @($r.families).Count | Should Be 2
+        $r.families[0].family | Should Be $ar
+        "$($r.families[1].family)|$($r.families[1].latest)|$($r.families[1].version)|$($r.families[1].versions)" | Should Be 'query|query_v2.sql|2|2'
+        $v = Save-SnFile -Id 'V-4' -Target 1 -FileName 'x.sql' -Text '3' -VersionOf 'query'
+        [IO.Path]::GetFileName($v.path) | Should Be 'query_v3.sql'
+    }
+    It 'lists families of the attachments place and of an empty folder' {
+        New-SnTask -NonInteractive -Id 'V-5' -Title 'x' -Type 'Data pull' -Details @{ need = 'x' } | Out-Null
+        @((Get-SnFileFamilies -Id 'V-5' -Attachment).families).Count | Should Be 0
+        Save-SnFile -Id 'V-5' -Attachment -FileName 'their.sql' -Text 'x' | Out-Null
+        $r = Get-SnFileFamilies -Id 'V-5' -Attachment
+        $r.dir | Should Match '01_From_Requester$'
+        @($r.families).Count | Should Be 1
+        (Get-SnFileFamilies -Id 'V-5' -Target 1).versioned | Should Be $true
+    }
+}

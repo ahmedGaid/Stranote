@@ -8,16 +8,18 @@ when done. Each phase maps to a board row.
 
 ## Phase 1: Engine (board TL1) - blocks everything else
 
-- [ ] T001 [US1] Validate the type layout fields and `versioned` in the pack loader (`src/StranotePacks.ps1`, task-type block) per the contract, path-style messages
-- [ ] T002 [US1] Same validation for `types` / `saveTargets` in `Assert-SnSettings` (`src/StranoteCore.ps1`)
-- [ ] T003 [US1] `Get-SnTypeLayout($s, $typeDef)` resolver with field-by-field fallback (`src/StranoteCore.ps1`)
-- [ ] T004 [US1] `New-SnTask` uses it: type folders instead of `ticketFolders`; skip `baseChecklist` / `commonQuestions` when turned off; terminal path the same
-- [ ] T005 [US3] `Get-SnTaskTargets($task)` (type targets + general non-`{ticket}` targets); `Resolve-SnTarget`, `Get-SnTargetFolders` use it; `Resolve-SnAttachDir` reads the type's `attachmentsPath`
-- [ ] T006 [US2] `Get-SnFileFamily` (name rule) + `Get-SnFileFamilies -Id [-Target|-Attachment] [-SubFolder]`
-- [ ] T007 [US2] `Save-SnFile -VersionOf -AsNew -Note`: next version, `_v1` for the first file in a versioned place, refuse `-AsNew` on an existing name, record `family/version/follows/note`, `_NOTES.md` line; no flag = today's rule
-- [ ] T008 [US2] Server: `GET /api/families`; `/api/savefile` passes `versionOf` / `asNew` / `note`; `Get-SnMeta` sends layouts and per-task targets (`src/StranoteServer.ps1`, `src/StranoteCore.ps1`)
-- [ ] T009 [P] Pointer rows in `specs/001-career-packs-onboarding/contracts/pack-schema.md` -> `contracts/type-layout.md`
-- [ ] T010 [P] [US1] `tests/StranoteLayout.Tests.ps1` (Pester 3.4, temp data): validation errors; resolver fallback; New-SnTask with layout vs without (same as before, SC-004); targets list identical for types without `saveTargets`; family parsing (`x`, `x_v2`, `report_v7`, Arabic); versions, `_v1`, never overwrite, `-AsNew` refused; record fields; settings round-trip; no EBS words in template/engine
+- [X] T001 [US1] Validate the type layout fields and `versioned` in the pack loader (`src/StranotePacks.ps1`, task-type block) per the contract, path-style messages (f8b3b77)
+- [X] T002 [US1] Same validation for `types` / `saveTargets` in `Assert-SnSettings` (`src/StranoteCore.ps1`) (f8b3b77)
+- [X] T003 [US1] `Get-SnTypeLayout($s, $typeDef)` resolver with field-by-field fallback (`src/StranoteCore.ps1`) (f8b3b77)
+- [X] T004 [US1] `New-SnTask` uses it: type folders instead of `ticketFolders`; skip `baseChecklist` / `commonQuestions` when turned off; terminal path the same (f8b3b77)
+- [X] T005 [US3] `Get-SnTaskTargets($task)` (type targets + general non-`{ticket}` targets); `Resolve-SnTarget`, `Get-SnTargetFolders` use it; `Resolve-SnAttachDir` reads the type's `attachmentsPath` (f8b3b77)
+- [X] T006 [US2] `Get-SnFileFamily` (name rule) + `Get-SnFileFamilies -Id [-Target|-Attachment] [-SubFolder]` (f8b3b77)
+- [X] T007 [US2] `Save-SnFile -VersionOf -AsNew -Note`: next version, `_v1` for the first file in a versioned place, refuse `-AsNew` on an existing name, record `family/version/follows/note`, `_NOTES.md` line; no flag = today's rule (f8b3b77)
+- [X] T008 [US2] Server: `GET /api/families`; `/api/savefile` passes `versionOf` / `asNew` / `note`; `Get-SnMeta` sends layouts and per-task targets (`src/StranoteServer.ps1`, `src/StranoteCore.ps1`) (f8b3b77)
+- [X] T009 [P] Pointer rows in `specs/001-career-packs-onboarding/contracts/pack-schema.md` -> `contracts/type-layout.md` (f8b3b77)
+- [X] T010 [P] [US1] `tests/StranoteLayout.Tests.ps1` (Pester 3.4, temp data): validation errors; resolver fallback; New-SnTask with layout vs without (same as before, SC-004); targets list identical for types without `saveTargets`; family parsing (`x`, `x_v2`, `report_v7`, Arabic); versions, `_v1`, never overwrite, `-AsNew` refused; record fields; settings round-trip; no EBS words in template/engine (f8b3b77)
+
+TL1 notes: the page already indexes save places per task (`taskLayout(t)` in the template, needed once a type has its own places). For TL4: the general save-destination editor rebuilds each place as name/path/prefix and would drop `versioned`; keep it there too.
 
 **Checkpoint**: a test pack with a layout type creates the right folders/checklist from the terminal; versions saved by parameter.
 

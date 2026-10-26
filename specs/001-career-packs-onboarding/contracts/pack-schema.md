@@ -43,7 +43,7 @@ Minimal valid pack:
 1. `schemaVersion` = 1; `id` matches `^[a-z0-9]+(-[a-z0-9]+)*$` and the file name.
 2. `areas[].id` unique; every `areas[].category` exists in `categories[].id`.
 3. `taskTypes[].name` unique; `checklist` items non-empty strings; intake fields and `variants` as in spec 004's
-   `contracts/intake-fields.md`.
+   `contracts/intake-fields.md`; layout fields as in spec 005's `contracts/type-layout.md`.
 4. `extractors[].pattern` compiles as .NET regex, has a `key` group (`pkg` + `member` for `api`), and runs over a 50 KB sample in < 250 ms (200 ms match timeout). Guide: `docs/pack-authoring.md`.
 5. `extractors[].kind` in `api | table | term | decision | answer`.
 6. `starterLessons[]` pass `Set-SnLesson` validation (check questions mcq/tf only).
@@ -63,10 +63,13 @@ default: "Technical" }`. A card's category = `byKind[card.kind]`, else the categ
 **taskTypes**: same shape as the old `settings.types` (`name`, `questions[{k,q,d}]`, `openQuestions[]`,
 `checklist[]`, `objects[]`). Optional intake fields on questions (`kind`, `options`, `required`, `when`,
 `askIfBlank`, `sub`) and `variants[]` per type (spec 004): see
-`specs/004-task-attachments-report-intake/contracts/intake-fields.md`; validated by rule 3.
+`specs/004-task-attachments-report-intake/contracts/intake-fields.md`; validated by rule 3. Optional layout fields
+per type (`folders`, `saveTargets` with `versioned`, `attachmentsPath`, `useBaseChecklist`, `useCommonQuestions`;
+spec 005): see `specs/005-task-type-layouts-versions/contracts/type-layout.md`; validated by rule 3.
 
 **settings**: any engine setting the pack provides (phases, folders, saveTargets, abbreviations, prefix...).
 `attachmentsPath` (spec 004): where attachments go inside the task folder, starts with `{ticket}`.
+`saveTargets[].versioned` (spec 005, optional): the first file of a family in that place is saved as `<name>_v1`.
 `modules`, `types` and `knowledge` are derived from `areas`, `taskTypes`, `categories` and `categoryRules`.
 
 **Extractors** (code kinds `api`/`table`; word kind `term`, T037):

@@ -117,6 +117,11 @@ while ($listener.IsListening) {
                 '/api/plan' { Send $ctx 200 (Get-SnPlan | ConvertTo-Json -Depth 6 -Compress) }
                 '/api/suggest' { Send $ctx 200 (Get-SnSuggestions -Id $req.QueryString['id'] | ConvertTo-Json -Depth 5 -Compress) }
                 '/api/files' { Send $ctx 200 (Get-SnTaskFiles -Id $req.QueryString['id'] | ConvertTo-Json -Depth 5 -Compress) }
+                '/api/families' {
+                    $q = $req.QueryString
+                    $r = Get-SnFileFamilies -Id $q['id'] -Target ([int]$q['target']) -SubFolder "$($q['sub'])" -Attachment:($q['attachment'] -eq '1') -Question "$($q['question'])"
+                    Send $ctx 200 ($r | ConvertTo-Json -Depth 5 -Compress)
+                }
                 '/api/targetfolders' { Send $ctx 200 (Get-SnTargetFolders -Id $req.QueryString['id'] -Target ([int]$req.QueryString['target']) | ConvertTo-Json -Depth 4 -Compress) }
                 default      { Send $ctx 404 '{"error":"not found"}' }
             }
@@ -182,7 +187,8 @@ while ($listener.IsListening) {
             '/api/savefile' {
                 $p = @{ Id = (Str $b.id); Target = [int]$b.target; SubFolder = (Str $b.subFolder); FileName = (Str $b.fileName)
                         AddPrefix = [bool]$b.addPrefix; AddHeader = [bool]$b.addHeader; Purpose = (Str $b.purpose)
-                        Attachment = [bool]$b.attachment; Question = (Str $b.question) }
+                        Attachment = [bool]$b.attachment; Question = (Str $b.question)
+                        VersionOf = (Str $b.versionOf); AsNew = [bool]$b.asNew; Note = (Str $b.note) }
                 if ($null -ne $b.text) { $p.Text = [string]$b.text } else { $p.Base64 = [string]$b.base64 }
                 $r = Save-SnFile @p
                 Send $ctx 200 ($r | ConvertTo-Json -Compress)
