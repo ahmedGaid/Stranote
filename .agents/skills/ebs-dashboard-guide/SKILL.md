@@ -57,16 +57,23 @@ type's checklist. If the module can't be loaded, still give the guide (EBS user:
 | 2 | `install_sec_rule.sql` | Deployment script | - | Paste (numbered automatically) |
 
 Rules for this table:
+- Destinations are per task type: use the names in `typeLayouts.<Type>.saveTargets` exactly (they differ for types with
+  their own layout, e.g. Data request).
 - Use destination names exactly as in `saveTargets`. Mention **numbered** for destinations with `prefix=true` - the user types the plain name, the dashboard adds `<ID>_NN_`.
 - EBS pack: production objects (packages, tables, views, ldt, rdf, BIP templates, ctl, shell, wft) go to the **repo** with the right sub-folder; scratch/test calls go to **Task script**; install, rollback and data-fix scripts go to **Deployment script** in run order; screenshots/outputs of *your tests* go to **Test evidence**.
 - Input from the business (their screenshots, emails, sample or wrong outputs, mockups of the expected result) is an
   **attachment**, not a save destination: task page > **+ Attach** (sub-folder `Problem` / `Expected` for a Report fix),
   saved in `<ticket>\01_Requirements\Attachments`. Write "Attach" in the destination column for these rows.
+- **Data request** (a consultant asked for data by SQL): the query goes to **Query script** (`02_Scripts`), the
+  sheet you send to **Data sheet** (`03_Data`), their own scripts / screenshots are an **Attach** row
+  (`01_From_Requester`). When the folder already has that query or sheet, write *"new version of `<family>`"* in the
+  How column (e.g. `AP_holds_query_v2.sql`) with a one-line "what changed"; the dashboard asks the same question on save.
 - Something reusable (a clean API call example)? Add a row for **Reusable snippet** too.
 - EBS pack: if an object you wrote depends on setup that you did not write (concurrent program, value set, request group, lookup, profile, grants/synonyms), still list it as a row marked *"to create - extract with FNDLOAD"* so the user doesn't forget it. Give the FNDLOAD command in the code section of your answer, not in the table.
 
 **Update progress** (same card > *Update progress* > **Save update**):
-- Phase: `<phase from settings>` - percent fills in automatically (or give a number)
+- Phase: `<a phase of the task's type>` (`typeLayouts.<Type>.phases`; Data request: Requested / Query written / Data
+  sent / Confirmed) - percent fills in automatically (or give a number)
 - Note: one line describing what was done (write it for them)
 - Tick: the checklist items this work completes, by their exact text (and number from `Show-SnTask` if known)
 - Answer: open questions this work answers, with the answer
@@ -85,7 +92,9 @@ End with exactly one offer line:
 Use the module directly (same rules as the `ebs-task` skill):
 - New task: `New-SnTask -NonInteractive ...` with the values from your table.
 - Files: `Save-SnFile -Id <ID> -Target <index in saveTargets> -SubFolder '<sub>' -FileName '<name>' -Text $content [-AddPrefix] [-AddHeader -Purpose '...']`
-  (`-AddPrefix` when that destination has `prefix=true`; save in the run order of the table).
+  (`-AddPrefix` when that destination has `prefix=true`; save in the run order of the table). A new version of a file
+  already there: `-VersionOf '<family>' -Note '<what changed>'` (check with `Get-SnFileFamilies -Id <ID> -Target <n>`);
+  a new file: `-AsNew`. Never overwrite.
 - Progress: `Update-SnTask -Id <ID> -Phase ... -Note '...' -Check <n,...> -Answers @{ '<n>' = '...' }`.
 - Cards / CV bullet: `Set-SnCard ...` and `Add-SnCvBullet ...` as described in the `stranote-learn` skill.
 - Then reply with the IDs/paths created, and remind them the dashboard card shows everything (refresh the page).

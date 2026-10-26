@@ -65,6 +65,18 @@ $meta = Get-SnMeta           # modules (= the pack's areas), types, priorities, 
      -Attach @('problemFiles=C:\Users\me\Downloads\aging_output.xlsx', 'C:\Users\me\Downloads\email.msg')
    ```
    Check `AttachFailed` in the result and tell the user which files were not saved.
+   **Data request** (EBS technical pack: a consultant asks for data from the DB by SQL): ask what data and why
+   (`need`, required), instance, OU / ledger, filters, columns, output (`output` choice) and one time or recurring
+   (`repeat` choice); their scripts / screenshots / sample sheets go in `-Attach` (they land in `01_From_Requester`).
+   The task gets only the folders `01_From_Requester`, `02_Scripts`, `03_Data`, its own 6-item checklist (no
+   MD050 / UAT / deploy items) and its own phases (Requested, Query written, Data sent, Confirmed, On Hold, Done).
+   ```powershell
+   New-SnTask -NonInteractive -Title 'AP invoices on hold' -Module AP -Type 'Data request' -Requester '...' `
+     -Details @{ need='All AP invoices on hold for one OU since July'; instance='PROD'; scope='OU Cairo'; output='Excel sheet' } `
+     -Attach @('C:\Users\me\Downloads\their_query.sql', 'C:\Users\me\Downloads\screen.png')
+   ```
+   Any type can have its own layout (`folders`, `saveTargets`, `attachmentsPath`, `useBaseChecklist`,
+   `useCommonQuestions`, `phases`; see `(Get-SnMeta).typeLayouts.<Type>`); `New-SnTask` applies it by itself.
 5. Report back briefly: folder created, proposed object names, the open questions to take to the business, and suggest the first step.
 
 ## Progress update
@@ -73,7 +85,7 @@ Map the user's words to parameters, then run `Update-SnTask`:
 
 | User says | Parameter |
 |---|---|
-| "moved to testing", "in UAT" | `-Phase` one of `$meta.phases` (EBS: Requirements/Design/Development/Testing/UAT/Deployment/On Hold/Done) |
+| "moved to testing", "in UAT" | `-Phase` one of the task type's phases: `$meta.typeLayouts.<Type>.phases` (EBS: Requirements/Design/Development/Testing/UAT/Deployment/On Hold/Done; Data request: Requested/Query written/Data sent/Confirmed/On Hold/Done) |
 | "about 60%" | `-Percent 60` (omit to auto-set from phase) |
 | what they did | `-Note '...'` |
 | "blocked by DBA / waiting for ..." | `-Blocker '...'`; "unblocked" -> `-ClearBlocker` |
@@ -88,24 +100,37 @@ If the update is vague, ask one short follow-up (phase? blocker?) before writing
 ## Saving scripts / files for a task
 
 When the user gives you a script or file for a task, save it with `Save-SnFile` (never write into ticket folders by hand).
-Destinations come from settings (`(Get-SnMeta).saveTargets`, index = `-Target`); pick by name, never by a remembered
-index. Other packs have their own list (General: Notes, File or attachment, How-to, Template, Certificate). EBS pack defaults:
+Destinations are per task type: `(Get-SnMeta).typeLayouts.<Type>.saveTargets` (index = `-Target`; the type's own places
+first, then the general ones outside the task folder). Pick by name, never by a remembered index. Other packs have their
+own list (General: Notes, File or attachment, How-to, Template, Certificate). EBS pack defaults:
 0 task script (ticket\03_Dev\API, numbered), 1 deployment script (ticket\05_Deploy, numbered), 2 production code (repo; pass `-SubFolder 'db\packages'` etc.),
 3 reusable snippet (04_Knowledge\SQL_Snippets\<module>), 4 requirements, 5 design, 6 test evidence.
+Data request: Query script (`02_Scripts`, versioned), Data sheet (`03_Data`, versioned), From requester, then repo and snippet.
 
 ```powershell
 Save-SnFile -Id 'CR-1042' -Target 0 -FileName 'create_invoice_api.sql' -Text $script -AddPrefix -AddHeader -Purpose '...'
 ```
 Use `-Base64` for binary content. List a task's files with `Get-SnTaskFiles -Id X`.
 
+**Versions** (never overwrite): before saving into a folder that already has files, list them with
+`Get-SnFileFamilies -Id X -Target <n>` (or `-Attachment`) and decide - a changed query or a corrected sheet is a **new
+version**, something else is a **new file**. Ask the user when it is not clear.
+```powershell
+Save-SnFile -Id 'T-0050' -Target 0 -FileName 'q.sql' -Text $sql -VersionOf 'AP_holds_query' -Note 'added supplier site'  # -> AP_holds_query_v3.sql
+Save-SnFile -Id 'T-0050' -Target 1 -FileName 'AP_holds.xlsx' -Base64 $b64 -AsNew   # new file; refused if the name is taken
+```
+Versioned places name the first file `_v1`; a plain name counts as v1. The note goes to the task and `_NOTES.md`.
+
 **Attachments** (screenshots, emails, sample outputs, mockups - input to the work, not deliverables) go to the task's
-attachments folder (`(Get-SnSettings).attachmentsPath`; EBS: `<ticket>\01_Requirements\Attachments`):
+attachments folder (`(Get-SnMeta).typeLayouts.<Type>.attachmentsPath`; EBS: `<ticket>\01_Requirements\Attachments`;
+Data request: `<ticket>\01_From_Requester` - the requester's own scripts and screenshots, kept apart from yours):
 ```powershell
 Save-SnFile -Id 'CR-1042' -Attachment -SourcePath 'C:\Users\me\Downloads\wrong_totals.png' -FileName 'wrong_totals.png' -Question problemFiles
 Save-SnFile -Id 'CR-1042' -Attachment -SubFolder 'Expected' -FileName 'expected.xlsx' -Base64 $b64
 ```
 `-Question <files question key>` uses that question's sub-folder (EBS Report fix: `Problem`, `Expected`). Never
-overwrites (`_v2`), 50 MB per file. In the dashboard: task page > **+ Attach** (drop, choose or paste Ctrl+V).
+overwrites (`_v2`), 50 MB per file. In the dashboard: task page > **+ Attach** (drop, choose, or paste a screenshot or
+text with Ctrl+V); the dashboard asks "new file or new version?" whenever the folder already has files.
 
 ## Other commands
 
