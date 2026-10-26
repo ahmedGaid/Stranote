@@ -13,6 +13,12 @@ function New-LayoutType {
     [pscustomobject]@{
         name = 'Data pull'
         useBaseChecklist = $false; useCommonQuestions = $false
+        phases = @(
+            [pscustomobject]@{ name = 'Requested'; percent = 10; column = 'Not started' }
+            [pscustomobject]@{ name = 'Data sent'; percent = 70; column = 'Review' }
+            [pscustomobject]@{ name = 'On Hold'; percent = $null; column = 'On Hold' }
+            [pscustomobject]@{ name = 'Done'; percent = 100; column = 'Done' }
+        )
         folders = @('01_From_Requester', '02_Scripts', '03_Data')
         attachmentsPath = '{ticket}\01_From_Requester'
         saveTargets = @(
@@ -233,12 +239,97 @@ Describe 'File families and versions' {
     }
 }
 
+function Get-PhaseErrors($Type, [string[]]$General) { & (Get-Module Stranote) { param($t, $g) Get-SnTypePhaseErrors $t $g } $Type $General }
+
+Describe 'Task-type phases' {
+    $general = @('Not started', 'Planning', 'In progress', 'Review', 'On Hold', 'Done')
+    It 'accepts the layout type phases and types without phases' {
+        @(Get-PhaseErrors (New-LayoutType) $general).Count | Should Be 0
+        @(Get-PhaseErrors ([pscustomobject]@{ name = 'Task' }) $general).Count | Should Be 0
+    }
+    It 'refuses a list without Done, unknown columns, moved Done / On Hold, duplicates and bad percents' {
+        $t = [pscustomobject]@{ name = 'X'; phases = @(
+                [pscustomobject]@{ name = 'Sent'; percent = 150; column = 'UAT' }
+                [pscustomobject]@{ name = 'sent'; column = 'Review' }
+                [pscustomobject]@{ name = 'On Hold'; column = 'Review' }
+                [pscustomobject]@{ name = 'Ready'; column = '' }) }
+        $e = @(Get-PhaseErrors $t $general) -join ' | '
+        $e | Should Match "phases must include 'Done'"
+        $e | Should Match "phase 'Sent': column 'UAT' is not one of the phases"
+        $e | Should Match "phase 'Sent' percent must be 0-100"
+        $e | Should Match 'phase names must be unique'
+        $e | Should Match "phase 'On Hold' must use the 'On Hold' column"
+        $e | Should Match "phase 'Ready' needs a board column"
+        $t2 = [pscustomobject]@{ name = 'Y'; phases = @([pscustomobject]@{ name = 'Done'; column = 'Review' }) }
+        $e2 = @(Get-PhaseErrors $t2 $general) -join ' | '
+        $e2 | Should Match 'needs at least one phase besides Done'
+        $e2 | Should Match "phase 'Done' must use the 'Done' column"
+    }
+    It 'Test-SnPack checks columns against the pack phases' {
+        $pk = [IO.File]::ReadAllText((Join-Path $packs 'general.json')) | ConvertFrom-Json
+        $bad = New-LayoutType; $bad.phases[1].column = 'UAT'
+        $pk.taskTypes = @(@($pk.taskTypes) + $bad)
+        (@((Test-SnPack -Pack $pk).errors) -join ' | ') | Should Match "taskTypes\[6\]: Type 'Data pull': phase 'Data sent': column 'UAT'"
+    }
+
+    $root = $null
+    BeforeEach { $root = Initialize-LayoutEnv }
+    AfterEach { Remove-SnTestEnv $root }
+
+    It 'a new task starts in the type first phase and moves only through the type phases' {
+        New-SnTask -NonInteractive -Id 'P-1' -Title 'x' -Type 'Data pull' -Details @{ need = 'x' } | Out-Null
+        (Find-SnTask 'P-1').phase | Should Be 'Requested'
+        Update-SnTask -Id 'P-1' -Phase 'data sent' | Out-Null
+        $t = Find-SnTask 'P-1'
+        "$($t.phase)|$($t.percent)" | Should Be 'Data sent|70'
+        { Update-SnTask -Id 'P-1' -Phase 'Planning' } | Should Throw 'Phase must be one of: Requested, Data sent, On Hold, Done'
+    }
+    It 'a type without phases keeps the general phases' {
+        New-SnTask -NonInteractive -Id 'P-2' -Title 'x' -Type 'Task' | Out-Null
+        (Find-SnTask 'P-2').phase | Should Be 'Not started'
+        Update-SnTask -Id 'P-2' -Phase 'Review' | Out-Null
+        "$((Find-SnTask 'P-2').phase)|$((Find-SnTask 'P-2').percent)" | Should Be 'Review|80'
+    }
+    It 'a task keeps a phase its type no longer has and can still be updated' {
+        New-SnTask -NonInteractive -Id 'P-3' -Title 'x' -Type 'Data pull' -Details @{ need = 'x' } | Out-Null
+        Update-SnTask -Id 'P-3' -Phase 'Data sent' | Out-Null
+        $s = Get-SnSettings
+        $ty = @($s.types | Where-Object { $_.name -eq 'Data pull' })[0]
+        $ty.phases = @(@($ty.phases) | Where-Object { $_.name -ne 'Data sent' })
+        Save-SnSettings -Settings $s | Out-Null
+        (Find-SnTask 'P-3').phase | Should Be 'Data sent'
+        Update-SnTask -Id 'P-3' -Note 'still waiting' | Out-Null
+        Update-SnTask -Id 'P-3' -Phase 'Data sent' -Note 'kept' | Out-Null
+        (Find-SnTask 'P-3').phase | Should Be 'Data sent'
+        Update-SnTask -Id 'P-3' -Phase 'Requested' | Out-Null
+        (Find-SnTask 'P-3').phase | Should Be 'Requested'
+    }
+    It 'tells the page each type phases, percents and board columns' {
+        $m = Get-SnMeta
+        @($m.typeLayouts['Data pull'].phases) -join ',' | Should Be 'Requested,Data sent,On Hold,Done'
+        $m.typeLayouts['Data pull'].phaseColumn.'Data sent' | Should Be 'Review'
+        $m.typeLayouts['Data pull'].phasePct['Data sent'] | Should Be 70
+        $m.typeLayouts['Task'].phaseColumn.'Planning' | Should Be 'Planning'
+        @($m.phases) -join ',' | Should Be 'Not started,Planning,In progress,Review,On Hold,Done'
+    }
+}
+
 Describe 'Shipped EBS technical pack: Data request' {
     $root = New-SnTestEnv
     try {
         Save-SnProfile -SnProfile ([pscustomobject]@{ schemaVersion = 1; roles = @([pscustomobject]@{ id = 'r1'; packId = 'oracle-ebs-technical' }) }) | Out-Null
         $pk = [IO.File]::ReadAllText((Join-Path $packs 'oracle-ebs-technical.json')) | ConvertFrom-Json
 
+        It 'moves through its own short phases, shown in the general board columns' {
+            New-SnTask -NonInteractive -Id 'DR-9' -Title 'Phases' -Type 'Data request' -Details @{ need = 'x' } | Out-Null
+            (Find-SnTask 'DR-9').phase | Should Be 'Requested'
+            Update-SnTask -Id 'DR-9' -Phase 'Data sent' | Out-Null
+            "$((Find-SnTask 'DR-9').phase)|$((Find-SnTask 'DR-9').percent)" | Should Be 'Data sent|70'
+            { Update-SnTask -Id 'DR-9' -Phase 'Design' } | Should Throw 'Phase must be one of'
+            $m = Get-SnMeta
+            $m.typeLayouts['Data request'].phaseColumn.'Data sent' | Should Be 'UAT'
+            @($m.typeLayouts['Report'].phases) -join ',' | Should Be (@($pk.settings.phases | ForEach-Object { $_.name }) -join ',')
+        }
         It 'creates the data folders, its own checklist only and open questions for the gaps' {
             $src = Join-Path $root 'their.sql'; [IO.File]::WriteAllText($src, 'select 1 from dual')
             $r = New-SnTask -NonInteractive -Id 'DR-1' -Title 'Invoices on hold' -Type 'Data request' -Details @{ need = 'All AP invoices on hold' } -Attach @("reqFiles=$src")

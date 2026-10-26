@@ -48,8 +48,8 @@ TL1 notes: the page already indexes save places per task (`taskLayout(t)` in the
 
 ## Phase 6: Per-type phases (board TL6) - needs TL1, TL4 (owner choice Q3-B)
 
-- [ ] T022 [US7] Validate `taskTypes[].phases` (pack loader + `Assert-SnSettings`): `Done` present, unique names, `column` in general phases, percent 0-100 (`src/StranotePacks.ps1`, `src/StranoteCore.ps1`)
-- [ ] T023 [US7] Engine: `Get-PhaseNames` / `Get-PhasePct` take the task type; `New-SnTask` first phase, `Update-SnTask` choices + auto percent (keep the current phase if no longer listed); `Get-SnMeta` sends per-type phases, columns, percents
-- [ ] T024 [US7] Page: update dialog offers the type's phases; board and list place cards by column and show the type phase label (`src/dashboard_template.html`)
-- [ ] T025 [US7] Data request phases in `packs/oracle-ebs-technical.json` (FR-017); Settings type editor phases list (name, %, column), empty = general
-- [ ] T026 [US7] Tests in `tests/StranoteLayout.Tests.ps1`: validation, first phase, update choices, removed phase kept, types without phases unchanged; browser check light / dark / 390 px
+- [X] T022 [US7] Validate `taskTypes[].phases` (pack loader + `Assert-SnSettings`): `Done` present, unique names, `column` in general phases, percent 0-100 (`src/StranotePacks.ps1`, `src/StranoteCore.ps1`) (e686649)
+- [X] T023 [US7] Engine: `Get-PhaseNames` / `Get-PhasePct` take the task type; `New-SnTask` first phase, `Update-SnTask` choices + auto percent (keep the current phase if no longer listed); `Get-SnMeta` sends per-type phases, columns, percents (e686649)
+- [X] T024 [US7] Page: update dialog offers the type's phases; board and list place cards by column and show the type phase label (`src/dashboard_template.html`) (e686649)
+- [X] T025 [US7] Data request phases in `packs/oracle-ebs-technical.json` (FR-017); Settings type editor phases list (name, %, column), empty = general (e686649)
+- [X] T026 [US7] Tests in `tests/StranoteLayout.Tests.ps1`: validation, first phase, update choices, removed phase kept, types without phases unchanged; browser check light / dark / 390 px (e686649)

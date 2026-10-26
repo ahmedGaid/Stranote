@@ -96,7 +96,7 @@ function Assert-SnSettings($s) {
         if (@($keys | Select-Object -Unique).Count -ne $keys.Count) { throw "Type '$($t.name)': question keys must be unique." }
         $ie = @(Get-SnIntakeErrors $t)
         if ($ie.Count) { throw "$($ie[0])." }
-        $le = @(Get-SnLayoutErrors $t)
+        $le = @(Get-SnLayoutErrors $t) + @(Get-SnTypePhaseErrors $t $ph)
         if ($le.Count) { throw "$("$($le[0])".TrimEnd('.'))." }
     }
     if ("$($s.attachmentsPath)") {
@@ -193,12 +193,46 @@ function Get-CurrentCompany($s) {
     return ''
 }
 
-function Get-PhaseNames($s) { return @($s.phases | ForEach-Object { $_.name }) }
+function Get-SnPhaseList($s, $TypeDef) {
+    # the phases of a task type (spec 005): its own list, else the general one; each { name, percent, column }
+    # (column = the general phase = board column it shows in)
+    $own = @(@($TypeDef.phases) | Where-Object { $_ -and "$($_.name)".Trim() })
+    if ($own.Count) { return @($own | ForEach-Object { [pscustomobject]@{ name = "$($_.name)".Trim(); percent = $_.percent; column = "$($_.column)".Trim() } }) }
+    return @(@($s.phases) | Where-Object { $_ } | ForEach-Object { [pscustomobject]@{ name = "$($_.name)"; percent = $_.percent; column = "$($_.name)" } })
+}
 
-function Get-PhasePct($s) {
+function Get-PhaseNames($s, $TypeDef) { return @(Get-SnPhaseList $s $TypeDef | ForEach-Object { $_.name }) }
+
+function Get-PhasePct($s, $TypeDef) {
     $h = @{}
-    foreach ($p in $s.phases) { if ($null -ne $p.percent -and "$($p.percent)" -ne '') { $h[$p.name] = [int]$p.percent } }
+    foreach ($p in @(Get-SnPhaseList $s $TypeDef)) { if ($null -ne $p.percent -and "$($p.percent)" -ne '') { $h[$p.name] = [int]$p.percent } }
     return $h
+}
+
+function Get-SnTypePhaseErrors($Type, [string[]]$General) {
+    <# Errors in a task type's own phases ({ name, percent, column }); empty = valid; a type without phases is valid.
+       'Done' is required (closing a task sets it); 'Done' and 'On Hold' keep their columns; column = a general phase. #>
+    $ps = @(@($Type.phases) | Where-Object { $null -ne $_ })
+    if (-not $ps.Count) { return @() }
+    $errs = @()
+    $at = "Type '$($Type.name)'"
+    $names = @($ps | ForEach-Object { "$($_.name)".Trim() })
+    if (@($names | Where-Object { -not $_ }).Count) { $errs += "${at}: a phase has no name" }
+    if ($names -cnotcontains 'Done') { $errs += "${at}: phases must include 'Done' (used when closing a task)" }
+    if (-not @($names | Where-Object { $_ -and $_ -cne 'Done' }).Count) { $errs += "${at}: needs at least one phase besides Done" }
+    if (@($names | ForEach-Object { $_.ToLower() } | Select-Object -Unique).Count -ne $names.Count) { $errs += "${at}: phase names must be unique" }
+    foreach ($p in $ps) {
+        $n = "$($p.name)".Trim(); $c = "$($p.column)".Trim()
+        if (-not $n) { continue }
+        if (-not $c) { $errs += "${at}: phase '$n' needs a board column" }
+        elseif ($General -cnotcontains $c) { $errs += "${at}: phase '$n': column '$c' is not one of the phases ($($General -join ', '))" }
+        if (@('Done', 'On Hold') -ccontains $n -and $c -cne $n) { $errs += "${at}: phase '$n' must use the '$n' column" }
+        if ($null -ne $p.percent -and "$($p.percent)" -ne '') {
+            $v = 0
+            if (-not [int]::TryParse("$($p.percent)", [ref]$v) -or $v -lt 0 -or $v -gt 100) { $errs += "${at}: phase '$n' percent must be 0-100 or empty" }
+        }
+    }
+    return $errs   # callers wrap the result in @()
 }
 
 function Get-TypeDef($s, [string]$Name) {
@@ -376,6 +410,7 @@ function Get-SnTypeLayout($s, $TypeDef) {
     return [pscustomobject]@{
         folders = $folders; saveTargets = $targets; attachmentsPath = $ap
         useBaseChecklist = ($TypeDef.useBaseChecklist -ne $false); useCommonQuestions = ($TypeDef.useCommonQuestions -ne $false)
+        phases = @(Get-SnPhaseList $s $TypeDef)
     }
 }
 
@@ -646,7 +681,7 @@ function New-SnTask {
     $objects = @($objPatterns | ForEach-Object { Expand-Pattern $_ $tok })
     $branch = Expand-Pattern $s.branchPattern $tok
 
-    $phases = Get-PhaseNames $s
+    $phases = @(Get-PhaseNames $s $typeDef)   # the type's own phases when it has them (spec 005)
     $firstPhase = $phases[0]
     $now = Get-Now
     $task = [pscustomobject][ordered]@{
@@ -727,8 +762,11 @@ function Update-SnTask {
     )
     $t = Find-SnTask $Id
     $s = Get-SnSettings
-    $phases = Get-PhaseNames $s
-    $phasePct = Get-PhasePct $s
+    # the phases of the task's type (spec 005); a phase no longer in the list stays a choice, so nothing is lost
+    $typeDef = Get-TypeDef $s $t.type
+    $phases = @(Get-PhaseNames $s $typeDef)
+    $phasePct = Get-PhasePct $s $typeDef
+    if ($t.phase -and $phases -notcontains $t.phase) { $phases += "$($t.phase)" }
     $interactive = -not ($Phase -or $Percent -ge 0 -or $Note -or $Blocker -or $ClearBlocker -or $Check -or $Uncheck -or $Question -or $Answers -or $AddQuestion -or $Due -or $Priority)
 
     if ($interactive) {
@@ -1117,7 +1155,8 @@ function Get-SnMeta {
         $l = Get-SnTypeLayout $s $t
         $tl[$t.name] = [pscustomobject]@{ folders = @($l.folders); attachmentsPath = $l.attachmentsPath
             useBaseChecklist = $l.useBaseChecklist; useCommonQuestions = $l.useCommonQuestions
-            saveTargets = @($l.saveTargets | ForEach-Object { ConvertTo-SnMetaTarget $_ }) }
+            saveTargets = @($l.saveTargets | ForEach-Object { ConvertTo-SnMetaTarget $_ })
+            phases = @($l.phases | ForEach-Object { $_.name }); phasePct = (Get-PhasePct $s $t); phaseColumn = (ConvertTo-SnPhaseColumns $l.phases) }
     }
     return [pscustomobject]@{
         modules = @($s.modules); types = @($s.types | ForEach-Object { $_.name }); priorities = @($s.priorities)
@@ -1130,6 +1169,13 @@ function Get-SnMeta {
         typeLayouts = $tl
         pack = (Get-SnMetaPack)
     }
+}
+
+function ConvertTo-SnPhaseColumns($Phases) {
+    # phase name -> board column (a general phase), for the page's board and list
+    $h = [ordered]@{}
+    foreach ($p in @($Phases)) { $h[$p.name] = $p.column }
+    return [pscustomobject]$h
 }
 
 function ConvertTo-SnMetaTarget($T) {
