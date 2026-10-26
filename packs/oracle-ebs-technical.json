@@ -920,6 +920,49 @@
                                       ]
                       },
                       {
+                          "name":  "Data request",
+                          "useBaseChecklist":  false,
+                          "useCommonQuestions":  false,
+                          "folders":  [ "01_From_Requester", "02_Scripts", "03_Data" ],
+                          "attachmentsPath":  "{ticket}\\01_From_Requester",
+                          "saveTargets":  [
+                                              { "name": "Query script", "path": "{ticket}\\02_Scripts", "prefix": false, "versioned": true },
+                                              { "name": "Data sheet", "path": "{ticket}\\03_Data", "prefix": false, "versioned": true },
+                                              { "name": "From requester (their script, screenshots)", "path": "{ticket}\\01_From_Requester", "prefix": false }
+                                          ],
+                          "questions":  [
+                                            { "k": "need", "q": "What data is needed and why (the business question)", "kind": "long", "required": true },
+                                            { "k": "instance", "q": "Instance to query (PROD / UAT / DEV)", "d": "PROD" },
+                                            { "k": "scope", "q": "Operating unit / ledger / organization", "d": "" },
+                                            { "k": "filters", "q": "Filters and parameters (period, dates, statuses)", "kind": "long", "askIfBlank": "Which filters / date range should the data cover?" },
+                                            { "k": "columns", "q": "Columns needed (or attach their sample sheet)", "kind": "long", "askIfBlank": "Which columns does the requester need?" },
+                                            { "k": "output", "q": "Output wanted", "kind": "choice", "d": "Excel sheet", "options": [ "Excel sheet", "CSV file", "In the email body / screenshot", "SQL only (they run it)" ] },
+                                            { "k": "repeat", "q": "One time or recurring?", "kind": "choice", "d": "One time", "options": [ "One time", "Recurring (may become a report)" ] },
+                                            { "k": "reqFiles", "q": "Their script / screenshots / sample sheet", "kind": "files" }
+                                        ],
+                          "openQuestions":  [
+                                                "Is querying PROD allowed, or should it run on a clone?",
+                                                "Does the data contain personal or sensitive fields that must be masked or left out?"
+                                            ],
+                          "variants":  [
+                                           {
+                                               "when": { "k": "repeat", "is": "Recurring (may become a report)" },
+                                               "openQuestions": [ "Is querying PROD allowed, or should it run on a clone?", "Does the data contain personal or sensitive fields that must be masked or left out?", "Will this be needed again: should it become a report (new Report task)?" ]
+                                           }
+                                       ],
+                          "checklist":  [
+                                            "Need, filters and columns confirmed with the requester",
+                                            "Query written and run on the agreed instance",
+                                            "Row count and totals checked against the application screens or a known figure",
+                                            "Data sheet saved in 03_Data and sent to the requester",
+                                            "Requester confirmed the data is right",
+                                            "Reusable query saved as a snippet (if it will be needed again)"
+                                        ],
+                          "objects":  [
+
+                                      ]
+                      },
+                      {
                           "name":  "Other",
                           "questions":  [
 
@@ -1130,7 +1173,8 @@
                                             "OAF":  "OA Framework (OAF)",
                                             "Workflow":  "Oracle Workflow",
                                             "Support":  "Production support and troubleshooting",
-                                            "Analysis":  "Solution analysis and design"
+                                            "Analysis":  "Solution analysis and design",
+                                            "Data request":  "SQL data extraction for the business"
                                         },
                               "rules":  [
                                             { "key": "plsql", "name": "PL/SQL", "group": "Technical", "types": [ "Report", "Interface", "Conversion", "Extension", "Workflow" ], "tag": "^pl\\/?sql$" },
@@ -1144,7 +1188,7 @@
                                            "patterns":  [ "\\b([a-z][a-z0-9_]*_(?:pkg|pub|pvt|api|grp))\\b", "\\b(fnd_request|fnd_global|fnd_program|fnd_file|fnd_profile|fnd_message|mo_global|fnd_flex_val_api)\\b" ],
                                            "tag":  "_(pkg|pub|pvt|api|grp)$"
                                        },
-                              "verbs":  { "Report": "Developed", "Interface": "Built", "Conversion": "Migrated", "Extension": "Extended", "OAF": "Extended", "Workflow": "Customized", "Support": "Resolved", "Analysis": "Designed" },
+                              "verbs":  { "Report": "Developed", "Interface": "Built", "Conversion": "Migrated", "Extension": "Extended", "OAF": "Extended", "Workflow": "Customized", "Support": "Resolved", "Analysis": "Designed", "Data request": "Extracted" },
                               "bullet":  "{verb} {title} for Oracle EBS {module}{api}, [result: e.g. N records loaded / X hours saved per month]."
                           },
                "cvTips":  [

@@ -222,3 +222,50 @@ Describe 'File families and versions' {
         (Get-SnFileFamilies -Id 'V-5' -Target 1).versioned | Should Be $true
     }
 }
+
+Describe 'Shipped EBS technical pack: Data request' {
+    $root = New-SnTestEnv
+    try {
+        Save-SnProfile -SnProfile ([pscustomobject]@{ schemaVersion = 1; roles = @([pscustomobject]@{ id = 'r1'; packId = 'oracle-ebs-technical' }) }) | Out-Null
+        $pk = [IO.File]::ReadAllText((Join-Path $packs 'oracle-ebs-technical.json')) | ConvertFrom-Json
+
+        It 'creates the data folders, its own checklist only and open questions for the gaps' {
+            $src = Join-Path $root 'their.sql'; [IO.File]::WriteAllText($src, 'select 1 from dual')
+            $r = New-SnTask -NonInteractive -Id 'DR-1' -Title 'Invoices on hold' -Type 'Data request' -Details @{ need = 'All AP invoices on hold' } -Attach @("reqFiles=$src")
+            @(Get-ChildItem $r.Folder -Directory | ForEach-Object { $_.Name } | Sort-Object) -join ',' | Should Be '01_From_Requester,02_Scripts,03_Data'
+            Test-Path (Join-Path $r.Folder '01_From_Requester\their.sql') | Should Be $true
+            $t = Find-SnTask 'DR-1'
+            $items = @($t.checklist | ForEach-Object { $_.item })
+            $items.Count | Should Be 6
+            @($items | Where-Object { @($pk.settings.baseChecklist) -contains $_ }).Count | Should Be 0
+            $q = @($t.questions | ForEach-Object { $_.q })
+            $q -contains 'Which filters / date range should the data cover?' | Should Be $true
+            $q -contains 'Which columns does the requester need?' | Should Be $true
+            @($q | Where-Object { @($pk.settings.commonQuestions) -contains $_ }).Count | Should Be 0
+        }
+        It 'a recurring request asks whether it should become a report' {
+            New-SnTask -NonInteractive -Id 'DR-2' -Title 'Monthly holds' -Type 'Data request' -Details @{ need = 'x'; filters = 'OU 1'; columns = 'all'; repeat = 'recurring (may become a report)' } | Out-Null
+            $q = @((Find-SnTask 'DR-2').questions | ForEach-Object { $_.q })
+            $q -contains 'Will this be needed again: should it become a report (new Report task)?' | Should Be $true
+            $q.Count | Should Be 3
+        }
+        It 'saves the query and the data sheet as versions in their own folders' {
+            New-SnTask -NonInteractive -Id 'DR-3' -Title 'Holds' -Type 'Data request' -Details @{ need = 'x' } | Out-Null
+            $names = @(Get-Targets (Find-SnTask 'DR-3') | ForEach-Object { $_.name })
+            $qi = [array]::IndexOf($names, 'Query script'); $di = [array]::IndexOf($names, 'Data sheet')
+            $a = Save-SnFile -Id 'DR-3' -Target $qi -FileName 'AP_holds.sql' -Text 'select 1 from dual'
+            $b = Save-SnFile -Id 'DR-3' -Target $qi -FileName 'pasted.sql' -Text 'select 2 from dual' -VersionOf 'AP_holds' -Note 'added supplier site'
+            $c = Save-SnFile -Id 'DR-3' -Target $di -FileName 'Book1.xlsx' -Base64 ([Convert]::ToBase64String([byte[]](1, 2)))
+            $a.relative | Should Match '\\02_Scripts\\AP_holds_v1\.sql$'
+            $b.relative | Should Match '\\02_Scripts\\AP_holds_v2\.sql$'
+            $c.relative | Should Match '\\03_Data\\Book1_v1\.xlsx$'
+            @($names | Select-Object -Skip 3) -join '|' | Should Be (@($pk.settings.saveTargets | Where-Object { "$($_.path)" -notmatch '^\{ticket\}' } | ForEach-Object { $_.name }) -join '|')
+        }
+        It 'other EBS types keep the general folders and checklist' {
+            $r = New-SnTask -NonInteractive -Id 'IF-1' -Title 'Supplier load' -Type 'Interface'
+            @(Get-ChildItem $r.Folder -Directory | ForEach-Object { $_.Name } | Sort-Object) -join ',' | Should Be ((@($pk.settings.ticketFolders) | Sort-Object) -join ',')
+            $items = @((Find-SnTask 'IF-1').checklist | ForEach-Object { $_.item })
+            ($items | Select-Object -Last (@($pk.settings.baseChecklist).Count)) -join '|' | Should Be (@($pk.settings.baseChecklist) -join '|')
+        }
+    } finally { Remove-SnTestEnv $root }
+}
