@@ -21,6 +21,7 @@ $script:DefaultsPath = Join-Path $PSScriptRoot 'settings.default.json'
 $script:BackupPath   = Join-Path $PSScriptRoot 'settings.backup.json'
 $script:Utf8         = New-Object System.Text.UTF8Encoding $false
 $script:RequiredWorkFolders = @('01_Tickets', '99_Archive')
+$script:MaxFileBytes = 50 * 1048576   # one saved file or attachment (the page checks the same limit)
 
 # ---------------------------------------------------------------------------
 # Config (root + auto-id counter) and settings (everything user-editable)
@@ -93,6 +94,13 @@ function Assert-SnSettings($s) {
             if (-not "$($q.q)".Trim()) { throw "Type '$($t.name)': question '$($q.k)' has no text." }
         }
         if (@($keys | Select-Object -Unique).Count -ne $keys.Count) { throw "Type '$($t.name)': question keys must be unique." }
+        $ie = @(Get-SnIntakeErrors $t)
+        if ($ie.Count) { throw "$($ie[0])." }
+    }
+    if ("$($s.attachmentsPath)") {
+        if ("$($s.attachmentsPath)" -notmatch '^\{ticket\}') { throw 'Attachments folder must start with {ticket} (inside the task folder).' }
+        $rel = ("$($s.attachmentsPath)" -replace '^\{ticket\}[\\/]?', '') -replace '\{(id|module|type)\}', 'x'
+        if ($rel) { Test-RelPath $rel 'Attachments folder' }
     }
     if (-not ("$($s.ticketFolderName)" -match '\{id\}')) { throw 'Ticket folder name pattern must contain {id}.' }
     foreach ($f in $s.ticketFolders) { Test-RelPath $f 'Ticket subfolder' }
@@ -197,6 +205,122 @@ function Get-TypeDef($s, [string]$Name) {
 }
 
 # ---------------------------------------------------------------------------
+# Intake: question kinds, conditions (when) and variants of a task type
+# Spec: specs/004-task-attachments-report-intake (contracts/intake-fields.md)
+# ---------------------------------------------------------------------------
+
+$script:IntakeKinds = @('text', 'long', 'choice', 'files')
+
+function Get-SnQuestionKind($Q) { if ("$($Q.kind)") { return "$($Q.kind)".ToLower() } else { return 'text' } }
+
+function Get-SnWhenValues($When) {
+    # the answer values a condition accepts: { k, is } or { k, in: [] }
+    if ($null -ne $When.in) { return @(@($When.in) | ForEach-Object { "$_" }) }
+    return @("$($When.is)")
+}
+
+function Get-SnWhenErrors($When, [hashtable]$Choices, [hashtable]$Depth, [string]$At) {
+    $errs = @()
+    $k = "$($When.k)"
+    if (-not $Choices.ContainsKey($k)) { return @("${At}: when.k '$k' is not an earlier choice question") }
+    if ($null -ne $When.in -and "$($When.is)") { $errs += "${At}: when needs 'is' or 'in', not both" }
+    $vals = @(Get-SnWhenValues $When)
+    if (-not @($vals | Where-Object { $_ }).Count) { $errs += "${At}: when needs a value ('is' or 'in')" }
+    foreach ($v in $vals) { if ($v -and -not @($Choices[$k] | Where-Object { $_ -ieq $v }).Count) { $errs += "${At}: when value '$v' is not an option of '$k'" } }
+    if ($Depth[$k] -ge 2) { $errs += "${At}: conditions may be at most 2 levels deep" }
+    return $errs
+}
+
+function Get-SnIntakeErrors($Type) {
+    <# Errors in a task type's intake fields (kind, options, required, when, askIfBlank, sub) and variants; empty = valid.
+       Questions without the new fields are always valid. Used by Test-SnPack and Assert-SnSettings. #>
+    $errs = @()
+    $choices = @{}; $depth = @{}
+    foreach ($q in @(@($Type.questions) | Where-Object { $_ })) {
+        $at = "Type '$($Type.name)', question '$($q.k)'"
+        $kind = Get-SnQuestionKind $q
+        $opts = @(@($q.options) | Where-Object { $null -ne $_ } | ForEach-Object { "$_".Trim() })
+        if ($script:IntakeKinds -notcontains $kind) { $errs += "${at}: kind must be one of $($script:IntakeKinds -join ', ')" }
+        if ($kind -eq 'choice') {
+            if ($opts.Count -lt 2 -or $opts.Count -gt 30) { $errs += "${at}: a choice needs 2 to 30 options" }
+            elseif (@($opts | Where-Object { -not $_ }).Count) { $errs += "${at}: an option is empty" }
+            elseif (@($opts | ForEach-Object { $_.ToLower() } | Select-Object -Unique).Count -ne $opts.Count) { $errs += "${at}: options must be unique" }
+            elseif ("$($q.d)" -and -not @($opts | Where-Object { $_ -ieq "$($q.d)" }).Count) { $errs += "${at}: default '$($q.d)' is not one of the options" }
+        } elseif ($opts.Count) { $errs += "${at}: options are only for kind 'choice'" }
+        if ($kind -eq 'files') {
+            if ($q.required) { $errs += "${at}: a files question cannot be required" }
+            if ("$($q.askIfBlank)") { $errs += "${at}: askIfBlank is not for files questions" }
+            if ("$($q.sub)") { try { Test-RelPath "$($q.sub)" "$at sub-folder" } catch { $errs += $_.Exception.Message } }
+        } elseif ("$($q.sub)") { $errs += "${at}: sub is only for kind 'files'" }
+        $d = 0
+        if ($q.when) {
+            $errs += @(Get-SnWhenErrors $q.when $choices $depth $at)
+            if ($depth.ContainsKey("$($q.when.k)")) { $d = $depth["$($q.when.k)"] + 1 }
+        }
+        if ($kind -eq 'choice') { $choices["$($q.k)"] = $opts; $depth["$($q.k)"] = $d }
+    }
+    $vs = @(@($Type.variants) | Where-Object { $_ })
+    for ($i = 0; $i -lt $vs.Count; $i++) {
+        $at = "Type '$($Type.name)', variant $($i + 1)"
+        if (-not $vs[$i].when) { $errs += "${at}: when is required"; continue }
+        $errs += @(Get-SnWhenErrors $vs[$i].when $choices @{} $at)
+        foreach ($l in 'openQuestions', 'checklist', 'objects') {
+            if (@(@($vs[$i].$l) | Where-Object { $null -ne $_ -and -not "$_".Trim() }).Count) { $errs += "${at}: $l has an empty item" }
+        }
+    }
+    return $errs   # callers wrap the result in @()
+}
+
+function Test-SnWhen($When, [hashtable]$Answers) {
+    $a = "$($Answers["$($When.k)"])"
+    return [bool](@(Get-SnWhenValues $When | Where-Object { $_ -and $_ -ieq $a }).Count)
+}
+
+function Resolve-SnIntake($TypeDef, [hashtable]$Answers) {
+    <# Applies a type's intake rules to the answers (key -> text). Returns:
+       visible   questions shown for these answers (in order; a question whose condition's question is hidden is hidden)
+       details   { q, a, k } for visible non-file questions with an answer (choice answers in the option's spelling)
+       variant   the first variant whose condition matches, or $null
+       askBusiness open questions from askIfBlank of visible blank questions
+       errors    required visible questions left blank, choice answers that are not an option #>
+    if (-not $Answers) { $Answers = @{} }
+    $shown = @{}; $visible = @(); $details = @(); $ask = @(); $errs = @()
+    $clean = @{}
+    foreach ($q in @(@($TypeDef.questions) | Where-Object { $_ -and $_.k })) {
+        $k = "$($q.k)"
+        if ($q.when) {
+            $wk = "$($q.when.k)"
+            if (-not $shown.ContainsKey($wk) -or -not (Test-SnWhen $q.when $clean)) { continue }
+        }
+        $shown[$k] = $true; $visible += $q
+        $kind = Get-SnQuestionKind $q
+        if ($kind -eq 'files') { continue }
+        $val = if ($Answers.ContainsKey($k)) { "$($Answers[$k])".Trim() } else { '' }
+        if ($kind -eq 'choice' -and $val) {
+            $m = @(@($q.options) | Where-Object { "$_" -ieq $val })
+            if ($m.Count) { $val = "$($m[0])" } else { $errs += "'$($q.q)': '$val' is not one of: $(@($q.options) -join ', ')"; $val = '' }
+        }
+        $clean[$k] = $val
+        if ($val) { $details += [pscustomobject]@{ q = $q.q; a = $val; k = $k } }
+        else {
+            if ($q.required) { $errs += "'$($q.q)' needs an answer" }
+            if ("$($q.askIfBlank)".Trim()) { $ask += "$($q.askIfBlank)".Trim() }
+        }
+    }
+    $variant = $null
+    foreach ($v in @(@($TypeDef.variants) | Where-Object { $_ -and $_.when })) {
+        if ($shown.ContainsKey("$($v.when.k)") -and (Test-SnWhen $v.when $clean)) { $variant = $v; break }
+    }
+    return [pscustomobject]@{ visible = $visible; details = $details; variant = $variant; askBusiness = $ask; errors = $errs }
+}
+
+function Get-SnTypeList($TypeDef, $Variant, [string]$Name) {
+    # a variant's list replaces the type's own when the variant defines it
+    if ($Variant -and $null -ne $Variant.$Name) { return @($Variant.$Name) }
+    return @($TypeDef.$Name)
+}
+
+# ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
 
@@ -242,6 +366,28 @@ function Read-Choice([string]$Prompt, [string[]]$Choices, [string]$Default = '')
         $m = @($Choices | Where-Object { $_ -ieq $a.Trim() })
         if ($m.Count) { return $m[0] }
         return $a.Trim()
+    }
+}
+
+function Read-SnOption($Q) {
+    # a choice question: only one of its options is accepted
+    $opts = @($Q.options | ForEach-Object { "$_" })
+    while ($true) {
+        $a = Read-Choice $Q.q $opts ([string]$Q.d)
+        $m = @($opts | Where-Object { $_ -ieq $a })
+        if ($m.Count) { return $m[0] }
+        Write-Host '  Choose one of the numbers above.' -ForegroundColor Yellow
+    }
+}
+
+function Read-Lines([string]$Prompt, [switch]$Required) {
+    # several lines; an empty line ends
+    Write-Host "$Prompt (empty line to finish)" -ForegroundColor Cyan
+    while ($true) {
+        $lines = @()
+        while ($true) { $l = Read-Host ' '; if ([string]::IsNullOrWhiteSpace($l)) { break }; $lines += $l }
+        if ($Required -and -not $lines.Count) { Write-Host '  (required)' -ForegroundColor Yellow; continue }
+        return , $lines
     }
 }
 
@@ -321,7 +467,8 @@ function New-SnTask {
     param(
         [string]$Id, [string]$Title, [string]$Module, [string]$Type, [string]$Priority,
         [string]$Due, [string]$Requester, [string]$Description, [string]$ShortCode,
-        [hashtable]$Details, [string[]]$ExtraQuestions, [switch]$NonInteractive
+        [hashtable]$Details, [string[]]$ExtraQuestions, [switch]$NonInteractive,
+        [string[]]$Attach   # files to copy into the attachments folder; 'key=path' puts one under a files question
     )
     $cfg = Get-SnConfig
     $s = Get-SnSettings
@@ -351,6 +498,35 @@ function New-SnTask {
     if (-not $Priority) { $Priority = $s.defaultPriority }
     $Due = ConvertTo-SnDate $Due
 
+    # Type-specific details: only the questions shown for these answers (conditions, variants: Resolve-SnIntake).
+    # Checked before an auto id is used, so a missing answer does not burn a number.
+    $answers = @{}
+    if ($Details) { foreach ($k in $Details.Keys) { $answers[$k] = [string]$Details[$k] } }
+    $attachList = @($Attach | Where-Object { $_ })
+    $qs = @($typeDef.questions | Where-Object { $_ -and $_.k })
+    if ($ask -and $qs.Count) {
+        Write-Host "--- $Type details ---" -ForegroundColor Green
+        foreach ($q in $qs) {
+            $k = "$($q.k)"
+            if ($answers.ContainsKey($k)) { continue }
+            if ($q.when -and -not @((Resolve-SnIntake $typeDef $answers).visible | Where-Object { "$($_.k)" -eq $k }).Count) { continue }
+            switch (Get-SnQuestionKind $q) {
+                'choice' { $answers[$k] = Read-SnOption $q }
+                'long'   { $answers[$k] = (Read-Lines $q.q -Required:([bool]$q.required)) -join "`n" }
+                'files'  { foreach ($p in (Read-Lines "$($q.q) - file paths")) { $attachList += "$k=$($p.Trim('"'))" } }
+                default  { $answers[$k] = Read-Text $q.q ([string]$q.d) -Required:([bool]$q.required) }
+            }
+        }
+    }
+    $intake = Resolve-SnIntake $typeDef $answers
+    if (@($intake.errors).Count) { throw "$Type details: $(@($intake.errors) -join '; ')." }
+    $detailList = @($intake.details)
+    if ($Details) {
+        $known = @($qs | ForEach-Object { $_.k })
+        foreach ($k in $Details.Keys) { if ($known -notcontains $k) { $detailList += [pscustomobject]@{ q = $k; a = [string]$Details[$k] } } }
+    }
+    $fileKeys = @($intake.visible | Where-Object { (Get-SnQuestionKind $_) -eq 'files' } | ForEach-Object { "$($_.k)" })
+
     if (-not $Id) {
         $Id = '{0}{1:D4}' -f $s.autoIdPrefix, [int]$cfg.nextAutoId
         $cfg.nextAutoId = [int]$cfg.nextAutoId + 1
@@ -359,22 +535,7 @@ function New-SnTask {
     $Id = $Id.Trim().ToUpper()
     if (@(Get-SnTaskList -IncludeArchive | Where-Object { $_.id -ieq $Id }).Count) { throw "Task '$Id' already exists." }
 
-    # Type-specific details
-    $detailList = @()
-    $qs = @($typeDef.questions | Where-Object { $_ -and $_.k })
-    if ($ask -and $qs.Count) { Write-Host "--- $Type details ---" -ForegroundColor Green }
-    foreach ($q in $qs) {
-        $val = ''
-        if ($Details -and $Details.ContainsKey($q.k)) { $val = [string]$Details[$q.k] }
-        elseif ($ask) { $val = Read-Text $q.q ([string]$q.d) }
-        if ($val) { $detailList += [pscustomobject]@{ q = $q.q; a = $val } }
-    }
-    if ($Details) {
-        $known = @($qs | ForEach-Object { $_.k })
-        foreach ($k in $Details.Keys) { if ($known -notcontains $k) { $detailList += [pscustomobject]@{ q = $k; a = [string]$Details[$k] } } }
-    }
-
-    $objPatterns = @($typeDef.objects | Where-Object { $_ })
+    $objPatterns = @(Get-SnTypeList $typeDef $intake.variant 'objects' | Where-Object { $_ })
     if (-not $ShortCode) {
         $ShortCode = Get-ShortCode $s $Title $Module
         if ($ask -and $objPatterns.Count) { $ShortCode = Read-Text 'Short code for object names' $ShortCode }
@@ -382,11 +543,11 @@ function New-SnTask {
     $ShortCode = (Get-SafeName $ShortCode 20).ToUpper()
 
     $questions = @()
-    foreach ($q in (@($typeDef.openQuestions) + @($s.commonQuestions) + @($ExtraQuestions) | Where-Object { "$_".Trim() })) {
+    foreach ($q in (@(Get-SnTypeList $typeDef $intake.variant 'openQuestions') + @($s.commonQuestions) + @($intake.askBusiness) + @($ExtraQuestions) | Where-Object { "$_".Trim() })) {
         $questions += [pscustomobject]@{ q = $q; answered = $false; answer = '' }
     }
     $checklist = @()
-    foreach ($c in (@($typeDef.checklist) + @($s.baseChecklist) | Where-Object { "$_".Trim() })) { $checklist += [pscustomobject]@{ item = $c; done = $false } }
+    foreach ($c in (@(Get-SnTypeList $typeDef $intake.variant 'checklist') + @($s.baseChecklist) | Where-Object { "$_".Trim() })) { $checklist += [pscustomobject]@{ item = $c; done = $false } }
 
     $tok = @{ prefix = $s.prefix; prefixLower = $s.prefix.ToLower(); module = $Module; code = $ShortCode; base = "$($s.prefix)_$($Module)_$ShortCode"; id = $Id; type = $Type }
     $objects = @($objPatterns | ForEach-Object { Expand-Pattern $_ $tok })
@@ -427,7 +588,7 @@ function New-SnTask {
     [void]$sb.AppendLine($Description)
     if ($detailList.Count) {
         [void]$sb.AppendLine(''); [void]$sb.AppendLine('## Details')
-        foreach ($d in $detailList) { [void]$sb.AppendLine("- **$($d.q):** $($d.a)") }
+        foreach ($d in $detailList) { [void]$sb.AppendLine("- **$($d.q):** $(("$($d.a)" -replace "`r?`n", "`r`n  "))") }
     }
     if ($objects.Count) {
         [void]$sb.AppendLine(''); [void]$sb.AppendLine('## Proposed object names')
@@ -442,11 +603,25 @@ function New-SnTask {
     [void]$sb.AppendLine("- $now | $firstPhase 0% | Task created")
     Write-Utf8 (Join-Path $folder '_NOTES.md') $sb.ToString()
 
+    # Attachments: copied one by one; a file that fails is reported and does not undo the task or the other files
+    $attached = 0; $failed = @()
+    foreach ($a in $attachList) {
+        $qk = ''; $p = "$a"
+        if ($p -match '^([A-Za-z][A-Za-z0-9_]*)=(.+)$') { $qk = $Matches[1]; $p = $Matches[2] }
+        $leaf = [IO.Path]::GetFileName($p)
+        try {
+            if ($qk -and $fileKeys -notcontains $qk) { throw "'$qk' is not a file question shown for these answers" }
+            Save-SnFile -Id $Id -Attachment -Question $qk -SourcePath $p -FileName $leaf -NoRefresh | Out-Null
+            $attached++
+        } catch { $failed += "${leaf}: $($_.Exception.Message)"; Write-Warning "Not attached: ${leaf}: $($_.Exception.Message)" }
+    }
+
     Update-SnDashboard | Out-Null
     Write-Host ''
     Write-Host "Created $Id -> $folder" -ForegroundColor Green
     Write-Host "  $($questions.Count) open questions, $($checklist.Count) checklist items. Branch: $branch"
-    return [pscustomobject]@{ Id = $Id; Folder = $folder; OpenQuestions = $questions.Count; Checklist = $checklist.Count }
+    if ($attachList.Count) { Write-Host "  $attached of $($attachList.Count) attachments saved." }
+    return [pscustomobject]@{ Id = $Id; Folder = $folder; OpenQuestions = $questions.Count; Checklist = $checklist.Count; Attached = $attached; AttachFailed = $failed }
 }
 
 function Update-SnTask {
@@ -633,6 +808,16 @@ function Resolve-SnTarget($Task, [int]$Target, [string]$SubFolder) {
     return [pscustomobject]@{ Dir = (Assert-UnderRoot $dir); Target = $tg }
 }
 
+function Resolve-SnAttachDir($Task, [string]$Sub) {
+    # attachments place inside the task folder (settings.attachmentsPath, default {ticket}\Attachments) + optional sub-folder
+    $p = "$((Get-SnSettings).attachmentsPath)"
+    if (-not $p) { $p = '{ticket}\Attachments' }
+    $p = Expand-Pattern ($p -replace '^\{ticket\}[\\/]?', '') @{ id = (Get-SafeName $Task.id 20 -KeepHyphen); module = $Task.module; type = (Get-SafeName $Task.type 20) }
+    $dir = if ($p) { Join-Path $Task._path $p } else { $Task._path }
+    if ($Sub) { Test-RelPath $Sub 'Sub-folder'; $dir = Join-Path $dir $Sub }
+    return (Assert-UnderRoot $dir)
+}
+
 function Get-SnTargetFolders {
     [CmdletBinding()]
     param([Parameter(Mandatory)][string]$Id, [int]$Target = 0)
@@ -652,23 +837,50 @@ function Save-SnFile {
     param(
         [Parameter(Mandatory)][string]$Id, [int]$Target = 0, [string]$SubFolder,
         [Parameter(Mandatory)][string]$FileName, [string]$Base64, [string]$Text,
-        [switch]$AddPrefix, [switch]$AddHeader, [string]$Purpose
+        [switch]$AddPrefix, [switch]$AddHeader, [string]$Purpose,
+        # -Attachment: save in the task's attachments place (settings.attachmentsPath) instead of save target -Target;
+        # -Question: the files question it answers (its sub-folder is used); -SourcePath: copy this file (left untouched)
+        [switch]$Attachment, [string]$Question, [string]$SourcePath, [switch]$NoRefresh
     )
     $t = Find-SnTask $Id -IncludeArchive
-    $r = Resolve-SnTarget $t $Target $SubFolder
+    if ($Attachment) {
+        $sub = ''
+        if ($Question) {
+            $fq = @(@((Get-TypeDef (Get-SnSettings) $t.type).questions) | Where-Object { $_ -and "$($_.k)" -eq $Question -and (Get-SnQuestionKind $_) -eq 'files' })
+            if (-not $fq.Count) { throw "'$Question' is not a file question of type '$($t.type)'." }
+            $sub = "$($fq[0].sub)"
+        }
+        if ($SubFolder) { if ($sub) { $sub = Join-Path $sub $SubFolder } else { $sub = $SubFolder } }
+        $dir = Resolve-SnAttachDir $t $sub
+        $targetName = 'Attachments'
+    } else {
+        $r = Resolve-SnTarget $t $Target $SubFolder
+        $dir = $r.Dir
+        $targetName = $r.Target.name
+    }
     $name = ([IO.Path]::GetFileName($FileName.Trim()) -replace '[\\/:*?"<>|]', '_').Trim()
     if (-not $name) { throw 'File name is required.' }
-    New-Item -ItemType Directory -Force -Path $r.Dir | Out-Null
+    # size is checked before anything is written
+    $bytes = $null
+    if ($PSBoundParameters.ContainsKey('Text')) { }
+    elseif ($SourcePath) {
+        if (-not (Test-Path -LiteralPath $SourcePath -PathType Leaf)) { throw "File not found: $SourcePath" }
+        if ((Get-Item -LiteralPath $SourcePath).Length -gt $script:MaxFileBytes) { throw "$name is larger than 50 MB." }
+    } elseif ($Base64) {
+        $bytes = [Convert]::FromBase64String($Base64)
+        if ($bytes.Length -gt $script:MaxFileBytes) { throw "$name is larger than 50 MB." }
+    } else { throw 'Nothing to save (no content).' }
+    New-Item -ItemType Directory -Force -Path $dir | Out-Null
 
     if ($AddPrefix -and -not $name.StartsWith("$($t.id)_", [StringComparison]::OrdinalIgnoreCase)) {
         $rx = '^' + [regex]::Escape($t.id) + '_(\d+)_'
         $max = 0
-        foreach ($f in Get-ChildItem -Path $r.Dir -File) { if ($f.Name -match $rx) { $max = [Math]::Max($max, [int]$Matches[1]) } }
+        foreach ($f in Get-ChildItem -Path $dir -File) { if ($f.Name -match $rx) { $max = [Math]::Max($max, [int]$Matches[1]) } }
         $name = '{0}_{1:D2}_{2}' -f $t.id, ($max + 1), $name
     }
-    $path = Join-Path $r.Dir $name
+    $path = Join-Path $dir $name
     $stem = [IO.Path]::GetFileNameWithoutExtension($name); $ext = [IO.Path]::GetExtension($name); $v = 2
-    while (Test-Path $path) { $path = Join-Path $r.Dir ('{0}_v{1}{2}' -f $stem, $v, $ext); $v++ }
+    while (Test-Path -LiteralPath $path) { $path = Join-Path $dir ('{0}_v{1}{2}' -f $stem, $v, $ext); $v++ }
 
     if ($PSBoundParameters.ContainsKey('Text')) {
         $body = $Text -replace "`r?`n", "`r`n"
@@ -684,20 +896,24 @@ function Save-SnFile {
             $body = $hdr + $body
         }
         Write-Utf8 $path $body
-    } elseif ($Base64) {
-        [IO.File]::WriteAllBytes($path, [Convert]::FromBase64String($Base64))
-    } else { throw 'Nothing to save (no content).' }
+    } elseif ($SourcePath) {
+        [IO.File]::Copy((Get-Item -LiteralPath $SourcePath).FullName, $path)
+    } else {
+        [IO.File]::WriteAllBytes($path, $bytes)
+    }
 
     # Record it on the task
     $now = Get-Now
     $rel = $path.Substring([IO.Path]::GetFullPath((Get-SnConfig).root).TrimEnd('\').Length).TrimStart('\')
     if (-not ($t.PSObject.Properties.Name -contains 'files')) { $t | Add-Member -NotePropertyName 'files' -NotePropertyValue @() }
-    $t.files = @($t.files) + [pscustomobject]@{ at = $now; path = $rel; target = $r.Target.name }
+    $rec = [ordered]@{ at = $now; path = $rel; target = $targetName }
+    if ($Attachment) { $rec.question = $Question; $rec.original = [IO.Path]::GetFileName($FileName.Trim()) }
+    $t.files = @($t.files) + [pscustomobject]$rec
     $t.updated = $now
     $t.history = @($t.history) + [pscustomobject]@{ at = $now; phase = $t.phase; percent = $t.percent; note = "Saved file: $rel" }
     Save-SnTask $t
-    Add-NotesLog $t "$now | FILE | $rel  ($($r.Target.name))"
-    Update-SnDashboard | Out-Null
+    Add-NotesLog $t "$now | FILE | $rel  ($targetName)"
+    if (-not $NoRefresh) { Update-SnDashboard | Out-Null }
     return [pscustomobject]@{ path = $path; relative = $rel }
 }
 
@@ -729,7 +945,11 @@ function Get-SnMeta {
     $s = Get-SnSettings
     $tq = @{}; $tobj = @{}
     foreach ($t in $s.types) {
-        $tq[$t.name] = @($t.questions | ForEach-Object { [pscustomobject]@{ k = $_.k; q = $_.q; d = [string]$_.d } })
+        $tq[$t.name] = @($t.questions | Where-Object { $_ } | ForEach-Object {
+            $o = [ordered]@{ k = $_.k; q = $_.q; d = [string]$_.d }
+            # intake fields (spec 004) only when the pack sets them, so plain questions look as before
+            foreach ($f in 'kind', 'options', 'required', 'when', 'askIfBlank', 'sub') { if ($null -ne $_.$f) { $o[$f] = $_.$f } }
+            [pscustomobject]$o })
         $tobj[$t.name] = (@($t.objects | Where-Object { $_ }).Count -gt 0)
     }
     return [pscustomobject]@{
@@ -739,6 +959,7 @@ function Get-SnMeta {
         career = $s.career
         appearance = $s.appearance
         saveTargets = @($s.saveTargets | ForEach-Object { [pscustomobject]@{ name = $_.name; path = $_.path; prefix = [bool]$_.prefix } })
+        attachmentsPath = $(if ("$($s.attachmentsPath)") { "$($s.attachmentsPath)" } else { '{ticket}\Attachments' })
         pack = (Get-SnMetaPack)
     }
 }

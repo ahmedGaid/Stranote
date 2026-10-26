@@ -80,6 +80,13 @@ function Test-SnPack {
     for ($i = 0; $i -lt $tt.Count; $i++) {
         if (-not "$($tt[$i].name)".Trim()) { & $err "taskTypes[$i].name: required" }
         foreach ($c in @($tt[$i].checklist | Where-Object { $null -ne $_ })) { if (-not "$c".Trim()) { & $err "taskTypes[$i].checklist: empty item" } }
+        foreach ($e in @(Get-SnIntakeErrors $tt[$i])) { & $err "taskTypes[$i]: $e" }
+    }
+    if ($Pack.settings -and "$($Pack.settings.attachmentsPath)") {
+        $ap = "$($Pack.settings.attachmentsPath)"
+        $rel = ($ap -replace '^\{ticket\}[\\/]?', '') -replace '\{(id|module|type)\}', 'x'
+        if ($ap -notmatch '^\{ticket\}') { & $err 'settings.attachmentsPath: must start with {ticket}' }
+        elseif ($rel) { try { Test-RelPath $rel 'settings.attachmentsPath' } catch { & $err $_.Exception.Message } }
     }
 
     $ex = @($Pack.extractors | Where-Object { $_ })

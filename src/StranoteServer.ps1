@@ -171,7 +171,8 @@ while ($listener.IsListening) {
             }
             '/api/savefile' {
                 $p = @{ Id = (Str $b.id); Target = [int]$b.target; SubFolder = (Str $b.subFolder); FileName = (Str $b.fileName)
-                        AddPrefix = [bool]$b.addPrefix; AddHeader = [bool]$b.addHeader; Purpose = (Str $b.purpose) }
+                        AddPrefix = [bool]$b.addPrefix; AddHeader = [bool]$b.addHeader; Purpose = (Str $b.purpose)
+                        Attachment = [bool]$b.attachment; Question = (Str $b.question) }
                 if ($null -ne $b.text) { $p.Text = [string]$b.text } else { $p.Base64 = [string]$b.base64 }
                 $r = Save-SnFile @p
                 Send $ctx 200 ($r | ConvertTo-Json -Compress)

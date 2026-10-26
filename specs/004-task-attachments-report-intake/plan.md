@@ -67,11 +67,11 @@ specs/004-task-attachments-report-intake/
 
 ```text
 src/
-├── settings.default.json      # attachmentsPath = {ticket}\Attachments (AT1)
 ├── StranotePacks.ps1          # validate question fields + variants in the pack loader (AT1)
 ├── StranoteCore.ps1           # Resolve-SnIntake; New-SnTask uses it (+ -Attach paths, terminal prompts);
 │                              # Assert-SnSettings validates the same fields; Save-SnFile -Attachment -Question;
-│                              # Get-SnMeta sends full question objects + variants + attachmentsPath (AT1)
+│                              # Get-SnMeta sends full question objects + attachmentsPath (AT1);
+│                              # attachmentsPath default {ticket}\Attachments lives in code (data-model.md)
 ├── StranoteServer.ps1         # /api/savefile passes attachment/question; /api/file image preview (AT1, AT4)
 └── dashboard_template.html    # New task dialog: choice/long/files, conditions, attachments, upload after create;
                                # Settings type editor keeps unknown fields (AT3); task page Attach + previews (AT4)

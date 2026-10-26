@@ -6,7 +6,7 @@ All changes are additive (Principle IV). No migration; old tasks and packs read 
 |---|---|---|
 | `packs/<id>.json` `taskTypes[].questions[]` | `kind`, `options`, `required`, `when`, `askIfBlank`, `sub` | new, optional ([contract](contracts/intake-fields.md)) |
 | `packs/<id>.json` `taskTypes[].variants[]` | `when`, `openQuestions`, `checklist`, `objects` | new, optional |
-| `src/settings.default.json` / pack `settings` | `attachmentsPath` | new, default `{ticket}\\Attachments`; EBS packs `{ticket}\\01_Requirements\\Attachments` |
+| pack `settings` / `overrides.json` | `attachmentsPath` | new, optional; engine default in code `{ticket}\Attachments` (not in `settings.default.json`: a new default key would make the legacy-migration check see a difference); EBS packs `{ticket}\01_Requirements\Attachments` |
 | `overrides.json` | `types`, `attachmentsPath` | may hold them after a Settings save; editor keeps every field |
 | `task.json` `details[]` | `k` | new, optional; hidden questions are not stored |
 | `task.json` `files[]` | `question`, `original` | new, optional; `target` = `Attachments` for attachments |
