@@ -26,6 +26,17 @@ stored in `<work root>\04_Knowledge\Stranote`). Your profile (`profile.json`, sa
   sub-folders). Blank gaps become open questions. Other packs can branch any task type the same way
   (`docs/pack-authoring.md`).
 
+## Task-type layouts and file versions
+- **Each task type can have its own layout**: sub-folders, save places, attachments folder, checklist (with or
+  without the common one) and phases. Settings > Task types > Layout; empty parts use the general settings.
+  Existing tasks keep what they were created with.
+- **Data request** (Oracle EBS technical): a consultant asks for data by SQL. The task gets `01_From_Requester`
+  (their scripts and screenshots), `02_Scripts` (your queries) and `03_Data` (the sheets you send), a short data
+  checklist, and the phases Requested, Query written, Data sent, Confirmed, Done.
+- **New file or new version?** Saving or attaching into a folder that already has files asks first. A new version is
+  saved as `<name>_v2`, `_v3` ... next to the earlier ones (never overwritten), with an optional "what changed" note;
+  the task page shows the latest version first and folds the older ones. Pasted text can be saved as a file too.
+
 ## Upgrading an existing Oracle EBS install
 On first start the server runs `Invoke-SnMigration`: it backs up to `06_Admin\Backups\ops-migration-<time>`,
 writes `profile.json` (pack `oracle-ebs-technical`) and `overrides.json` (only your changes), checks that the

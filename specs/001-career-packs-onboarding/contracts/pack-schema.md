@@ -64,8 +64,8 @@ default: "Technical" }`. A card's category = `byKind[card.kind]`, else the categ
 `checklist[]`, `objects[]`). Optional intake fields on questions (`kind`, `options`, `required`, `when`,
 `askIfBlank`, `sub`) and `variants[]` per type (spec 004): see
 `specs/004-task-attachments-report-intake/contracts/intake-fields.md`; validated by rule 3. Optional layout fields
-per type (`folders`, `saveTargets` with `versioned`, `attachmentsPath`, `useBaseChecklist`, `useCommonQuestions`;
-spec 005): see `specs/005-task-type-layouts-versions/contracts/type-layout.md`; validated by rule 3.
+per type (`folders`, `saveTargets` with `versioned`, `attachmentsPath`, `useBaseChecklist`, `useCommonQuestions`,
+`phases` with a board `column` each; spec 005): see `specs/005-task-type-layouts-versions/contracts/type-layout.md`; validated by rule 3.
 
 **settings**: any engine setting the pack provides (phases, folders, saveTargets, abbreviations, prefix...).
 `attachmentsPath` (spec 004): where attachments go inside the task folder, starts with `{ticket}`.

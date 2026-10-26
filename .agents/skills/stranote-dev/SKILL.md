@@ -38,11 +38,15 @@ The constitution (`.specify/memory/constitution.md`) wins over this file.
   changes). Check UI changes in light, dark and 390px width.
 - Live upgrade = back up, copy `src\*` (except config/settings json) + `packs\` into `D:\Work\05_Tools\Stranote`,
   restart the server. Backups go to `D:\Work\06_Admin\Backups\stranote-upgrade-<timestamp>`. Only when the board
-  row says so, one agent at a time. A pack change to task types (e.g. spec 004 Report New/Fix) stays hidden when
-  the live `overrides.json` holds its own `types` (migrated installs do): show the owner, and only with their word
-  merge the new `questions`/`variants` of that type into `overrides.json` (backup first).
+  row says so, one agent at a time. A pack change to task types (e.g. spec 004 Report New/Fix, spec 005 Data request)
+  stays hidden when the live `overrides.json` holds its own `types` (migrated installs do): show the owner, and only
+  with their word merge the new type / its `questions`/`variants` into `overrides.json` (backup first).
 - Task intake (spec 004): optional question fields `kind`/`options`/`required`/`when`/`askIfBlank`/`sub` and type
   `variants` (pack data, `Resolve-SnIntake`); attachments via `Save-SnFile -Attachment` into `attachmentsPath`.
+- Type layouts (spec 005): optional type fields `folders`/`saveTargets`(+`versioned`)/`attachmentsPath`/
+  `useBaseChecklist`/`useCommonQuestions`/`phases` resolved by `Get-SnTypeLayout` (field-by-field fallback); save-place
+  indexes are per task (`Get-SnTaskTargets`, page `taskLayout(t)`); versions are a file-name rule `<family>_v<n>`
+  (`Get-SnFileFamily`, `Save-SnFile -VersionOf/-AsNew/-Note`, `GET /api/families`). Tests: `tests/StranoteLayout.Tests.ps1`.
 - Commits: only on your own task branch; commits to `main`, merges and pushes only when the owner asks. Mark
   finished tasks `[X]` in `tasks.md` with the commit id.
 

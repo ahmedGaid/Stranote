@@ -42,9 +42,9 @@ TL1 notes: the page already indexes save places per task (`taskLayout(t)` in the
 
 ## Phase 5: Skills, docs, live upgrade note (board TL5) - needs TL2
 
-- [ ] T019 [P] [US5] `.agents/skills/ebs-task/SKILL.md`: Data request intake; `.agents/skills/ebs-dashboard-guide/SKILL.md`: where query / sheet / requester files go, save as next version with a note
-- [ ] T020 [P] README.md + `docs/pack-authoring.md`: type layout fields and versions; `stranote-dev` file-map line
-- [ ] T021 Live-upgrade note: check live `overrides.json` `types`; add Data request only on the owner's word, backup first
+- [X] T019 [P] [US5] `.agents/skills/ebs-task/SKILL.md`: Data request intake; `.agents/skills/ebs-dashboard-guide/SKILL.md`: where query / sheet / requester files go, save as next version with a note (a6e6317)
+- [X] T020 [P] README.md + `docs/pack-authoring.md`: type layout fields and versions; `stranote-dev` file-map line (a6e6317)
+- [X] T021 Live-upgrade note: check live `overrides.json` `types`; add Data request only on the owner's word, backup first (a6e6317)
 
 ## Phase 6: Per-type phases (board TL6) - needs TL1, TL4 (owner choice Q3-B)
 

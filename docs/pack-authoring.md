@@ -121,6 +121,27 @@ most 2 levels deep. `"askIfBlank": "..."` turns a blank answer into an open ques
 ```
 Full contract: `specs/004-task-attachments-report-intake/contracts/intake-fields.md`.
 
+**Its own layout (optional).** A type can bring its own task sub-folders (`folders`, instead of
+`settings.ticketFolders`), its own save places (`saveTargets`, paths start with `{ticket}`; `"versioned": true` saves the
+first file as `name_v1` so every version shows in its name), its own attachments folder (`attachmentsPath`), and can
+leave out the general lists (`"useBaseChecklist": false`, `"useCommonQuestions": false`). It can also have its own
+`phases`: each `{ "name", "percent", "column" }`, where `column` is one of the general phases (the board column it
+shows in); `Done` is required and keeps the `Done` column, `On Hold` keeps `On Hold`. Anything left out uses the
+general setting; existing tasks never change.
+
+```json
+{ "name": "Shift handover",
+  "useBaseChecklist": false,
+  "folders": ["01_Notes", "02_Photos"],
+  "attachmentsPath": "{ticket}\\02_Photos",
+  "saveTargets": [ { "name": "Handover sheet", "path": "{ticket}\\01_Notes", "prefix": false, "versioned": true } ],
+  "phases": [ { "name": "Drafted", "percent": 30, "column": "In progress" },
+              { "name": "Handed over", "percent": 90, "column": "Review" },
+              { "name": "Done", "percent": 100, "column": "Done" } ],
+  "checklist": ["Handover read back"], "openQuestions": [], "objects": [] }
+```
+Full contract: `specs/005-task-type-layouts-versions/contracts/type-layout.md`.
+
 ### `settings`
 
 Any engine setting the pack wants to set: `phases`, `commonQuestions`, `baseChecklist`, `ticketFolders`,
